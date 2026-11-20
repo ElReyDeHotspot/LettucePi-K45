@@ -1,0 +1,153 @@
+			</div>
+			<footer class="mobile-hide">
+				<span class="footer-brand">Misectel LuCI Theme</span>
+				<span class="footer-meta">
+					<a href="https://github.com/openwrt/luci" target="_blank" rel="noreferrer">{{ _('Powered by') }} {{ version.luciname }} ({{ version.luciversion }})</a>
+					/
+					{{ version.distname }} {{ version.distversion }} ({{ version.distrevision }})
+				</span>
+			</footer>
+		</div>
+	</div>
+
+	<script>L.require('menu-misectel')</script>
+	<script>
+/* Top-right account menu (the three dots).
+ *
+ * Deliberately its own script block: the block below returns immediately
+ * unless document.body has node-main-login, because it exists to decorate the
+ * login page. Anything for the logged-in UI placed inside it never runs.
+ *
+ * Delegated from document so it keeps working after LuCI re-renders the
+ * topbar, and guarded so a re-run cannot bind the handlers twice. */
+(function () {
+	if (document.body.hasAttribute('data-account-menu-wired'))
+		return;
+	document.body.setAttribute('data-account-menu-wired', '1');
+
+	function closeAccountMenus(except) {
+		document.querySelectorAll('[data-account-menu]').forEach(function (menu) {
+			if (menu === except) return;
+			var panel = menu.querySelector('.account-menu__panel');
+			var button = menu.querySelector('.account-menu__button');
+			if (panel) panel.hidden = true;
+			if (button) button.setAttribute('aria-expanded', 'false');
+			menu.classList.remove('is-open');
+		});
+	}
+
+	document.addEventListener('click', function (ev) {
+		var button = ev.target && ev.target.closest ? ev.target.closest('.account-menu__button') : null;
+		if (!button) { closeAccountMenus(null); return; }
+		ev.preventDefault();
+		var menu = button.closest('[data-account-menu]');
+		var panel = menu ? menu.querySelector('.account-menu__panel') : null;
+		if (!panel) return;
+		var open = panel.hidden;
+		closeAccountMenus(menu);
+		panel.hidden = !open;
+		button.setAttribute('aria-expanded', open ? 'true' : 'false');
+		if (menu) menu.classList.toggle('is-open', open);
+	});
+
+	document.addEventListener('keydown', function (ev) {
+		if (ev.key === 'Escape') closeAccountMenus(null);
+	});
+})();
+</script>
+	<script>
+	(function() {
+		if (!document.body.classList.contains('node-main-login'))
+			return;
+
+		const main = document.querySelector('.node-main-login > .main');
+		const container = document.querySelector('.node-main-login #maincontent > .container');
+		const form = document.querySelector('.node-main-login form');
+		const textInput = document.querySelector('.node-main-login input[type="text"]');
+		const passwordInput = document.querySelector('.node-main-login input[type="password"]');
+		const submitButton = document.querySelector('.node-main-login input[type="submit"], .node-main-login .cbi-button');
+		const valueFields = Array.from(document.querySelectorAll('.node-main-login .cbi-value-field'));
+		const setupRequired = document.body.getAttribute('data-setup-required') === '1';
+
+		if (main && !main.querySelector('.login-bg-bubbles')) {
+			const bubbles = document.createElement('ul');
+			bubbles.className = 'login-bg-bubbles';
+
+			for (let i = 0; i < 10; i++)
+				bubbles.appendChild(document.createElement('li'));
+
+			main.appendChild(bubbles);
+		}
+
+
+		if (container && !container.querySelector('.login-shell-card-title')) {
+			const title = document.createElement('div');
+			title.className = 'login-shell-card-title';
+			/* The leaf and the product name, not the generic vendor string.
+			   logo.svg is the same asset the dashboard header uses, so the
+			   login and the page behind it show the same mark. The sizing
+			   lives in cascade.css as .login-leaf-img. */
+			title.innerHTML = '<img class="login-leaf-img" src="/luci-static/misectel/logo.svg" alt="">'
+				+ '<span class="login-wordmark">LettucePi</span>';
+			container.insertBefore(title, container.firstChild);
+		}
+
+		if (form && container && !container.querySelector('.login-shell-body')) {
+			const body = document.createElement('div');
+			body.className = 'login-shell-body';
+			form.parentNode.insertBefore(body, form);
+			body.appendChild(form);
+		}
+
+		const loginBody = container ? container.querySelector('.login-shell-body') : null;
+
+		document.querySelectorAll('.node-main-login .cbi-section-descr, .node-main-login .cbi-value-title, .node-main-login .cbi-map-descr').forEach((el) => el.remove());
+		document.querySelectorAll('.node-main-login p, .node-main-login .cbi-map-descr').forEach((el) => {
+			const text = (el.textContent || '').trim();
+
+			if (text === 'Please enter your username and password.')
+				el.remove();
+		});
+
+		valueFields.forEach((field, index) => {
+			field.classList.add('login-field');
+			field.classList.add(index === 0 ? 'login-field-user' : 'login-field-password');
+
+			if (!field.querySelector('.login-field-icon')) {
+				const icon = document.createElement('span');
+				icon.className = 'login-field-icon';
+				field.prepend(icon);
+			}
+		});
+
+		if (textInput) {
+			if (!textInput.value)
+				textInput.value = 'admin';
+			textInput.placeholder = '{{ entityencode(_("Username"), true) }}';
+			textInput.classList.add('login-user-input');
+		}
+
+		if (passwordInput) {
+			passwordInput.placeholder = '{{ entityencode(_("Enter password"), true) }}';
+			passwordInput.classList.add('login-password-input');
+		}
+
+		if (submitButton) {
+			if ('value' in submitButton)
+				submitButton.value = '{{ entityencode(_("Log in"), true) }}';
+			if (submitButton.tagName === 'BUTTON')
+				submitButton.textContent = '{{ entityencode(_("Log in"), true) }}';
+			submitButton.classList.add('login-submit-button');
+		}
+
+		if (form)
+			form.setAttribute('autocomplete', 'on');
+
+		if (setupRequired)
+			window.location.replace('{{ entityencode(dispatcher.build_url("setup"), true) }}');
+	})();
+	</script>
+	<script src="/luci-static/resources/wifi-polish-plain.js?v=7"></script>
+
+</body>
+</html>

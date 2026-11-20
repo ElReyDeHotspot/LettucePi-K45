@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+"""Apply the K45P UI port to an extracted, unmodified K45P rootfs."""
+from pathlib import Path
+import shutil, re, sys, json, hashlib
+
+root=Path(sys.argv[1]).resolve(); repo=Path(__file__).resolve().parents[1]
+assert root != Path('/') and (root/'etc/openwrt_release').is_file()
+assert "r37978-cd0a06bfd3fd" in (root/'etc/openwrt_release').read_text()
+original_backend=(root/'usr/share/rpcd/ucode/misectel').read_text()
+shutil.copytree(repo/'payload',root,dirs_exist_ok=True)
+backend=root/'usr/share/rpcd/ucode/misectel'
+s=backend.read_text()
+# Retain the current vendor's OEM methods, which did not exist on the K43P.
+for name in ['oem_mac_address','oem_serial_number']:
+    m=re.search(r'\n\t'+name+r': \{.*?(?=\n\t[a-z_]+: \{|\n};)',original_backend,re.S)
+    if m:
+        s=s.replace('\n\tttl_status:',m[0].rstrip().rstrip(',')+',\n\tttl_status:',1)
+# Model display is a K45P property, never inferred from a K43P boot environment.
+s=re.sub(r'\n\toem_model_name: \{.*?(?=\n\t[a-z_]+: \{)',"\n\toem_model_name: { call: function() { return { model_name: 'LettucePi K45P' }; } },\n",s,count=1,flags=re.S)
+s=s.replace("const APN_FALLBACK_COUNTRY = 'unknown'","const APN_FALLBACK_COUNTRY = 'us'")
+backend.write_text(s.replace('readMisectelOption','readLettucePiOption'))
+
+# The current vendor firmware uses gateway-* routes; align the routes in the
+# existing views, menu tree, config and templates with the ported overview.
+routes={'gateway-dashboard':'dashboard','gateway-wireless':'wifi','gateway-network':'settings','gateway-system':'settings','gateway-portmap':'portmap','gateway-vpnoverview':'overview','gateway-wireguard':'wireguard','gateway-openvpn':'openvpn','gateway-l2tp':'l2tp','gateway-pptp':'pptp','gateway-vxlan':'vxlan','gateway-vrf':'vrf','gateway-dns':'dns'}
+text_roots=['www','usr/share/luci/menu.d','usr/share/ucode/luci/template','usr/share/rpcd','etc/config','etc/uci-defaults','lib/wifi']
+changed=[]
+for folder in text_roots:
+    for p in (root/folder).rglob('*'):
+        if not p.is_file() or p.is_symlink():continue
+        try:old=p.read_text()
+        except (UnicodeError,OSError):continue
+        s=old
+        for a,b in routes.items():s=s.replace(a,b)
+        # Legacy route compatibility fallbacks in the vendor theme.
+        for a,b in [('admin/misectel-dashboard','admin/dashboard'),('admin-misectel-dashboard','admin-dashboard')]:s=s.replace(a,b)
+        if p.suffix in ['.ut','.json'] or p.name=='misectel':
+            s=s.replace('Misectel','LettucePi')
+        s=s.replace("option lang auto","option lang en")
+        s=s.replace('set luci.main.lang="auto"','set luci.main.lang="en"')
+        s=s.replace("DEFAULT_APN_COUNTRY='unknown'","DEFAULT_APN_COUNTRY='us'")
+        s=s.replace("country || 'CN'","country || 'US'").replace('country || "CN"','country || "US"')
+        s=s.replace("isZh()?'确认':'OK'","'OK'").replace("isZh()?'正在处理，请稍候…':'Processing, please wait…'","'Processing, please wait…'")
+        if s!=old:p.write_text(s);changed.append(str(p.relative_to(root)))
+
+# Enable Apps in the themed navigation (these are intentionally disabled until
+# the operator turns them on; installing the UI never changes data traffic).
+menu=root/'www/luci-static/resources/menu-misectel.js'
+s=menu.read_text()
+for a,b in {'misectel-dashboard':'dashboard','misectel-wireless':'wifi','misectel-network':'settings','misectel-system':'settings','misectel-portmap':'portmap'}.items():s=s.replace(a,b)
+if "'apps'" not in s:
+    s=s.replace("const DEFAULT_ALWAYS_SHOW=[","const DEFAULT_ALWAYS_SHOW=['apps','apps/tailscale','apps/speedtest','apps/sqm','apps/zapret',")
+s=s.replace("'system/system',",'').replace(",'system/system'",'')
+menu.write_text(s)
+
+# Keep defaults aligned with routes and expose the installed apps.
+cfg=root/'etc/config/misectel'
+s=cfg.read_text()
+for name,value in [('brand_name','LettucePi'),('model_name','K45P'),('header_name','LettucePi K45P'),('apn_country','us')]:
+    s=re.sub(r"(option "+name+r"\s+)'[^']*'",lambda m:m[1]+repr(value),s)
+cfg.write_text(s)
+
+# Add the existing clients view to the ported dashboard menu.
+p=root/'usr/share/luci/menu.d/luci-app-misectel-dashboard.json'
+d=json.loads(p.read_text());d['admin/dashboard/clients']={'title':'Connected Devices','order':10,'action':{'type':'view','path':'misectel-device/index'},'depends':{'acl':['luci-app-misectel-device']}}
+# Preserve the vendor's unauthenticated setup route; the wizard is reachable
+# from setup and can be revisited using its normal setup entry.
+p.write_text(json.dumps(d,indent=2)+'\n')
+
+# An IPv6 TTL rule must leave NDP/MLD hop limits intact.
+p=root/'etc/init.d/qmodem_ttl'
+if p.exists():
+    s=p.read_text()
+    if 'meta l4proto != ipv6-icmp' not in s:
+        s=s.replace('iifname "br-lan" ip6 hoplimit set $ttl', 'iifname "br-lan" meta l4proto != ipv6-icmp ip6 hoplimit set $ttl')
+    p.write_text(s)
+
+# Only English catalogs and picker entries are shipped.
+translations={'通知内容':'Message','来源号码':'Sender number','通话类型':'Call type','通知标题':'Notification title','设备名称':'Device name','App应用名':'App name','接收时间':'Received at','自定义':'Custom','短信通知':'SMS notification','中国电信':'China Telecom','中国移动':'China Mobile','中国联通':'China Unicom','成功转发短信至飞书':'Forwarded SMS to Feishu','最终发送失败':'Final delivery failed','放弃重试':'No more retries','短信来自':'SMS from','长度':'length','字符':'characters','准备推送到飞书':'sending to Feishu','次发送失败':'delivery failed','重试中':'retrying','第':'Attempt '}
+han=re.compile('[\u3400-\u9fff]')
+for p in root.rglob('*'):
+    if not p.is_file() or p.is_symlink():continue
+    try:s=p.read_text()
+    except (UnicodeError,OSError):continue
+    if not han.search(s):continue
+    if p.name=='at_commands_zh.json':
+        p.unlink();continue
+    if p.name=='apns.json':
+        d=json.loads(s);d['apns']['apn']=[a for a in d['apns']['apn'] if a.get('_mcc') in {'001','310','311','312','313','314','315','316'}]
+        p.write_text(json.dumps(d,indent=2)+'\n');continue
+    # Drop Chinese comments without touching functional shell or JavaScript.
+    s=re.sub(r'/\*.*?\*/',lambda m:'' if han.search(m[0]) else m[0],s,flags=re.S)
+    lines=[]
+    for line in s.splitlines():
+        if han.search(line):
+            if line.lstrip().startswith(('#','//')):continue
+            for a,b in translations.items():line=line.replace(a,b)
+            if han.search(line) and ' #' in line:line=line.split(' #',1)[0]
+            if han.search(line) and ' //' in line:line=line.split(' //',1)[0]
+        lines.append(line)
+    s='\n'.join(lines)+'\n'
+    if han.search(s):raise RuntimeError('Untranslated Chinese text in '+str(p))
+    p.write_text(s)
+p=root/'usr/share/qmodem/modem_ctrl.sh'
+p.write_text(p.read_text().replace('at_commands_zh.json','at_commands_en.json'))
+
+# Use the same US presets in the QModem manual APN dropdowns.
+nc=root/'www/luci-static/resources/view/qmodem/network_config.js'
+if nc.exists():
+    s=nc.read_text();presets=json.loads((root/'usr/share/misectel/apn-presets/defaults/us.json').read_text())['presets']
+    def esc(v):return v.replace('\\','\\\\').replace("'","\\'")
+    opts="o.value('',_('Auto Choose'));"+''.join("o.value('%s','%s');"%(esc(e['apn']),esc(e['operator'])) for e in presets)
+    val=re.compile(r"o\.value\('[^']*',(?:_\()?'[^']*'\)?\);")
+    for name in ['apn','apn2']:
+        m=re.search(r"o=s\.option\(form\.Value,'"+name+r"',",s)
+        if not m:continue
+        start=m.start();end=s.find('o=s.option(',start+5);end=end if end>0 else len(s)
+        block=s[start:end];first=val.search(block)
+        if first:block=block[:first.start()]+opts+val.sub('',block[first.start():]);s=s[:start]+block+s[end:]
+    nc.write_text(s)
+
+for p in root.rglob('*'):
+    if p.is_file() and not p.is_symlink() and ('zh-cn' in p.name or 'zh-tw' in p.name or 'zh_cn' in p.name or 'zh_tw' in p.name):p.unlink()
+for folder in ['usr/sbin','usr/libexec','usr/share/rpcd/ucode','etc/init.d','etc/hotplug.d','etc/uci-defaults','lib/preinit']:
+    for p in (repo/'payload'/folder).rglob('*') if (repo/'payload'/folder).exists() else []:
+        if p.is_file():(root/p.relative_to(repo/'payload')).chmod(0o755)
+(root/'usr/share/rpcd/ucode/misectel').chmod(0o755)
+
+# Preserve binary contents and architecture of the bundled tpws engine.
+assert (root/'usr/sbin/tpws').read_bytes()[:4]==b'\x7fELF'
+tc=root/'sbin/tc'
+if not tc.exists() and not tc.is_symlink():tc.symlink_to('/usr/libexec/tc-full')
+for name,start in [('chester-sqm',96),('ttyd',99)]:
+    link=root/('etc/rc.d/S%02d%s'%(start,name))
+    if not link.is_symlink():link.symlink_to('../init.d/'+name)
+print(f'Customized K45P rootfs; normalized {len(changed)} files')

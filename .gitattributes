@@ -1,0 +1,5 @@
+* text=auto eol=lf
+*.itb -text
+*.apk -text
+*.adb -text
+tpws -text

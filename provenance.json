@@ -1,0 +1,20 @@
+{
+  "product": "LettucePi K45P",
+  "board": "misectel,m02k45",
+  "source_repo": "https://github.com/ElReyDeHotspot/LettucePi-K43P",
+  "source_commit": "06afa65130680aa38b893dcde6c4ce989c69e94b",
+  "selected_base": {
+    "release": "25.12.1",
+    "revision": "r37978-cd0a06bfd3fd",
+    "kernel": "6.12.94",
+    "source": "Read from running K45P /dev/ubi0_3",
+    "sha256": "172861404158cacec011baace3817c7d30c76e45af45b6999911a1ddb602f784"
+  },
+  "rejected_attachment": {
+    "sha256": "49f6c307c5ebd0d58e2af85f05ed802a705d26aa0f255fcc541d97b501b83f8f",
+    "release": "25.12-SNAPSHOT",
+    "revision": "r37822+1-5cb47aa34e",
+    "kernel": "6.12.85",
+    "reason": "Does not match running firmware; user selected running firmware instead"
+  }
+}

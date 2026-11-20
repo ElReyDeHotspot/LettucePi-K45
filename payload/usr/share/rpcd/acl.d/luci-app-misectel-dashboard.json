@@ -1,0 +1,88 @@
+{
+    "luci-app-misectel-dashboard": {
+        "description": "Grant access to the LettucePi dashboard",
+        "read": {
+            "ubus": {
+                "system": [
+                    "board",
+                    "info"
+                ],
+                "luci": [
+                    "getCPUInfo",
+                    "getCPUUsage",
+                    "getTempInfo",
+                    "getBuiltinEthernetPorts"
+                ],
+                "network.device": [
+                    "status"
+                ],
+                "network.interface": [
+                    "dump"
+                ],
+                "network.wireless": [
+                    "status"
+                ],
+                "qmodem": [
+                    "base_info",
+                    "network_info",
+                    "cell_info",
+                    "sim_info",
+                    "get_connect_status"
+                ],
+                "misectel": [
+                    "internet_status",
+                    "led_power",
+                    "modem_temp",
+                    "neighbors",
+                    "oem_model_name",
+                    "sqm_status",
+                    "system_time",
+                    "tcp_connections",
+                    "temp_status",
+                    "ttl_status",
+                    "update_settings",
+                    "video_engine",
+                    "wan_to_lan"
+                ],
+                "iwinfo": [
+                    "info",
+                    "countrylist",
+                    "freqlist",
+                    "phyname",
+                    "assoclist"
+                ],
+                "luci-rpc": [
+                    "getHostHints",
+                    "getWirelessDevices"
+                ],
+                "uci": [
+                    "get"
+                ]
+            },
+            "uci": [
+                "dhcp",
+                "firewall",
+                "misectel",
+                "network",
+                "qmodem",
+                "qmodem_ttl",
+                "wireless"
+            ]
+        },
+        "write": {
+            "ubus": {
+                "misectel": [
+                    "set_led_power",
+                    "set_sqm",
+                    "set_ttl",
+                    "set_update_settings",
+                    "set_video_engine",
+                    "set_wan_to_lan"
+                ],
+                "qmodem": [
+                    "send_at"
+                ]
+            }
+        }
+    }
+}

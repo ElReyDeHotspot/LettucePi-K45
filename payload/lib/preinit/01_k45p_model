@@ -1,0 +1,5 @@
+do_k45p_model() {
+    mkdir -p /tmp/sysinfo
+    echo 'LettucePi K45P' > /tmp/sysinfo/model
+}
+boot_hook_add preinit_main do_k45p_model

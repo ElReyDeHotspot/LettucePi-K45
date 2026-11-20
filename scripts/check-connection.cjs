@@ -1,0 +1,16 @@
+const fs=require('node:fs');
+const assert=require('node:assert/strict');
+const path=require('node:path');
+const s=fs.readFileSync(path.join(__dirname,'../payload/www/luci-static/resources/view/misectel-dashboard/overview.js'),'utf8');
+const helper=s.slice(s.indexOf('function k45pConnectionState'),s.indexOf('function buildModemInterfaceInfo'));
+const state=new Function('_',helper+'return k45pConnectionState;')(v=>v);
+const section={alias:'pcie0',network:'rmnet_mhi0'};
+const fallback={tone:'offline',text:'Disconnected'};
+const run=info=>state(section,{interface:[{interface:'pcie0',...info}]},fallback);
+assert.equal(run({up:true,'ipv4-address':[{address:'192.0.0.2'}]}).tone,'online');
+assert.equal(run({up:true,'ipv6-address':[{address:'2001:db8::1'}]}).tone,'online');
+assert.equal(run({up:false,'ipv4-address':[{address:'192.0.0.2'}]}).tone,'offline');
+assert.equal(run({up:true}).tone,'offline');
+assert.equal(run({up:false,pending:true}).tone,'warn');
+assert.equal(state(section,{interface:[{interface:'wan',up:true}]},fallback),fallback);
+console.log('Passed 6 modem connection status checks');

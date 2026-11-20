@@ -1,0 +1,50 @@
+#!/bin/sh
+# K45P FIT updater. Never substitutes the K43P flash method or forces checks.
+set -eu
+MANIFEST_URL=https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/latest.json
+VERSION_FILE=/etc/chester-version
+LOG=/tmp/chester-update.log
+field() { sed -n "s/^$1=//p" "$VERSION_FILE" 2>/dev/null | head -1; }
+fetch_manifest() {
+    curl -fsSL --connect-timeout 10 --max-time 30 "$MANIFEST_URL?cb=$(date +%s)" > "$1"
+    jq -e '.product == "K45P" and .board == "misectel,m02k45" and (.build|type == "string") and (.version|type == "string") and (.url|startswith("https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/")) and (.sha256|test("^[a-f0-9]{64}$")) and (.size|type == "number") and .size > 1000000 and .size < 60000000' "$1" >/dev/null
+}
+case "${1:-status}" in
+status)
+    t=$(mktemp /tmp/k45p-manifest.XXXXXX); trap 'rm -f "$t"' EXIT
+    if ! fetch_manifest "$t"; then
+        jq -n --arg v "$(field version)" '{ok:false,error:"offline or invalid K45P manifest",installed_version:$v}'
+        exit 0
+    fi
+    jq --arg iv "$(field version)" --arg ib "$(field build)" --arg id "$(field built)" --arg iN "$(field bin)" \
+      '{ok:true,installed_version:$iv,installed_build:$ib,installed_built:$id,installed_bin:$iN,latest_version:.version,latest_built:.built,latest_sha:.sha256,size:.size,latest_bin:.bin,notes:.notes,update_available:(.build > $ib)}' "$t"
+    ;;
+install)
+    [ "$(cat /tmp/sysinfo/board_name)" = 'misectel,m02k45' ] || { echo 'FAIL: unsupported board'; exit 1; }
+    mkdir /tmp/k45p-update.lock 2>/dev/null || { echo 'FAIL: an update is already running'; exit 1; }
+    t=$(mktemp /tmp/k45p-manifest.XXXXXX)
+    trap 'rm -f "$t"; rmdir /tmp/k45p-update.lock 2>/dev/null || true' EXIT
+    fetch_manifest "$t" || { echo 'FAIL: invalid K45P manifest'; exit 1; }
+    url=$(jq -r .url "$t"); sha=$(jq -r .sha256 "$t"); size=$(jq -r .size "$t")
+    [ "$(df -k /tmp | awk 'NR==2 {print $4}')" -gt $((size / 1024 + 16384)) ] || { echo 'FAIL: insufficient memory'; exit 1; }
+    : > "$LOG"
+    img=/tmp/k45p-sysupgrade.itb
+    curl --http1.1 -fL --retry 3 --connect-timeout 20 --max-time 1200 -o "$img.part" "$url" >> "$LOG" 2>&1 || { echo 'FAIL: download failed'; exit 1; }
+    [ "$(wc -c < "$img.part" | tr -d ' ')" = "$size" ] || { echo 'FAIL: incorrect size'; exit 1; }
+    [ "$(sha256sum "$img.part" | awk '{print $1}')" = "$sha" ] || { rm -f "$img.part"; echo 'FAIL: checksum mismatch'; exit 1; }
+    mv "$img.part" "$img"
+    sysupgrade -T "$img" >> "$LOG" 2>&1 || { echo 'FAIL: stock K45P image validation failed'; exit 1; }
+    echo 'OK: installing, the K45P will restart'
+    if [ "$(uci -q get chester.update.keep_settings || true)" = 0 ]; then
+        (sleep 3; sysupgrade -n "$img" >> "$LOG" 2>&1) </dev/null >/dev/null 2>&1 &
+    else
+        (sleep 3; sysupgrade "$img" >> "$LOG" 2>&1) </dev/null >/dev/null 2>&1 &
+    fi
+    ;;
+auto-run)
+    [ "$(uci -q get chester.update.auto || true)" = 1 ] || exit 0
+    "$0" status | jq -e '.ok and .update_available' >/dev/null || exit 0
+    "$0" install
+    ;;
+*) echo 'usage: chester-update status|install|auto-run' >&2; exit 2 ;;
+esac

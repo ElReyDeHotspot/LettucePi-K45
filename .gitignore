@@ -1,0 +1,4 @@
+work/
+*.key
+*.tar.gz
+__pycache__/
