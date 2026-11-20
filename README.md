@@ -114,3 +114,14 @@ on/off control, automatic active-connection selection for streaming tests,
 collapsible streaming sites, and advanced settings/diagnostics. The view is
 `payload/www/luci-static/resources/view/chester-zapret/streaming.js`; the engine
 and saved recipes remain carp4 Zapret2. No firmware image was generated.
+
+The live refinement branch also adds Speedtest and Failover shortcuts below
+the last two Overview sockets, uses OpenWrt display branding with the K43P-style
+Chester K45P SSH banner, and synchronizes the saved APN list with the six K43P
+US presets. These display changes retain the actual vendor version/revision
+and kernel recorded in provenance. Vendor HTTP connectivity callbacks and
+Chinese DNS probe defaults were replaced with configured ICMP health checks.
+Chinese SMS integrations were removed. Tailscale factory autorun is disabled;
+its Apps control can explicitly enable it. Version-matched ImmortalWrt package
+feeds remain necessary for the vendor userspace; they are package sources,
+not telemetry endpoints. No new firmware image was generated.

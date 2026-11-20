@@ -1,0 +1,25 @@
+# SMS forwarding defaults (disabled)
+config sms_forward 'sms_forward'
+	option enable '0'
+	option log_level 'info'
+
+config sms_forward_instance
+	option enable '0'
+	option modem_cfg 'modem_1'
+	option poll_interval '30'
+	option api_type 'tgbot'
+	option api_config '{"bot_token":"123456:ABC-DEF","chat_id":"123456789"}'
+
+config sms_forward_instance
+	option enable '0'
+	option modem_cfg 'modem_1'
+	option poll_interval '60'
+	option api_type 'webhook'
+	option api_config '{"webhook_url":"https://example.com/webhook","request_method":"POST","format":"{\"sender\":\"{SENDER}\",\"time\":\"{TIME}\",\"content\":\"{CONTENT}\"}"}'
+
+config sms_forward_instance
+	option enable '0'
+	option modem_cfg 'modem_1'
+	option poll_interval '60'
+	option api_type 'webhook'
+	option api_config '{"webhook_url":"https://example.com/sms?from={SENDER}&time={TIME}","request_method":"GET","format":"{CONTENT}"}'

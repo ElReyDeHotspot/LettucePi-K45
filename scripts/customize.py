@@ -159,3 +159,26 @@ if z2.is_dir():
     nft=z2/'common/nft.sh'
     text=nft.read_text()
     if 'counter queue num' not in text: nft.write_text(text.replace('queue num ','counter queue num '))
+
+# US build: remove optional Chinese SMS notification integrations.
+for provider in ('feishu','pushdeer','serverchan'):
+    (root/f'usr/share/sms_forwarder/sms_forward_{provider}.sh').unlink(missing_ok=True)
+for script in ('usr/share/misectel/wan5g-probe.sh','usr/share/qmodem/led_scripts/connectivity.sh'):
+    (root/script).chmod(0o755)
+
+# VPN starts only after an explicit Apps / Tailscale enable action.
+for link in (root/'etc/rc.d').glob('*tailscale'):
+    link.unlink()
+
+# Remove inherited Chinese DNS probe defaults without changing unrelated config.
+for name in ('etc/config/misectel_uplink',):
+    p=root/name
+    if p.exists():
+        text=p.read_text()
+        for old,new in [('223.5.5.5','1.1.1.1'),('223.6.6.6','1.0.0.1'),('119.29.29.29','8.8.8.8'),('114.114.114.114','9.9.9.9')]: text=text.replace(old,new)
+        p.write_text(text)
+
+
+# Shared modem helpers copied from the vendor tree must remain executable.
+for p in (repo/'payload/usr/share/qmodem').rglob('*.sh'):
+    (root/p.relative_to(repo/'payload')).chmod(0o755)

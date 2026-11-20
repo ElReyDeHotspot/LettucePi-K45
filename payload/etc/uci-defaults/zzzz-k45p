@@ -42,4 +42,8 @@ case "$(uci -q get system.@system[0].hostname)" in
         uci commit system
         ;;
 esac
+# Migrate only the untouched vendor four-entry APN list; retain custom lists.
+if [ "$(sha256sum /etc/misectel/apn-presets/us.json 2>/dev/null | cut -d' ' -f1)" = '1f417c8debf0978c37604df54cb67ea88dd73e2efc4f064e3ece2b934ac4850f' ]; then
+    cp /usr/share/misectel/apn-presets/defaults/us.json /etc/misectel/apn-presets/us.json
+fi
 exit 0
