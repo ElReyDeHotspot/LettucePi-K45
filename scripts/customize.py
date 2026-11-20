@@ -21,6 +21,11 @@ shutil.copytree(repo/'payload',root,dirs_exist_ok=True)
 # LuCI is served by ucode CGI. The patched upstream server has no Lua module.
 p=root/'etc/config/uhttpd'
 p.write_text('\n'.join(line for line in p.read_text().splitlines() if 'lua_prefix' not in line)+'\n')
+# config_generate only creates a missing network config, preserving retained LANs.
+p=root/'bin/config_generate'
+s=p.read_text()
+assert 'lan) ipad=${ipaddr:-"192.168.1.1"}' in s
+p.write_text(s.replace('lan) ipad=${ipaddr:-"192.168.1.1"}', 'lan) ipad=${ipaddr:-"192.168.100.1"}'))
 backend=root/'usr/share/rpcd/ucode/misectel'
 s=backend.read_text()
 # Retain the current vendor's OEM methods, which did not exist on the K43P.

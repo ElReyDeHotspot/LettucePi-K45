@@ -3,3 +3,4 @@
 *.apk -text
 *.adb -text
 tpws -text
+*.cmd -text

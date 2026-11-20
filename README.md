@@ -1,6 +1,6 @@
 # LettucePi K45P
 
-## Bin 6 — finalized build 202611200007
+## Bin 6 — finalized build 202611200008
 
 Version 1.0.5 / bin 6 includes the current Chester K45P UI and apps, K43P
 layout, four-by-four band grid, mobile controls, fan shortcut, consistent
@@ -15,8 +15,9 @@ included. The vendor Linux 6.12.94 kernel and device tree remain byte-identical.
 Standard HTTP management is retained by owner choice; no certificate setup
 is required after factory reset.
 
-Build 202611200007 supersedes the earlier bin 6 build 202611200006, adding the
-last Overview shortcuts. OTA uses the monotonically increasing build ID,
+Build 202611200008 supersedes the earlier bin 6 builds, adding the
+last Overview shortcuts and explicit clean-install LAN/login defaults.
+Fresh routers use 192.168.100.1 and root/admin. OTA uses the increasing build ID,
 so existing devices can distinguish this finalized image.
 
 For fresh vendor routers, Windows `scripts/Update-K45P.cmd` installs the

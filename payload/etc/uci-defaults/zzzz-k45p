@@ -1,4 +1,10 @@
 #!/bin/sh
+# A clean vendor rootfs has no initial root hash. Preserve existing passwords
+# on settings-preserving upgrades, and initialize a fresh router to admin.
+current_hash=$(sed -n 's/^root:\([^:]*\):.*/\1/p' /etc/shadow)
+case "$current_hash" in
+    ''|'!'|'*'|'x') (printf 'admin\n'; sleep 1; printf 'admin\n') | passwd root >/dev/null 2>&1 || exit 1 ;;
+esac
 uci -q set rpcd.@login[0].username='root'
 uci -q set rpcd.@login[0].password='$p$root'
 uci -q set rpcd.admin='login'
