@@ -2,11 +2,18 @@
 # K45P FIT updater. Never substitutes the K43P flash method or forces checks.
 set -eu
 MANIFEST_URL=https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/latest.json
+RAW_BASE=https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45
+REF_URL=https://api.github.com/repos/ElReyDeHotspot/LettucePi-K45/git/ref/heads/main
 VERSION_FILE=/etc/chester-version
 LOG=/tmp/chester-update.log
 field() { sed -n "s/^$1=//p" "$VERSION_FILE" 2>/dev/null | head -1; }
 fetch_manifest() {
-    curl -fsSL --connect-timeout 10 --max-time 30 "$MANIFEST_URL?cb=$(date +%s)" > "$1"
+    # Resolve once, then keep manifest and image on that immutable commit.
+    head_json=$(curl -fsSL --connect-timeout 10 --max-time 30 "$REF_URL?cb=$(date +%s)") || return 1
+    MANIFEST_REF=$(printf '%s' "$head_json" | jq -er '.object.sha') || return 1
+    [ "${#MANIFEST_REF}" = 40 ] || return 1
+    case "$MANIFEST_REF" in *[!0-9a-f]*) return 1 ;; esac
+    curl -fsSL --connect-timeout 10 --max-time 30 "$RAW_BASE/$MANIFEST_REF/firmware/latest.json" > "$1" || return 1
     jq -e '.product == "K45P" and .board == "misectel,m02k45" and (.build|type == "string") and (.version|type == "string") and (.url|startswith("https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/")) and (.sha256|type == "string") and (.sha256|length == 64) and (.size|type == "number") and .size > 1000000 and .size < 60000000' "$1" >/dev/null || return 1
     # The vendor jq is built without regex support.
     sha_check=$(jq -r .sha256 "$1")
@@ -29,6 +36,7 @@ install)
     trap 'rm -f "$t"; rmdir /tmp/k45p-update.lock 2>/dev/null || true' EXIT
     fetch_manifest "$t" || { echo 'FAIL: invalid K45P manifest'; exit 1; }
     url=$(jq -r .url "$t"); sha=$(jq -r .sha256 "$t"); size=$(jq -r .size "$t")
+    url="$RAW_BASE/$MANIFEST_REF/${url#"$RAW_BASE/main/"}"
     [ "$(df -k /tmp | awk 'NR==2 {print $4}')" -gt $((size / 1024 + 16384)) ] || { echo 'FAIL: insufficient memory'; exit 1; }
     : > "$LOG"
     img=/tmp/k45p-sysupgrade.itb
