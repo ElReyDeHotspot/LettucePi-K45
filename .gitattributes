@@ -3,4 +3,4 @@
 *.apk -text
 *.adb -text
 tpws -text
-*.cmd -text
+*.cmd -text whitespace=cr-at-eol
