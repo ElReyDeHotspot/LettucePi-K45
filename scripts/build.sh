@@ -6,7 +6,7 @@ BASE=${1:?Usage: build.sh base.itb [work-directory]}
 WORK=${2:-/var/tmp/k45p-build}
 APK=${APK_TOOLS:-/usr/local/bin/apk3}
 FWTOOL=${FWTOOL:-fwtool}
-BUILD=${BUILD_ID:-202611200008}
+BUILD=${BUILD_ID:-202611200009}
 VERSION=${VERSION:-1.0.5}
 BIN=${BIN_NUMBER:-6}
 case "$WORK" in /var/tmp/k45p-*|/tmp/k45p-*) ;; *) echo 'Use a dedicated /var/tmp/k45p-* directory' >&2; exit 1 ;; esac
