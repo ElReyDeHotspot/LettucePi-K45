@@ -2,11 +2,11 @@
   "product": "K45P",
   "board": "misectel,m02k45",
   "version": "1.0.5",
-  "build": "202611200009",
+  "build": "202611200010",
   "bin": "6",
   "built": "2026-11-20",
   "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.5-sysupgrade.itb",
-  "sha256": "c700de63b472a715240105c41756839ab0f2d266221122b34792dccce519fe1e",
+  "sha256": "1632f37f129a4b80623c9b55ed493c283d0bb7320796132aac7a1ba6c0748bf2",
   "size": 25977086,
   "notes": "Bin 6 finalized: K43P Quick Start with timezone, US APN, Wi-Fi and password steps; factory-reset LAN 192.168.100.1 and root/admin login; all Chester K45P UI and apps refinements including Overview Reboot, Software Update, Speedtest and Failover shortcuts; Carp4 Zapret2 with matching NFQUEUE modules; patched uHTTPd; signed OTA and rollback protection. Original vendor Linux 6.12.94 kernel and device tree preserved. Standard HTTP management."
 }

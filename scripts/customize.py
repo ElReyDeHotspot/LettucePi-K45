@@ -153,8 +153,12 @@ assert (root/'usr/sbin/tpws').read_bytes()[:4]==b'\x7fELF'
 tc=root/'sbin/tc'
 if not tc.exists() and not tc.is_symlink():tc.symlink_to('/usr/libexec/tc-full')
 for name,start in [('chester-sqm',96),('ttyd',99),('failover',99)]:
-    link=root/('etc/rc.d/S%02d%s'%(start,name))
-    if not link.is_symlink():link.symlink_to('../init.d/'+name)
+    init=(root/('etc/init.d/'+name)).read_text()
+    stop=re.search(r'^STOP=(\d+)',init,re.M)
+    timings=[('S',start)]+([('K',int(stop[1]))] if stop else [])
+    for prefix,order in timings:
+        link=root/('etc/rc.d/%s%02d%s'%(prefix,order,name))
+        if not link.is_symlink():link.symlink_to('../init.d/'+name)
 print(f'Customized K45P rootfs; normalized {len(changed)} files')
 
 # apk --no-scripts defers package post-install actions. Apply the companion
