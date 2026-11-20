@@ -1,27 +1,32 @@
 # LettucePi K45P
 
-## Live UI refinements (not built into an image yet)
+## Bin 6 — finalized build 202611200007
 
-Development changes after 1.0.4 are being tested directly on the router:
+Version 1.0.5 / bin 6 includes the current Chester K45P UI and apps, K43P
+layout, four-by-four band grid, mobile controls, fan shortcut, consistent
+APN presets, SSH banner, NIC speed labels and WAN/LAN switch, plus Overview
+shortcuts ordered Reboot, Software Update, Speedtest, Failover. Reboot opens
+the existing confirmation page.
 
-- Display name **Chester K45P**; default hostname **Chester-K45P**.
-- Restored local K43P carrier-card and square network-mode styles.
-- Fixed four-column/four-row carrier grid.
-- Fan shortcut next to 4K/HD, opening the existing fan settings page.
-- Equal-height phone controls labeled 4K/HD, Fan, TTL/HL, and LED.
-- Cache versions for live JavaScript and stylesheet updates.
+Carp4 Zapret2 and matching NFQUEUE modules are included in the image. The
+video engine remains off until enabled through Overview or Apps. Terminal,
+Failover monitoring, signed OTA verification and patched upstream uHTTPd are
+included. The vendor Linux 6.12.94 kernel and device tree remain byte-identical.
+Standard HTTP management is retained by owner choice; no certificate setup
+is required after factory reset.
 
-Firmware generation is on hold while this UI is reviewed.
+Build 202611200007 supersedes the earlier bin 6 build 202611200006, adding the
+last Overview shortcuts. OTA uses the monotonically increasing build ID,
+so existing devices can distinguish this finalized image.
 
-Carp4 Zapret2 is installed and running on the test K45P. The missing
-NFQUEUE modules were built separately from matching source, with netfilter
-code/data checked byte for byte against four vendor reference modules.
-IPv4/IPv6 packet round trips, HTTPS, module reload and Overview off/on passed.
-The vendor kernel is unchanged. Apps / 4K/HD Video opens carp4's panel, and
-Overview controls the same service. The original 19-domain video scope is
-preserved; TPWS is stopped and disabled. This is a live package update,
-not a new firmware image. See [the module build recipe](integrations/zapret2/README.md)
-and [validation](integrations/zapret2.json).
+For fresh vendor routers, Windows `scripts/Update-K45P.cmd` installs the
+newest signed release with `sysupgrade -n`, erasing saved settings. It prompts
+for SSH host-key approval and the root password. `--check` downloads and
+validates without flashing. The launcher uses ash's built-in printf;
+it does not require a base64 utility on the router. Its signed bootstrap
+verifies the signed manifest, board, image size, SHA256 and stock image check.
+See [release security](firmware/SECURITY.md) and the
+[NFQUEUE build recipe](integrations/zapret2/README.md).
 
 Version **1.0.4** fixes the top-right account menu: visible three-dot button,
 positioned dropdown, keyboard focus, and links to password settings, reboot
@@ -70,7 +75,7 @@ explicitly instead. See [provenance.json](provenance.json).
 
 Open **Overview → System Update** to check or install an update. Settings are
 kept by default; the page also offers an explicit settings reset option.
-The updater checks board identity, manifest family, download size, SHA-256,
+The updater verifies the pinned release signature and rollback floor, board identity, manifest family, download size, SHA-256,
 and stock `sysupgrade -T` validation. It uses the original K45P FIT upgrade
 path and never uses `sysupgrade -F` or the K43P flash method.
 The manifest and image are fetched from the same immutable Git commit.
