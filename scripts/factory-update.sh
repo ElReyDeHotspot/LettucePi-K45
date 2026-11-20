@@ -38,4 +38,7 @@ if [ "$mode" = --check ]; then
     exit 0
 fi
 echo 'Installing newest published K45P firmware, erasing saved settings, then rebooting.'
-sysupgrade -n "$t/firmware.itb"
+# procd closes the caller before stage2 consumes the image. An EXIT cleanup
+# here can delete that image during the handoff and leave the old firmware.
+trap - EXIT
+exec sysupgrade -n "$t/firmware.itb"
