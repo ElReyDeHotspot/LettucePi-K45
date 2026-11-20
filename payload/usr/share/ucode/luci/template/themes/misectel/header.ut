@@ -9,7 +9,7 @@
 	const boardinfo = ubus.call('system', 'board');
 	const hostname = striptags(`${boardinfo.hostname ?? '?'}`);
 	const appname = 'LettucePi K45P';
-	const authuser = ctx.authuser ?? 'admin';
+	const authuser = ctx.authuser ?? 'root';
 	const wizard_url = dispatcher.lookup('setup')
 		? dispatcher.build_url('setup')
 		: dispatcher.build_url('admin');

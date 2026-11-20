@@ -43,8 +43,11 @@ root password hash is preserved during an upgrade. Use 1.0.1 or later.
 
 Manifest: [`firmware/latest.json`](firmware/latest.json).
 
-The web login uses the vendor's `admin` account, mapped to the root password.
-SSH uses `root`. Existing credentials and network settings are preserved.
+The web login accepts **root** and **admin**. Both authenticate against the same
+root password, factory default **admin**; changing it changes it for both.
+The login form prefills `root`. SSH uses **root**. Existing changed passwords
+and network settings are preserved during OTA. Version **1.0.2** introduces
+these shared-password web logins.
 
 ## Rebuilding
 

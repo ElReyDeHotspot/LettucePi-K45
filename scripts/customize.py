@@ -69,6 +69,8 @@ s=cfg.read_text()
 for name,value in [('brand_name','LettucePi'),('model_name','K45P'),('header_name','LettucePi K45P'),('apn_country','us')]:
     s=re.sub(r"(option "+name+r"\s+)'[^']*'",lambda m:m[1]+repr(value),s)
 cfg.write_text(s)
+p=root/'etc/config/rpcd'
+p.write_text(re.sub(r"(option username\s+)'admin'",r"\1'root'",p.read_text())+"\nconfig login 'admin'\n\toption username 'admin'\n\toption password '$p$root'\n\tlist read '*'\n\tlist write '*'\n")
 
 # Add the existing clients view to the ported dashboard menu.
 p=root/'usr/share/luci/menu.d/luci-app-misectel-dashboard.json'

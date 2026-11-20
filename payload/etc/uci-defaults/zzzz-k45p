@@ -1,4 +1,14 @@
 #!/bin/sh
+uci -q set rpcd.@login[0].username='root'
+uci -q set rpcd.@login[0].password='$p$root'
+uci -q set rpcd.admin='login'
+uci -q set rpcd.admin.username='admin'
+uci -q set rpcd.admin.password='$p$root'
+uci -q delete rpcd.admin.read
+uci -q delete rpcd.admin.write
+uci -q add_list rpcd.admin.read='*'
+uci -q add_list rpcd.admin.write='*'
+uci -q commit rpcd
 uci -q set luci.main.lang='en'
 uci -q delete luci.languages.zh_cn
 uci -q delete luci.languages.zh_tw
