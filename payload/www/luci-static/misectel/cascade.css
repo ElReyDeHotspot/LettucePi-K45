@@ -9122,7 +9122,7 @@ body.logged-in .nav > li[data-menu-name="developer"] { --top-menu-icon: url("dat
 body.logged-in .nav > li[data-menu-name="developer"] > a > .menu-icon::before { content:"" !important; display:block; width:16px; height:16px; background:var(--top-menu-icon) center / contain no-repeat; }
 body.logged-in .slide-menu > li[data-menu-name="ttyd"] { --submenu-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http%3A//www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23fff'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Crect%20x='3'%20y='4'%20width='18'%20height='16'%20rx='2'/%3E%3Cpath%20d='m7%209%203%203-3%203m6%200h4'/%3E%3C/svg%3E"); }
 
-/* Keep the Failover shortcut below the WAN socket, outside its role switch. */
+/* Overview actions stay below the four sockets, outside the WAN role switch. */
 .chester-port-slot { display:grid; grid-template-rows:minmax(86px,1fr) 44px; gap:8px; min-width:0; }
 .chester-failover-shortcut { display:flex; align-items:center; justify-content:center; min-height:44px; padding:6px 8px; border:1px solid #d7dfe9; border-radius:10px; background:#f6f8fb; color:#243f5c; font-size:13px; font-weight:600; text-decoration:none; }
 .chester-failover-shortcut:hover { background:#eaf1fa; border-color:#9bb6d9; color:#163e72; text-decoration:none; }
@@ -9130,3 +9130,6 @@ body.logged-in .slide-menu > li[data-menu-name="ttyd"] { --submenu-icon: url("da
 
 .misectel-dashboard-port-panel.chester-ports-with-shortcut { grid-template-columns:repeat(4,minmax(0,1fr)); grid-auto-flow:row; grid-auto-columns:auto; }
 .chester-port-slot > .misectel-dashboard-port-panel__port { min-width:0; padding-left:6px; padding-right:6px; }
+
+.chester-failover-shortcut { text-align:center; line-height:1.2; }
+@media (max-width:600px) { .chester-failover-shortcut { font-size:12px; padding:6px 4px; } }
