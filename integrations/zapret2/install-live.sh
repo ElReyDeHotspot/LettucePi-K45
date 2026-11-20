@@ -17,7 +17,7 @@ if [ "$first" = 1 ] && [ -s /etc/chester-video-hosts ]; then
  uci set zapret2.main.host="$(grep -vE '^[[:space:]]*(#|$)' /etc/chester-video-hosts | tr '\n' ' ')"
  uci commit zapret2
 fi
-for file in usr/sbin/chester-zapret usr/sbin/chester-videotest usr/share/rpcd/ucode/misectel usr/share/luci/menu.d/luci-app-chester-zapret.json usr/share/luci/menu.d/luci-app-zapret2.json; do
+for file in usr/share/ucode/luci/template/header.ut www/luci-static/resources/view/chester-zapret/streaming.js usr/sbin/chester-zapret usr/sbin/chester-videotest usr/share/rpcd/ucode/misectel usr/share/luci/menu.d/luci-app-chester-zapret.json usr/share/luci/menu.d/luci-app-zapret2.json; do
  cp "$REPO/payload/$file" "/$file"
 done
 chmod 755 /usr/sbin/chester-zapret /usr/sbin/chester-videotest

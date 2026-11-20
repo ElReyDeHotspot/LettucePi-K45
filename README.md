@@ -108,3 +108,9 @@ The UI payload is adapted from
 recorded in provenance. The K45P connection indicator uses the modem's active
 netifd interface, because the vendor's QModem connection-status response can
 report disconnected while that interface is up and addressed.
+
+The K45P streaming page uses a simplified view adapted from carp4: a single
+on/off control, automatic active-connection selection for streaming tests,
+collapsible streaming sites, and advanced settings/diagnostics. The view is
+`payload/www/luci-static/resources/view/chester-zapret/streaming.js`; the engine
+and saved recipes remain carp4 Zapret2. No firmware image was generated.

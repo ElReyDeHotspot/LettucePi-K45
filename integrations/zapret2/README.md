@@ -56,7 +56,10 @@ Userspace dependencies come from the router's existing pinned feeds.
 To prepare a small update bundle on the host without copying firmware files:
 
 ```sh
-git archive HEAD integrations/zapret2 payload/usr/sbin/chester-zapret \
+git archive HEAD integrations/zapret2 \
+  payload/usr/share/ucode/luci/template/header.ut \
+  payload/www/luci-static/resources/view/chester-zapret/streaming.js \
+  payload/usr/sbin/chester-zapret \
   payload/usr/sbin/chester-videotest payload/usr/share/rpcd/ucode/misectel \
   payload/usr/share/luci/menu.d/luci-app-chester-zapret.json \
   payload/usr/share/luci/menu.d/luci-app-zapret2.json | gzip > k45p-zapret2-live.tar.gz
@@ -94,3 +97,9 @@ for a future image; no image was generated or published for this update.
 
 Upstream engine: [bol-van/zapret2](https://github.com/bol-van/zapret2).
 Kernel source and patches: [ImmortalWrt](https://github.com/immortalwrt/immortalwrt/tree/cd0a06bfd3fdbc1011e32d35348d2ee013b4daf2).
+
+The K45P streaming page uses a simplified view adapted from carp4: a single
+on/off control, automatic active-connection selection for streaming tests,
+collapsible streaming sites, and advanced settings/diagnostics. The view is
+`payload/www/luci-static/resources/view/chester-zapret/streaming.js`; the engine
+and saved recipes remain carp4 Zapret2. No firmware image was generated.
