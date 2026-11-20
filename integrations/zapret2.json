@@ -2,18 +2,49 @@
   "requested_source": "https://github.com/carp4/luci-app-zapret2",
   "source_commit": "36568c18fc0ad3153b4b99b2f1917833af81bb5d",
   "release": "v0.2.0-r29",
-  "status": "pending-compatible-kernel-support",
+  "status": "installed-and-validated-live",
   "running_kernel": "6.12.94",
   "vendor_kernel_abi": "768011ae6e81e700abee5e18322a466a",
   "public_kernel_abi": "b5b7729ffbba3ecdd83f339de8fadfb8",
-  "required_kernel_packages": ["kmod-nfnetlink-queue", "kmod-nft-queue"],
+  "required_kernel_packages": [
+    "kmod-nfnetlink-queue",
+    "kmod-nft-queue"
+  ],
   "checks": {
-    "runtime_nfqueue_symbols": false,
-    "unhooked_nft_queue_expression_supported": false,
+    "runtime_nfqueue_symbols": true,
+    "unhooked_nft_queue_expression_supported": true,
     "embedded_kernel_config": false,
     "public_nf_conntrack_matches_vendor": false,
-    "public_nfnetlink_matches_vendor": false
+    "public_nfnetlink_matches_vendor": false,
+    "reference_modules_code_and_data_match": [
+      "nfnetlink",
+      "nf_conntrack",
+      "nf_tables",
+      "nft_ct"
+    ],
+    "ipv4_queue_roundtrip": true,
+    "ipv6_queue_roundtrip": true,
+    "ipv4_youtube_https": 200,
+    "ipv6_youtube_https": 200,
+    "module_unload_and_startup_loader_reload": true,
+    "overview_off_on": true,
+    "boot_enabled": true,
+    "queue_drops": 0,
+    "kernel_taint_before": 4096,
+    "kernel_taint_after": 4096,
+    "vendor_kernel_unchanged": true,
+    "full_reboot_test": false
   },
-  "existing_engine": "TPWS v72.13, retained and running",
-  "no_firmware_image_generated_for_live_refinements": true
+  "no_firmware_image_generated_for_live_refinements": true,
+  "engine": "Zapret2 nfqws2 1.0.5.2",
+  "legacy_engine": "TPWS retained for rollback, stopped and disabled",
+  "module_source_revision": "cd0a06bfd3fdbc1011e32d35348d2ee013b4daf2",
+  "module_compiler": "OpenWrt GCC 14.3.0, KCFLAGS=-fno-caller-saves",
+  "module_config": "zapret2/kernel.config",
+  "packages": {
+    "kmod-nfnetlink-queue-6.12.94-r1.apk": "0da29346ad74c7e96560e4a53f308f49ee2759bf2a6577b66fb3bcf2ab628964",
+    "kmod-nft-queue-6.12.94-r1.apk": "1ce01b9334caf38c19e8a09fe4b9f61cbf23c06e1eb482f7def6b8a37231d62a",
+    "luci-app-zapret2.apk": "acc7d9f5199d63a0e7085bb2b24c226346147a888aaeb20bd01099797add1f3b",
+    "zapret2.apk": "d250e372dfec302eb34ed9e0178c054babb83f03b463a86e9f82098126f0612f"
+  }
 }

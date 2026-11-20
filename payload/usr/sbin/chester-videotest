@@ -24,14 +24,14 @@ AB_OUT=/tmp/chester-abtest.json
 AB_PROG=/tmp/chester-abtest.progress
 AB_PID=/tmp/chester-abtest.pid
 
-ENGINE=/usr/sbin/tpws
-INIT=/etc/init.d/chester-tpws
+ENGINE=/opt/zapret2/nfq2/nfqws2
+INIT=/etc/init.d/zapret2
 
 have() { command -v "$1" >/dev/null 2>&1; }
 have curl || { echo '{"ok":false,"error":"curl is not installed"}'; exit 1; }
 
 engine_present() { [ -x "$ENGINE" ]; }
-engine_running() { pidof tpws >/dev/null 2>&1; }
+engine_running() { pidof nfqws2 >/dev/null 2>&1; }
 
 measure() {
 	rate=$(curl -sS -o /dev/null --max-time "$SECS" \

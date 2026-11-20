@@ -461,10 +461,8 @@ const methods = {
 	// an rpcd method that calls `ubus call qmodem ...` deadlocks rpcd
 	// against itself and the request times out. The refresh is therefore
 	// detached and this returns whatever the last good reading was.
-	// The 4K/HD engine (tpws). Carriers throttle video by reading
-	// the TLS SNI; tpws splits the ClientHello so the hostname is
-	// never intact in one packet. Toggling it also sets the boot
-	// flag, so the switch means the same thing after a reboot.
+	// The 4K/HD control uses the same Zapret2 service as the Apps page.
+	// Its status includes the saved boot flag and the actual process state.
 	// The 2.5G socket can act as a WAN uplink or as another LAN
 	// port. misectel-optional-wan reads optional_wan_mode at boot
 	// to decide; wan_role only NAMES which network interface it is
@@ -507,17 +505,14 @@ const methods = {
 
 	video_engine: {
 		call: function() {
-			let running = trimSafe(readCommandOutput(
-				'pidof tpws >/dev/null 2>&1 && echo yes'));
-
+			let status = {};
+			try { status = json(readCommandOutput('/usr/sbin/chester-zapret status')); } catch (e) {}
 			return {
-				installed: fileExists('/etc/init.d/chester-tpws'),
-				// The 4K/HD page reads all three: it decides between the
-				// install prompt and the status card on 'installed', and
-				// distinguishes on-but-dead from on-and-working using both
-				// 'enabled' and 'running'.
-				enabled: (running == 'yes'),
-				running: (running == 'yes')
+				installed: !!status.present,
+				enabled: !!status.enabled,
+				running: !!status.running,
+				engine: 'Zapret2',
+				version: status.version || ''
 			};
 		}
 	},
@@ -527,21 +522,10 @@ const methods = {
 		call: function(request) {
 			let want = trimSafe(request.args.enabled);
 			let on = !(want == '0' || lc(want) == 'false' || lc(want) == 'off');
-
-			if (!fileExists('/etc/init.d/chester-tpws'))
-				return { success: false, enabled: false,
-					message: 'the 4K/HD engine is not installed' };
-
-			if (on) {
-				readCommandOutput('/etc/init.d/chester-tpws enable >/dev/null 2>&1');
-				readCommandOutput('/etc/init.d/chester-tpws start >/dev/null 2>&1');
-			}
-			else {
-				readCommandOutput('/etc/init.d/chester-tpws stop >/dev/null 2>&1');
-				readCommandOutput('/etc/init.d/chester-tpws disable >/dev/null 2>&1');
-			}
-
-			return { success: true, enabled: on };
+			let status = {};
+			try { status = json(readCommandOutput('/usr/sbin/chester-zapret ' + (on ? 'install' : 'uninstall'))); } catch (e) {}
+			return { success: !!status.ok, enabled: !!status.enabled,
+				message: status.error || '' };
 		}
 	},
 

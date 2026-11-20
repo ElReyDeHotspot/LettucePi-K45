@@ -13,11 +13,15 @@ Development changes after 1.0.4 are being tested directly on the router:
 
 Firmware generation is on hold while this UI is reviewed.
 
-The requested carp4 Zapret2 integration is pending matching kernel support.
-The running vendor kernel lacks NFQUEUE and does not embed its build config.
-The public 6.12.94 modules have a different ABI and different netfilter code;
-they have not been installed or forced. The existing TPWS engine remains
-active. See `integrations/zapret2.json` for the pinned source and checks.
+Carp4 Zapret2 is installed and running on the test K45P. The missing
+NFQUEUE modules were built separately from matching source, with netfilter
+code/data checked byte for byte against four vendor reference modules.
+IPv4/IPv6 packet round trips, HTTPS, module reload and Overview off/on passed.
+The vendor kernel is unchanged. Apps / 4K/HD Video opens carp4's panel, and
+Overview controls the same service. The original 19-domain video scope is
+preserved; TPWS is stopped and disabled. This is a live package update,
+not a new firmware image. See [the module build recipe](integrations/zapret2/README.md)
+and [validation](integrations/zapret2.json).
 
 Version **1.0.4** fixes the top-right account menu: visible three-dot button,
 positioned dropdown, keyboard focus, and links to password settings, reboot

@@ -148,3 +148,14 @@ for name,start in [('chester-sqm',96),('ttyd',99),('failover',99)]:
     link=root/('etc/rc.d/S%02d%s'%(start,name))
     if not link.is_symlink():link.symlink_to('../init.d/'+name)
 print(f'Customized K45P rootfs; normalized {len(changed)} files')
+
+# apk --no-scripts defers package post-install actions. Apply the companion
+# LuCI init override and default config to the staged root, without starting it.
+z2=root/'opt/zapret2'
+if z2.is_dir():
+    shutil.copy2(root/'usr/share/luci-app-zapret2/init.d-zapret2',root/'etc/init.d/zapret2')
+    (root/'etc/init.d/zapret2').chmod(0o755)
+    if not (z2/'config').exists(): shutil.copy2(z2/'config.default',z2/'config')
+    nft=z2/'common/nft.sh'
+    text=nft.read_text()
+    if 'counter queue num' not in text: nft.write_text(text.replace('queue num ','counter queue num '))

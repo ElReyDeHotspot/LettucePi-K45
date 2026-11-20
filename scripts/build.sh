@@ -22,6 +22,10 @@ langs=$("$APK" --root "$R" info 2>/dev/null | grep -E '^luci-i18n-.*-zh-(cn|tw)$
 # pinned to the exact running release, including the matching target feed.
 sed -i -e '/\/misectel\//d' -e '/\/qmodem\//d' -e '/\/video\//d' "$R/etc/apk/repositories.d/distfeeds.list"
 "$APK" --root "$R" --arch aarch64_cortex-a53 --no-scripts add tc-full ttyd luci-app-ttyd
+# Local NFQUEUE packages target only the captured vendor kernel ABI.
+(cd "$REPO/integrations/zapret2/packages"; sha256sum -c SHA256SUMS)
+"$APK" --root "$R" --arch aarch64_cortex-a53 --no-scripts --allow-untrusted add \
+  "$REPO"/integrations/zapret2/packages/*.apk
 python3 "$REPO/scripts/customize.py" "$R"
 printf 'version=%s\nbuilt=2026-11-20\nbuild=%s\nbin=%s\nproduct=K45P\n' "$VERSION" "$BUILD" "$BIN" > "$R/etc/chester-version"
 cp "$WORK/image0" "$WORK/kernel.bin"
