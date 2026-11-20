@@ -1,5 +1,9 @@
 # LettucePi K45P
 
+Version **1.0.4** fixes the top-right account menu: visible three-dot button,
+positioned dropdown, keyboard focus, and links to password settings, reboot
+and logout.
+
 Firmware and over-the-air updates for the **K45P**, hardware board
 `misectel,m02k45`. The repository URL remains `LettucePi-K45`.
 

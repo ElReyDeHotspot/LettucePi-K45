@@ -1,12 +1,12 @@
 {
   "product": "K45P",
   "board": "misectel,m02k45",
-  "version": "1.0.3",
-  "build": "202611200004",
-  "bin": "4",
+  "version": "1.0.4",
+  "build": "202611200005",
+  "bin": "5",
   "built": "2026-11-20",
-  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.3-sysupgrade.itb",
-  "sha256": "0eaeff87186aa8ea3adce90948919f5ddefe0edbc84f4254da672f65e297048a",
+  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.4-sysupgrade.itb",
+  "sha256": "8a1288410742294fd4d5d0497dee1442097eb4dee9fdef1e80d09854c13482a0",
   "size": 25542910,
-  "notes": "K45P release: compact login logo, full K43P sidebar, Apps Failover; shared root/admin password; K43P Overview and apps, English-only UI, US region, K45P FIT OTA. Vendor 25.12.1 kernel and device tree preserved."
+  "notes": "K45P release: repair top-right account menu icon and dropdown; retain K43P layout, Failover and shared root/admin password; K43P Overview and apps, English-only UI, US region, K45P FIT OTA. Vendor 25.12.1 kernel and device tree preserved."
 }

@@ -8779,3 +8779,80 @@ body[data-page="admin-network-wifi"] .misectel-page--wifi .misectel-card__footer
     height: 56px !important; max-width: 56px; object-fit: contain; margin: 0;
 }
 .node-main-login > .main .login-wordmark { font-size: 28px; line-height: 1.2; }
+
+/* The account controls share the fixed topbar, not the page layout. */
+body.logged-in .topbar-right .account-menu {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+}
+body.logged-in .topbar-right .account-menu__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    padding: 0;
+    color: #34465e;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    box-shadow: none;
+    cursor: pointer;
+}
+body.logged-in .topbar-right .account-menu__button:hover,
+body.logged-in .topbar-right .account-menu.is-open .account-menu__button {
+    color: #bd2038;
+    background: #fceaf0;
+    border-color: #f0c5cf;
+}
+body.logged-in .topbar-right .account-menu__button:focus-visible {
+    outline: 2px solid #c7273e;
+    outline-offset: 2px;
+}
+body.logged-in .topbar-right .account-menu__dots {
+    display: block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 -6px 0 currentColor, 0 6px 0 currentColor;
+    pointer-events: none;
+}
+body.logged-in .topbar-right .account-menu__panel:not([hidden]) {
+    position: absolute;
+    top: calc(100% + 9px);
+    right: 0;
+    z-index: 2100;
+    display: flex;
+    flex-direction: column;
+    width: 200px;
+    max-width: calc(100vw - 24px);
+    padding: 6px;
+    border: 1px solid #dce4ee;
+    border-radius: 13px;
+    background: #fff;
+    box-shadow: 0 12px 32px rgba(19, 38, 65, .19);
+}
+body.logged-in .topbar-right .account-menu__panel[hidden] { display: none; }
+body.logged-in .topbar-right .account-menu__item {
+    display: block;
+    padding: 11px 13px;
+    color: #26384f;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 500;
+    text-align: left;
+    text-decoration: none;
+    white-space: nowrap;
+}
+body.logged-in .topbar-right .account-menu__item:hover,
+body.logged-in .topbar-right .account-menu__item:focus-visible {
+    background: #f0f4f9;
+    color: #17283e;
+}
+body.logged-in .topbar-right .account-menu__item--danger { color: #be243d; }
+body.logged-in .topbar-right .account-menu__item--danger:hover { background: #fff0f3; }

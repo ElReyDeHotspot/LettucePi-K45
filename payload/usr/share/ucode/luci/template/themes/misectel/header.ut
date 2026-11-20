@@ -41,7 +41,7 @@
 <meta name="msapplication-TileColor" content="#b81425">
 <meta name="application-name" content="{{ appname }}">
 <meta name="apple-mobile-web-app-title" content="{{ appname }}">
-<link rel="stylesheet" href="{{ media }}/cascade.css?v=26.235.0825234159">
+<link rel="stylesheet" href="{{ media }}/cascade.css?v=k45p-1.0.4">
 <link rel="icon" href="{{ media }}/favicon.ico" sizes="48x48">
 {% if (node?.css): %}
 <link rel="stylesheet" href="{{ resource }}/{{ node.css }}">
@@ -78,10 +78,10 @@
 					</a>
 					<span class="account-name">{{ authuser }}</span>
 					<div class="account-menu" data-account-menu>
-						<button type="button" class="account-menu__button" aria-haspopup="true" aria-expanded="false" aria-label="{{ _('Menu') }}">
+						<button type="button" class="account-menu__button" aria-haspopup="true" aria-controls="account-menu-panel" aria-expanded="false" aria-label="{{ _('Account menu') }}">
 							<span class="account-menu__dots" aria-hidden="true"></span>
 						</button>
-						<div class="account-menu__panel" hidden>
+						<div class="account-menu__panel" id="account-menu-panel" hidden>
 							<a class="account-menu__item" href="{{ password_url }}">{{ _('Change Password') }}</a>
 							{% if (dispatcher.lookup("admin/system/reboot")): %}
 							<a class="account-menu__item" href="{{ dispatcher.build_url("admin/system/reboot") }}">{{ _('Reboot') }}</a>
