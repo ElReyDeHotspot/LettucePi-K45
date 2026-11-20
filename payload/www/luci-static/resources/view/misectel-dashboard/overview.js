@@ -57,7 +57,7 @@ function formatLinkSpeed(speed){if(isEmptyValue(speed))
 return _('Unknown');const match=String(speed).match(/\d+/);if(!match)
 return String(speed);const value=parseInt(match[0],10);if(isNaN(value)||value<=0)
 return String(speed);if(value>=1000)
-return`${(value / 1000).toFixed(value % 1000 === 0 ? 0 : 1)} Gbps`;return`${value} Mbps`;}
+return`${(value / 1000).toFixed(value % 1000 === 0 ? 0 : 1)}Gbps`;return`${value}Mbps`;}
 function parseNumericValue(value){if(value==null)
 return null;const match=String(value).match(/-?\d+(?:\.\d+)?/);if(!match)
 return null;const numeric=parseFloat(match[0]);return isNaN(numeric)?null:numeric;}

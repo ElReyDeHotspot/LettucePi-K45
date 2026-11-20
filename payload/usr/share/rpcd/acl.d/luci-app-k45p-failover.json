@@ -1,7 +1,37 @@
 {
   "luci-app-k45p-failover": {
     "description": "Manage physical WAN and cellular failover",
-    "read": {"ubus": {"failover": ["status"], "network.interface": ["dump"]}},
-    "write": {"ubus": {"failover": ["set_config"]}}
+    "read": {
+      "ubus": {
+        "failover": [
+          "status"
+        ],
+        "network.interface": [
+          "dump"
+        ],
+        "luci": [
+          "getBuiltinEthernetPorts"
+        ],
+        "network.device": [
+          "status"
+        ],
+        "misectel": [
+          "wan_to_lan"
+        ]
+      },
+      "uci": [
+        "misectel"
+      ]
+    },
+    "write": {
+      "ubus": {
+        "failover": [
+          "set_config"
+        ],
+        "misectel": [
+          "set_wan_to_lan"
+        ]
+      }
+    }
   }
 }
