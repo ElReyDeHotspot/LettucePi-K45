@@ -18,6 +18,9 @@ esac
 pw.write_text(guard+pw.read_text())
 original_backend=(root/'usr/share/rpcd/ucode/misectel').read_text()
 shutil.copytree(repo/'payload',root,dirs_exist_ok=True)
+# LuCI is served by ucode CGI. The patched upstream server has no Lua module.
+p=root/'etc/config/uhttpd'
+p.write_text('\n'.join(line for line in p.read_text().splitlines() if 'lua_prefix' not in line)+'\n')
 backend=root/'usr/share/rpcd/ucode/misectel'
 s=backend.read_text()
 # Retain the current vendor's OEM methods, which did not exist on the K43P.

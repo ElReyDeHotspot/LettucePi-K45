@@ -1,0 +1,27 @@
+#!/bin/sh
+# Verify exact signed bytes before parsing any release metadata.
+set -eu
+m=${1:?manifest required}; sig=${2:?signature required}
+key=/usr/share/chester/ota.pub
+[ -s "$key" ] && [ -s "$m" ] && [ -s "$sig" ] || exit 1
+[ "$(wc -c < "$m")" -le 65536 ] && [ "$(wc -c < "$sig")" -le 4096 ] || exit 1
+usign -V -p "$key" -m "$m" -x "$sig" >/dev/null 2>&1 || {
+    echo 'Untrusted or modified update manifest' >&2; exit 1;
+}
+jq -e '.product == "K45P" and .board == "misectel,m02k45" and (.build|type == "string") and (.version|type == "string") and (.url|type == "string") and (.url|startswith("https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/")) and (.sha256|type == "string") and (.sha256|length == 64) and (.size|type == "number") and .size > 1000000 and .size < 60000000 and (.size|floor) == .size' "$m" >/dev/null || exit 1
+b=$(jq -r .build "$m"); sha=$(jq -r .sha256 "$m"); url=$(jq -r .url "$m")
+[ "${#b}" = 12 ] || exit 1
+case "$b" in *[!0-9]*) exit 1 ;; esac
+case "$sha" in *[!0-9a-f]*) exit 1 ;; esac
+f=${url##*/}
+case "$f" in LettucePi-K45P-*-sysupgrade.itb) ;; *) exit 1 ;; esac
+case "$f" in *[!A-Za-z0-9._-]*) exit 1 ;; esac
+[ "$url" = "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/$f" ] || exit 1
+installed=$(sed -n 's/^build=//p' /etc/chester-version | head -1)
+floor=$(uci -q get chester.update.minimum_build || true)
+for v in "$installed" "${floor:-$installed}"; do
+    [ "${#v}" = 12 ] || exit 1
+    case "$v" in *[!0-9]*) exit 1 ;; esac
+    [ "$b" -ge "$v" ] || { echo 'Firmware rollback rejected' >&2; exit 1; }
+done
+cat "$m"

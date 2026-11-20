@@ -1,12 +1,12 @@
 {
   "product": "K45P",
   "board": "misectel,m02k45",
-  "version": "1.0.4",
-  "build": "202611200005",
-  "bin": "5",
+  "version": "1.0.5",
+  "build": "202611200006",
+  "bin": "6",
   "built": "2026-11-20",
-  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.4-sysupgrade.itb",
-  "sha256": "8a1288410742294fd4d5d0497dee1442097eb4dee9fdef1e80d09854c13482a0",
-  "size": 25542910,
-  "notes": "K45P release: repair top-right account menu icon and dropdown; retain K43P layout, Failover and shared root/admin password; K43P Overview and apps, English-only UI, US region, K45P FIT OTA. Vendor 25.12.1 kernel and device tree preserved."
+  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.5-sysupgrade.itb",
+  "sha256": "e21d5435448add99bd4523d810779b9651f28ccb353c680214b8bf386c25cf3f",
+  "size": 25977086,
+  "notes": "Chester K45P UI and apps refinements; Carp4 Zapret2 with matching NFQUEUE modules; patched upstream uHTTPd; signed OTA manifests with rollback protection. Original vendor Linux 6.12.94 kernel and device tree preserved. Standard HTTP management retained by request."
 }
