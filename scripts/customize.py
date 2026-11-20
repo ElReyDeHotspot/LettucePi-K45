@@ -62,6 +62,8 @@ if "'apps'" not in s:
     s=s.replace("const DEFAULT_ALWAYS_SHOW=[","const DEFAULT_ALWAYS_SHOW=['apps','apps/tailscale','apps/speedtest','apps/sqm','apps/zapret',")
 s=s.replace("'system/system',",'').replace(",'system/system'",'')
 menu.write_text(s)
+custom=root/'www/luci-static/misectel/custom.css'
+custom.write_text(custom.read_text().replace('--misectel-shell-sidebar-width: 184px','--misectel-shell-sidebar-width: 232px'))
 
 # Keep defaults aligned with routes and expose the installed apps.
 cfg=root/'etc/config/misectel'
@@ -142,7 +144,7 @@ for folder in ['usr/sbin','usr/libexec','usr/share/rpcd/ucode','etc/init.d','etc
 assert (root/'usr/sbin/tpws').read_bytes()[:4]==b'\x7fELF'
 tc=root/'sbin/tc'
 if not tc.exists() and not tc.is_symlink():tc.symlink_to('/usr/libexec/tc-full')
-for name,start in [('chester-sqm',96),('ttyd',99)]:
+for name,start in [('chester-sqm',96),('ttyd',99),('failover',99)]:
     link=root/('etc/rc.d/S%02d%s'%(start,name))
     if not link.is_symlink():link.symlink_to('../init.d/'+name)
 print(f'Customized K45P rootfs; normalized {len(changed)} files')

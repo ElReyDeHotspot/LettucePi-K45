@@ -1,0 +1,17 @@
+config failover 'main'
+	option enabled '0'
+	# auto = physical WAN primary, cellular takes over when WAN loses internet
+	# wan  = force physical WAN    cell = force cellular
+	option mode 'auto'
+	option primary 'wan'
+	option backup 'pcie0'
+	list target '1.1.1.1'
+	list target '8.8.8.8'
+	list target '9.9.9.9'
+	# seconds between checks
+	option interval '5'
+	# consecutive failed checks before switching to cellular
+	option fail_count '3'
+	# consecutive good checks before switching back to WAN
+	option recover_count '6'
+	option timeout '2'

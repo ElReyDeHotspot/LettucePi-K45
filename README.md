@@ -7,7 +7,7 @@ Firmware and over-the-air updates for the **K45P**, hardware board
 
 - K43P-style Overview: cellular signal and carriers, temperature, clients,
   Ethernet ports, LED switch, TTL/HL switch and 4K/HD switch.
-- Apps: Tailscale, Speedtest by Ookla, 4K/HD Video, Smart Queue.
+- Apps: Tailscale, Speedtest by Ookla, 4K/HD Video, Smart Queue, Failover.
 - Cellular IPv6 tools, US APN presets, and browser terminal.
 - English interface with Chinese language packages, catalogs and text removed.
 - US Wi-Fi country configuration and generation defaults.
@@ -16,6 +16,16 @@ Firmware and over-the-air updates for the **K45P**, hardware board
 Tailscale and the official Ookla engine install on demand from their panels.
 Traffic shaping and the video engine stay off until enabled by the operator.
 Automatic firmware installation is off by default.
+
+Version **1.0.3** matches the K43P theme's 232px desktop sidebar, restores a
+compact 56px login logo, and adds **Apps → Failover**. Failover monitors physical
+WAN and cellular health, supports automatic or manual uplink selection, and
+provides configurable failure/recovery thresholds. It starts disabled.
+The WAN socket must be configured as WAN before enabling automatic failover.
+It manages IPv4; IPv6 keeps its existing configuration. Selection uses a
+separate policy table, preserving netifd's main routes and connected LAN paths.
+The monitor/backend is adapted from the user-provided `k43p-failover` source;
+the page uses the current LuCI login rather than a separate sign-in.
 
 ## Base firmware
 

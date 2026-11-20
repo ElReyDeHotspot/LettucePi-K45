@@ -8768,3 +8768,14 @@ body[data-page="admin-network-wifi"] .misectel-page--wifi .misectel-card__footer
 		width: 100%;
 	}
 }
+
+/* Keep the K43P proportions for the K45P login and navigation. */
+.node-main-login > .main .login-shell-card-title {
+    display: flex !important; flex-direction: row !important; gap: 12px;
+    align-items: center; justify-content: center; padding: 6px 0 26px;
+}
+.node-main-login > .main .login-shell-card-title .login-leaf-img {
+    display: block; flex: 0 0 56px; width: 56px !important;
+    height: 56px !important; max-width: 56px; object-fit: contain; margin: 0;
+}
+.node-main-login > .main .login-wordmark { font-size: 28px; line-height: 1.2; }

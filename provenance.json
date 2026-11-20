@@ -16,5 +16,23 @@
     "revision": "r37822+1-5cb47aa34e",
     "kernel": "6.12.85",
     "reason": "Does not match running firmware; user selected running firmware instead"
+  },
+  "failover_reference": {
+    "source": "User-provided k43p-failover folder",
+    "file_sha256": {
+      "www/failover/index.html": "00e9e6307187f31ddd812cc7553307b9763a670fec41dc091113942674eca70b",
+      "usr/sbin/failoverd": "64c50685143e101335b68d160e9955b25bd04871ab4fddeb0852a040e4b7aab7",
+      "usr/share/rpcd/acl.d/failover.json": "1b33fc217da573c06ef3b088666a85afbe3731fd6153336276dd6b469b60498b",
+      "usr/libexec/rpcd/failover": "bf94cb8a10df2dfe391a3ac5fe2a068923ef1ce9c995b946d8c4a2a1af1ae729",
+      "etc/config/failover": "471eef6c9fc8b1d14c64b5041c5ac387646b85999e874ec1c390e14350383364",
+      "etc/init.d/failover": "99529ab108dedd3e72b9860cb7ace6a2344a45892cac9a66fafd3412ef479be5"
+    },
+    "adaptations": [
+      "Native LuCI page and existing login",
+      "Disabled by default",
+      "Validated settings and IPv4 targets",
+      "Isolated IPv4 policy table with connected LAN routes; main table preserved",
+      "Reject automatic WAN mode while socket is configured as LAN"
+    ]
   }
 }

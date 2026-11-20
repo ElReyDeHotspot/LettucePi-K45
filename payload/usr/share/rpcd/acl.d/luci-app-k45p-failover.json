@@ -1,0 +1,7 @@
+{
+  "luci-app-k45p-failover": {
+    "description": "Manage physical WAN and cellular failover",
+    "read": {"ubus": {"failover": ["status"], "network.interface": ["dump"]}},
+    "write": {"ubus": {"failover": ["set_config"]}}
+  }
+}

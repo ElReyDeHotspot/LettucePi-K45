@@ -1,0 +1,199 @@
+#!/bin/sh
+# WAN failover: physical WAN primary, cellular backup.
+# Health = any target answers a ping sent OUT that interface (ping -I <dev>).
+# K45P adaptation: select an uplink in policy table 222, with connected LAN
+# routes copied into it. netifd's main routing table is never changed.
+. /lib/functions.sh
+. /usr/share/libubox/jshn.sh
+
+STATUS=/tmp/failover.json
+LOG=/tmp/failover.log
+PROTO=222
+TABLE=222
+RULE=22222
+route_error=""
+TRIG=/tmp/failover.kick
+
+wan_state=unknown; wan_ok=0; wan_bad=0; wan_rtt=""
+cell_state=unknown; cell_rtt=""
+active=wan; switches=0; last_switch=0; since=$(date +%s)
+
+log() {
+	logger -t failover "$*"
+	echo "$(date '+%F %T') $*" >> $LOG
+	tail -n 40 $LOG > $LOG.t && mv $LOG.t $LOG
+}
+
+add_target() { targets="$targets $1"; }
+load_cfg() {
+	config_load failover
+	config_get enabled main enabled 0
+	config_get mode main mode auto
+	config_get primary main primary wan
+	config_get backup main backup pcie0
+	config_get interval main interval 5
+	config_get fail_count main fail_count 3
+	config_get recover_count main recover_count 6
+	config_get timeout main timeout 2
+	targets=""; config_list_foreach main target add_target
+	[ -n "$targets" ] || targets="1.1.1.1 8.8.8.8"
+	case "$mode" in auto|wan|cell) ;; *) mode=auto ;; esac
+}
+
+# iface -> "up dev gw ip"
+iface_info() {
+	local st up dev gw ip
+	st=$(ubus -S call network.interface.$1 status 2>/dev/null) || { echo "0 - - -"; return; }
+	up=$(echo "$st" | jsonfilter -e '@.up')
+	dev=$(echo "$st" | jsonfilter -e '@.l3_device')
+	gw=$(echo "$st" | jsonfilter -e '@.route[@.target="0.0.0.0"].nexthop' | head -n1)
+	ip=$(echo "$st" | jsonfilter -e '@["ipv4-address"][0].address')
+	[ "$up" = true ] && up=1 || up=0
+	echo "$up ${dev:--} ${gw:--} ${ip:--}"
+}
+
+# probe <dev> -> sets RTT (ms); returns 0 if any target answered
+probe() {
+	local t out
+	RTT=""
+	for t in $targets; do
+		out=$(ping -q -c1 -W "$timeout" -I "$1" "$t" 2>/dev/null) || continue
+		RTT=$(echo "$out" | sed -n 's#.*= [0-9.]*/\([0-9.]*\)/.*#\1#p' | cut -d. -f1)
+		return 0
+	done
+	return 1
+}
+
+clear_route() {
+    ip -4 rule del priority "$RULE" lookup "$TABLE" 2>/dev/null || true
+    ip -4 route flush table "$TABLE" proto "$PROTO" 2>/dev/null || true
+}
+
+apply_route() {
+    local dev gw up existing route
+    route_error=""
+    if [ "$1" = cell ]; then dev=$c_dev; gw=$c_gw; up=$c_up
+    else dev=$w_dev; gw=$w_gw; up=$w_up; fi
+    existing=$(ip -4 rule show | grep "^$RULE:" | grep -v "lookup $TABLE" || true)
+    [ -z "$existing" ] || { route_error="Routing priority is already in use"; return 1; }
+    existing=$(ip -4 route show table "$TABLE" 2>/dev/null | grep -v "proto $PROTO" || true)
+    [ -z "$existing" ] || { route_error="Routing table is already in use"; return 1; }
+    # Own a separate policy table. The main table and netifd routes stay intact.
+    ip -4 route flush table "$TABLE" proto "$PROTO" 2>/dev/null || true
+    ip -4 route show table main | grep -v '^default ' | sed 's/ proto [^ ]*//' |
+    while IFS= read -r route; do
+        [ -n "$route" ] && ip -4 route add table "$TABLE" $route proto "$PROTO" 2>/dev/null
+    done
+    if [ "$up" = 1 ] && [ "$dev" != - ]; then
+        if [ "$gw" != - ] && [ "$gw" != 0.0.0.0 ]; then
+            ip -4 route add table "$TABLE" default via "$gw" dev "$dev" proto "$PROTO" || { route_error="Cannot select uplink"; clear_route; return 1; }
+        else
+            ip -4 route add table "$TABLE" default dev "$dev" proto "$PROTO" || { route_error="Cannot select uplink"; clear_route; return 1; }
+        fi
+    else
+        ip -4 route add unreachable default table "$TABLE" proto "$PROTO"
+    fi
+    ip -4 rule show | grep -q "^$RULE:.*lookup $TABLE" || ip -4 rule add priority "$RULE" lookup "$TABLE"
+}
+
+set_active() {
+	[ "$1" = "$active" ] && return
+	log "switch: $active -> $1 ($2)"
+	active=$1; switches=$((switches+1)); last_switch=$(date +%s)
+
+
+}
+
+write_status() {
+	local t l
+	json_init
+	json_add_boolean running 1
+	json_add_boolean enabled "$enabled"
+	json_add_string error "$route_error"
+	json_add_string mode "$mode"
+	json_add_string active "$active"
+	json_add_int switches "$switches"
+	json_add_int last_switch "$last_switch"
+	json_add_int since "$since"
+	json_add_int now "$(date +%s)"
+	json_add_int interval "$interval"
+	json_add_int fail_count "$fail_count"
+	json_add_int recover_count "$recover_count"
+	json_add_array targets
+	for t in $targets; do json_add_string "" "$t"; done
+	json_close_array
+	json_add_object wan
+	json_add_string iface "$primary"; json_add_boolean up "$w_up"; json_add_string dev "$w_dev"
+	json_add_string gateway "$w_gw"; json_add_string ip "$w_ip"; json_add_string health "$wan_state"
+	json_add_string rtt "$wan_rtt"; json_add_int fails "$wan_bad"; json_add_int oks "$wan_ok"
+	json_close_object
+	json_add_object cell
+	json_add_string iface "$backup"; json_add_boolean up "$c_up"; json_add_string dev "$c_dev"
+	json_add_string gateway "$c_gw"; json_add_string ip "$c_ip"; json_add_string health "$cell_state"
+	json_add_string rtt "$cell_rtt"
+	json_close_object
+	json_add_array log
+	if [ -f $LOG ]; then
+		tail -n 15 $LOG > /tmp/failover.lt
+		while IFS= read -r l; do json_add_string "" "$l"; done < /tmp/failover.lt
+	fi
+	json_close_array
+	json_dump > $STATUS.t && mv $STATUS.t $STATUS
+}
+
+cleanup() {
+	clear_route
+	echo '{"running":false}' > $STATUS
+	exit 0
+}
+trap cleanup INT TERM
+
+clear_route
+load_cfg
+log "started (mode=$mode, primary=$primary, backup=$backup)"
+
+while :; do
+	load_cfg
+	set -- $(iface_info "$primary"); w_up=$1 w_dev=$2 w_gw=$3 w_ip=$4
+	set -- $(iface_info "$backup");  c_up=$1 c_dev=$2 c_gw=$3 c_ip=$4
+
+	if [ "$w_up" = 1 ] && [ "$w_dev" != - ] && probe "$w_dev"; then
+		wan_rtt=$RTT; wan_ok=$((wan_ok+1)); wan_bad=0
+	else
+		wan_rtt=""; wan_bad=$((wan_bad+1)); wan_ok=0
+	fi
+	[ "$w_up" = 1 ] || wan_bad=$fail_count
+	[ "$wan_bad" -ge "$fail_count" ] && wan_state=down
+	[ "$wan_ok" -ge "$recover_count" ] && wan_state=up
+	[ "$wan_state" = unknown ] && [ "$wan_ok" -ge 1 ] && wan_state=up
+
+	if [ "$c_up" = 1 ] && [ "$c_dev" != - ] && probe "$c_dev"; then
+		cell_state=up; cell_rtt=$RTT
+	else
+		cell_state=down; cell_rtt=""
+	fi
+
+	if [ "$enabled" != 1 ]; then
+		set_active wan "failover disabled"
+	else
+		case "$mode" in
+		wan)  set_active wan "forced by user" ;;
+		cell) set_active cell "forced by user" ;;
+		auto)
+			if [ "$wan_state" = down ] && [ "$cell_state" = up ]; then
+				set_active cell "WAN lost internet"
+			elif [ "$wan_state" = up ]; then
+				set_active wan "WAN healthy again"
+			fi ;;
+		esac
+	fi
+	# re-assert our route (the cellular gateway can change on re-dial)
+	if [ "$enabled" = 1 ]; then apply_route "$active"; else clear_route; route_error=""; fi
+
+	write_status
+	i=0
+	while [ $i -lt "$interval" ]; do
+		[ -f $TRIG ] && { rm -f $TRIG; break; }
+		sleep 1; i=$((i+1))
+	done
+done

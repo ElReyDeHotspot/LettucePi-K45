@@ -1,0 +1,62 @@
+#!/usr/bin/ucode
+'use strict';
+import { open, popen } from 'fs';
+import { cursor } from 'uci';
+
+function config(ctx) {
+    return {
+        enabled: ctx.get('failover','main','enabled') == '1',
+        mode: ctx.get('failover','main','mode') || 'auto',
+        primary: ctx.get('failover','main','primary') || 'wan',
+        backup: ctx.get('failover','main','backup') || 'pcie0',
+        targets: ctx.get('failover','main','target') || ['1.1.1.1','8.8.8.8'],
+        interval: ctx.get('failover','main','interval') || '5',
+        fail_count: ctx.get('failover','main','fail_count') || '3',
+        recover_count: ctx.get('failover','main','recover_count') || '6'
+    };
+}
+function validNumber(s, lo, hi) {
+    return match(s || '', /^[0-9]+$/) && +s >= lo && +s <= hi;
+}
+function invalid(message) { return {success:false, error:message}; }
+
+return { failover: {
+    status: { call: function() {
+        let ctx=cursor(), out={running:false};
+        let f=open('/tmp/failover.json','r');
+        if (f) { try {out=json(f.read('all'));} catch(e) {} f.close(); }
+        out.config=config(ctx);
+        out.wan_is_lan=ctx.get('misectel','network_defaults','optional_wan_mode') == 'lan';
+        out.vendor_failover=ctx.get('misectel','wan5g_switch','enabled') == '1';
+        return out;
+    }},
+    set_config: {
+        args:{enabled:'String',mode:'String',primary:'String',backup:'String',targets:'String',interval:'String',fail_count:'String',recover_count:'String'},
+        call:function(request) {
+            let a=request.args, ctx=cursor();
+            if (a.enabled != '0' && a.enabled != '1') return invalid('Invalid enabled value.');
+            if (a.mode != 'auto' && a.mode != 'wan' && a.mode != 'cell') return invalid('Choose Automatic, WAN only, or Cellular only.');
+            if (!match(a.primary || '', /^[A-Za-z0-9_][A-Za-z0-9_.-]{0,31}$/) || !match(a.backup || '', /^[A-Za-z0-9_][A-Za-z0-9_.-]{0,31}$/)) return invalid('Choose valid uplink interfaces.');
+            if (a.primary == a.backup) return invalid('Primary and backup must be different interfaces.');
+            if (!validNumber(a.interval,2,300) || !validNumber(a.fail_count,1,60) || !validNumber(a.recover_count,1,120)) return invalid('Check interval must be 2–300 seconds; failure count 1–60; recovery count 1–120.');
+            let targets=[];
+            for (let ip in split(a.targets || '', /[[:space:],]+/)) {
+                if (!length(ip)) continue;
+                if (!match(ip,/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/)) return invalid('Ping targets must be IPv4 addresses.');
+                for (let part in split(ip,'.')) if (!validNumber(part,0,255)) return invalid('A ping target has an invalid IPv4 octet.');
+                push(targets,ip);
+            }
+            if (!length(targets) || length(targets)>6) return invalid('Enter between one and six ping targets.');
+            if (a.enabled == '1') {
+                if (ctx.get('misectel','wan5g_switch','enabled') == '1') return invalid('Turn off the existing WAN/cellular switch before enabling Failover.');
+                if (a.mode != 'cell' && ctx.get('misectel','network_defaults','optional_wan_mode') == 'lan') return invalid('Change the WAN socket from LAN to WAN on Overview before enabling this mode.');
+            }
+            for (let key in ['enabled','mode','primary','backup','interval','fail_count','recover_count']) ctx.set('failover','main',key,a[key]);
+            ctx.set('failover','main','target',targets);
+            if (ctx.commit('failover') !== true) return invalid('Could not save Failover settings.');
+            let f=popen('touch /tmp/failover.kick; /etc/init.d/failover enabled || /etc/init.d/failover enable; /etc/init.d/failover running || /etc/init.d/failover start','r');
+            if (f) f.close();
+            return {success:true};
+        }
+    }
+}};
