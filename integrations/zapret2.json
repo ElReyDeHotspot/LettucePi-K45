@@ -1,0 +1,19 @@
+{
+  "requested_source": "https://github.com/carp4/luci-app-zapret2",
+  "source_commit": "36568c18fc0ad3153b4b99b2f1917833af81bb5d",
+  "release": "v0.2.0-r29",
+  "status": "pending-compatible-kernel-support",
+  "running_kernel": "6.12.94",
+  "vendor_kernel_abi": "768011ae6e81e700abee5e18322a466a",
+  "public_kernel_abi": "b5b7729ffbba3ecdd83f339de8fadfb8",
+  "required_kernel_packages": ["kmod-nfnetlink-queue", "kmod-nft-queue"],
+  "checks": {
+    "runtime_nfqueue_symbols": false,
+    "unhooked_nft_queue_expression_supported": false,
+    "embedded_kernel_config": false,
+    "public_nf_conntrack_matches_vendor": false,
+    "public_nfnetlink_matches_vendor": false
+  },
+  "existing_engine": "TPWS v72.13, retained and running",
+  "no_firmware_image_generated_for_live_refinements": true
+}

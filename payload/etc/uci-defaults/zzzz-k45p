@@ -16,7 +16,7 @@ uci -q set luci.themes.LettucePi='/luci-static/misectel'
 uci -q commit luci
 uci -q set misectel.main.brand_name='LettucePi'
 uci -q set misectel.main.model_name='K45P'
-uci -q set misectel.main.header_name='LettucePi K45P'
+uci -q set misectel.main.header_name='Chester K45P'
 uci -q set misectel.main.apn_country='us'
 uci -q commit misectel
 sed -i -e 's/gateway-dashboard/dashboard/g' -e 's/gateway-wireless/wifi/g' -e 's/gateway-network/settings/g' -e 's/gateway-system/settings/g' -e 's/gateway-portmap/portmap/g' -e 's/gateway-vpnoverview/overview/g' -e 's/gateway-wireguard/wireguard/g' -e 's/gateway-openvpn/openvpn/g' -e 's/gateway-l2tp/l2tp/g' -e 's/gateway-pptp/pptp/g' -e 's/gateway-vxlan/vxlan/g' /etc/config/misectel
@@ -34,5 +34,12 @@ uci -q get chester.update.keep_settings >/dev/null || uci set chester.update.kee
 uci -q commit chester
 /etc/init.d/chester-sqm enable
 mkdir -p /tmp/sysinfo
-echo 'LettucePi K45P' > /tmp/sysinfo/model
+echo 'Chester K45P' > /tmp/sysinfo/model
+# Replace vendor defaults, while retaining a hostname the operator customized.
+case "$(uci -q get system.@system[0].hostname)" in
+    ''|M12K45Ultra|M02K45|K45P|OpenWrt|ImmortalWrt|LettucePi-K45P)
+        uci set system.@system[0].hostname='Chester-K45P'
+        uci commit system
+        ;;
+esac
 exit 0

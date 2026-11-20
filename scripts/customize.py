@@ -26,7 +26,7 @@ for name in ['oem_mac_address','oem_serial_number']:
     if m:
         s=s.replace('\n\tttl_status:',m[0].rstrip().rstrip(',')+',\n\tttl_status:',1)
 # Model display is a K45P property, never inferred from a K43P boot environment.
-s=re.sub(r'\n\toem_model_name: \{.*?(?=\n\t[a-z_]+: \{)',"\n\toem_model_name: { call: function() { return { model_name: 'LettucePi K45P' }; } },\n",s,count=1,flags=re.S)
+s=re.sub(r'\n\toem_model_name: \{.*?(?=\n\t[a-z_]+: \{)',"\n\toem_model_name: { call: function() { return { model_name: 'Chester K45P' }; } },\n",s,count=1,flags=re.S)
 s=s.replace("const APN_FALLBACK_COUNTRY = 'unknown'","const APN_FALLBACK_COUNTRY = 'us'")
 backend.write_text(s.replace('readMisectelOption','readLettucePiOption'))
 
@@ -68,7 +68,7 @@ custom.write_text(custom.read_text().replace('--misectel-shell-sidebar-width: 18
 # Keep defaults aligned with routes and expose the installed apps.
 cfg=root/'etc/config/misectel'
 s=cfg.read_text()
-for name,value in [('brand_name','LettucePi'),('model_name','K45P'),('header_name','LettucePi K45P'),('apn_country','us')]:
+for name,value in [('brand_name','LettucePi'),('model_name','K45P'),('header_name','Chester K45P'),('apn_country','us')]:
     s=re.sub(r"(option "+name+r"\s+)'[^']*'",lambda m:m[1]+repr(value),s)
 cfg.write_text(s)
 p=root/'etc/config/rpcd'

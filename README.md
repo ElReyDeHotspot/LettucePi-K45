@@ -1,5 +1,24 @@
 # LettucePi K45P
 
+## Live UI refinements (not built into an image yet)
+
+Development changes after 1.0.4 are being tested directly on the router:
+
+- Display name **Chester K45P**; default hostname **Chester-K45P**.
+- Restored local K43P carrier-card and square network-mode styles.
+- Fixed four-column/four-row carrier grid.
+- Fan shortcut next to 4K/HD, opening the existing fan settings page.
+- Equal-height phone controls labeled 4K/HD, Fan, TTL/HL, and LED.
+- Cache versions for live JavaScript and stylesheet updates.
+
+Firmware generation is on hold while this UI is reviewed.
+
+The requested carp4 Zapret2 integration is pending matching kernel support.
+The running vendor kernel lacks NFQUEUE and does not embed its build config.
+The public 6.12.94 modules have a different ABI and different netfilter code;
+they have not been installed or forced. The existing TPWS engine remains
+active. See `integrations/zapret2.json` for the pinned source and checks.
+
 Version **1.0.4** fixes the top-right account menu: visible three-dot button,
 positioned dropdown, keyboard focus, and links to password settings, reboot
 and logout.

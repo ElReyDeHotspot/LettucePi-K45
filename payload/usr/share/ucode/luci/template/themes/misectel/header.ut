@@ -8,7 +8,7 @@
 
 	const boardinfo = ubus.call('system', 'board');
 	const hostname = striptags(`${boardinfo.hostname ?? '?'}`);
-	const appname = 'LettucePi K45P';
+	const appname = 'Chester K45P';
 	const authuser = ctx.authuser ?? 'root';
 	const wizard_url = dispatcher.lookup('setup')
 		? dispatcher.build_url('setup')
@@ -41,7 +41,7 @@
 <meta name="msapplication-TileColor" content="#b81425">
 <meta name="application-name" content="{{ appname }}">
 <meta name="apple-mobile-web-app-title" content="{{ appname }}">
-<link rel="stylesheet" href="{{ media }}/cascade.css?v=k45p-1.0.4">
+<link rel="stylesheet" href="{{ media }}/cascade.css?v=chester-k45p-live-5">
 <link rel="icon" href="{{ media }}/favicon.ico" sizes="48x48">
 {% if (node?.css): %}
 <link rel="stylesheet" href="{{ resource }}/{{ node.css }}">
