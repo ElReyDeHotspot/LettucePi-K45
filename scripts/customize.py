@@ -6,6 +6,16 @@ import shutil, re, sys, json, hashlib
 root=Path(sys.argv[1]).resolve(); repo=Path(__file__).resolve().parents[1]
 assert root != Path('/') and (root/'etc/openwrt_release').is_file()
 assert "r37978-cd0a06bfd3fd" in (root/'etc/openwrt_release').read_text()
+# The vendor script otherwise resets even a restored password on sysupgrade.
+pw=root/'etc/uci-defaults/50-root-passwd'
+guard="""# K45P: initialize factory credentials only when no password hash exists.
+current_hash=$(sed -n 's/^root:\\([^:]*\\):.*/\\1/p' /etc/shadow)
+case "$current_hash" in
+    ''|'!'|'*'|'x') ;;
+    *) exit 0 ;;
+esac
+"""
+pw.write_text(guard+pw.read_text())
 original_backend=(root/'usr/share/rpcd/ucode/misectel').read_text()
 shutil.copytree(repo/'payload',root,dirs_exist_ok=True)
 backend=root/'usr/share/rpcd/ucode/misectel'

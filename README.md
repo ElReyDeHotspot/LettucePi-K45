@@ -19,7 +19,7 @@ Automatic firmware installation is off by default.
 
 ## Base firmware
 
-Version 1.0.0 uses the image read from the running K45P before modification:
+The K45P releases use the image read from the running router before modification:
 ImmortalWrt **25.12.1**, revision `r37978-cd0a06bfd3fd`, Linux **6.12.94**.
 The kernel and device tree are retained byte for byte. No K43P kernel, device
 tree, partition-writing script, modem transport switcher or PHY LED watchdog
@@ -36,6 +36,10 @@ kept by default; the page also offers an explicit settings reset option.
 The updater checks board identity, manifest family, download size, SHA-256,
 and stock `sysupgrade -T` validation. It uses the original K45P FIT upgrade
 path and never uses `sysupgrade -F` or the K43P flash method.
+The manifest and image are fetched from the same immutable Git commit.
+
+Version **1.0.1** also fixes the vendor first-boot password script so an existing
+root password hash is preserved during an upgrade. Use 1.0.1 or later.
 
 Manifest: [`firmware/latest.json`](firmware/latest.json).
 

@@ -1,12 +1,12 @@
 {
   "product": "K45P",
   "board": "misectel,m02k45",
-  "version": "1.0.0",
-  "build": "202611200001",
-  "bin": "1",
+  "version": "1.0.1",
+  "build": "202611200002",
+  "bin": "2",
   "built": "2026-11-20",
-  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.0-sysupgrade.itb",
-  "sha256": "b8e7df1e38fcf09cd0f7681c4c7161b26aa722132edce0104360efb0e101cf47",
+  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.1-sysupgrade.itb",
+  "sha256": "e5192e7a654c13bb4d46f7387ceb182eaa526d41ee87183f4cb43e0cbf31c650",
   "size": 25534718,
-  "notes": "Initial K45P release: K43P Overview and apps, English-only UI, US region, K45P FIT OTA. Vendor 25.12.1 kernel and device tree preserved."
+  "notes": "K45P release: preserve existing password hashes on upgrade; K43P Overview and apps, English-only UI, US region, K45P FIT OTA. Vendor 25.12.1 kernel and device tree preserved."
 }

@@ -6,7 +6,9 @@ BASE=${1:?Usage: build.sh base.itb [work-directory]}
 WORK=${2:-/var/tmp/k45p-build}
 APK=${APK_TOOLS:-/usr/local/bin/apk3}
 FWTOOL=${FWTOOL:-fwtool}
-BUILD=${BUILD_ID:-202611200001}
+BUILD=${BUILD_ID:-202611200002}
+VERSION=${VERSION:-1.0.1}
+BIN=${BIN_NUMBER:-2}
 case "$WORK" in /var/tmp/k45p-*|/tmp/k45p-*) ;; *) echo 'Use a dedicated /var/tmp/k45p-* directory' >&2; exit 1 ;; esac
 mkdir -p "$WORK" "$REPO/firmware"
 [ ! -e "$WORK/root" ] || { echo 'Work root already exists; choose a fresh work directory' >&2; exit 1; }
@@ -21,7 +23,7 @@ langs=$("$APK" --root "$R" info 2>/dev/null | grep -E '^luci-i18n-.*-zh-(cn|tw)$
 sed -i -e '/\/misectel\//d' -e '/\/qmodem\//d' -e '/\/video\//d' "$R/etc/apk/repositories.d/distfeeds.list"
 "$APK" --root "$R" --arch aarch64_cortex-a53 --no-scripts add tc-full ttyd luci-app-ttyd
 python3 "$REPO/scripts/customize.py" "$R"
-printf 'version=1.0.0\nbuilt=2026-11-20\nbuild=%s\nbin=1\nproduct=K45P\n' "$BUILD" > "$R/etc/chester-version"
+printf 'version=%s\nbuilt=2026-11-20\nbuild=%s\nbin=%s\nproduct=K45P\n' "$VERSION" "$BUILD" "$BIN" > "$R/etc/chester-version"
 cp "$WORK/image0" "$WORK/kernel.bin"
 cp "$WORK/image1" "$WORK/k45p.dtb"
 cp "$REPO/scripts/k45p.its" "$WORK/k45p.its"
@@ -31,9 +33,10 @@ dumpimage -T flat_dt -p 0 -o "$WORK/check-kernel" "$WORK/k45p-unmetadata.itb" >/
 dumpimage -T flat_dt -p 1 -o "$WORK/check-dtb" "$WORK/k45p-unmetadata.itb" >/dev/null
 cmp "$WORK/image0" "$WORK/check-kernel"
 cmp "$WORK/image1" "$WORK/check-dtb"
-cp "$WORK/k45p-unmetadata.itb" "$REPO/firmware/LettucePi-K45P-1.0.0-sysupgrade.itb"
+IMAGE="$REPO/firmware/LettucePi-K45P-$VERSION-sysupgrade.itb"
+cp "$WORK/k45p-unmetadata.itb" "$IMAGE"
 cat > "$REPO/firmware/image-metadata.json" <<'EOF'
 {"metadata_version":"1.1","compat_version":"1.0","supported_devices":["misectel,m02k45"],"version":{"dist":"ImmortalWrt","version":"25.12.1","revision":"r37978-cd0a06bfd3fd","target":"mediatek/filogic","board":"misectel_m02k45"}}
 EOF
-"$FWTOOL" -I "$REPO/firmware/image-metadata.json" "$REPO/firmware/LettucePi-K45P-1.0.0-sysupgrade.itb"
+"$FWTOOL" -I "$REPO/firmware/image-metadata.json" "$IMAGE"
 echo 'FIT and metadata built. Run stock sysupgrade -T on the K45P before publication.'
