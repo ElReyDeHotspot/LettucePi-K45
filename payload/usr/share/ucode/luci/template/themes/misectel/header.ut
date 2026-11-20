@@ -41,7 +41,7 @@
 <meta name="msapplication-TileColor" content="#b81425">
 <meta name="application-name" content="{{ appname }}">
 <meta name="apple-mobile-web-app-title" content="{{ appname }}">
-<link rel="stylesheet" href="{{ media }}/cascade.css?v=chester-k45p-live-5">
+<link rel="stylesheet" href="{{ media }}/cascade.css?v=chester-k45p-live-7">
 <link rel="icon" href="{{ media }}/favicon.ico" sizes="48x48">
 {% if (node?.css): %}
 <link rel="stylesheet" href="{{ resource }}/{{ node.css }}">
