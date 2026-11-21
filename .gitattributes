@@ -4,3 +4,5 @@
 *.adb -text
 tpws -text
 *.cmd -text whitespace=cr-at-eol
+# Preserve the official CLI documentation as supplied by Ookla.
+payload/usr/share/chester/ookla/speedtest.md -whitespace
