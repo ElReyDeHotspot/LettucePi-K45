@@ -9,9 +9,9 @@ config failover 'main'
 	list target '8.8.8.8'
 	list target '9.9.9.9'
 	# seconds between checks
-	option interval '5'
+	option interval '2'
 	# consecutive failed checks before switching to cellular
-	option fail_count '3'
+	option fail_count '1'
 	# consecutive good checks before switching back to WAN
-	option recover_count '6'
-	option timeout '2'
+	option recover_count '3'
+	option timeout '1'

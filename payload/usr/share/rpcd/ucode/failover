@@ -10,9 +10,10 @@ function config(ctx) {
         primary: ctx.get('failover','main','primary') || 'wan',
         backup: ctx.get('failover','main','backup') || 'pcie0',
         targets: ctx.get('failover','main','target') || ['1.1.1.1','8.8.8.8'],
-        interval: ctx.get('failover','main','interval') || '5',
-        fail_count: ctx.get('failover','main','fail_count') || '3',
-        recover_count: ctx.get('failover','main','recover_count') || '6'
+        interval: ctx.get('failover','main','interval') || '2',
+        fail_count: ctx.get('failover','main','fail_count') || '1',
+        recover_count: ctx.get('failover','main','recover_count') || '3',
+        timeout: ctx.get('failover','main','timeout') || '1'
     };
 }
 function validNumber(s, lo, hi) {
@@ -44,7 +45,7 @@ return { failover: {
         return out;
     }},
     set_config: {
-        args:{enabled:'String',mode:'String',primary:'String',backup:'String',targets:'String',interval:'String',fail_count:'String',recover_count:'String'},
+        args:{enabled:'String',mode:'String',primary:'String',backup:'String',targets:'String',interval:'String',fail_count:'String',recover_count:'String',timeout:'String'},
         call:function(request) {
             let a=request.args, ctx=cursor();
             if (a.enabled != '0' && a.enabled != '1') return invalid('Invalid enabled value.');
@@ -52,6 +53,8 @@ return { failover: {
             if (!match(a.primary || '', /^[A-Za-z0-9_][A-Za-z0-9_.-]{0,31}$/) || !match(a.backup || '', /^[A-Za-z0-9_][A-Za-z0-9_.-]{0,31}$/)) return invalid('Choose valid uplink interfaces.');
             if (a.primary == a.backup) return invalid('Primary and backup must be different interfaces.');
             if (!validNumber(a.interval,2,300) || !validNumber(a.fail_count,1,60) || !validNumber(a.recover_count,1,120)) return invalid('Check interval must be 2–300 seconds; failure count 1–60; recovery count 1–120.');
+            let probeTimeout=a.timeout || ctx.get('failover','main','timeout') || '1';
+            if (!validNumber(probeTimeout,1,5)) return invalid('Probe timeout must be 1–5 seconds.');
             let targets=[];
             for (let ip in split(a.targets || '', /[[:space:],]+/)) {
                 if (!length(ip)) continue;
@@ -65,6 +68,7 @@ return { failover: {
                 if (needsWanSocket(ctx,a) && ctx.get('misectel','network_defaults','optional_wan_mode') == 'lan') return invalid('Change the Ethernet socket from LAN to WAN before using it as an uplink.');
             }
             for (let key in ['enabled','mode','primary','backup','interval','fail_count','recover_count']) ctx.set('failover','main',key,a[key]);
+            ctx.set('failover','main','timeout',probeTimeout);
             ctx.set('failover','main','target',targets);
             if (ctx.commit('failover') !== true) return invalid('Could not save Failover settings.');
             let f=popen('touch /tmp/failover.kick; /etc/init.d/failover enabled || /etc/init.d/failover enable; /etc/init.d/failover running || /etc/init.d/failover start','r');

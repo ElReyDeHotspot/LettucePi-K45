@@ -7,7 +7,7 @@
 
 var status = rpc.declare({object:'failover', method:'status', expect:{}});
 var interfaces = rpc.declare({object:'network.interface', method:'dump', expect:{interface:[]}});
-var save = rpc.declare({object:'failover', method:'set_config', params:['enabled','mode','primary','backup','targets','interval','fail_count','recover_count'], expect:{}});
+var save = rpc.declare({object:'failover', method:'set_config', params:['enabled','mode','primary','backup','targets','interval','fail_count','recover_count','timeout'], expect:{}});
 var builtinPorts = rpc.declare({object:'luci', method:'getBuiltinEthernetPorts', expect:{result:[]}});
 var devices = rpc.declare({object:'network.device', method:'status', expect:{'':{}}});
 var wanRole = rpc.declare({object:'misectel', method:'wan_to_lan', expect:{}});
@@ -70,7 +70,7 @@ return view.extend({
         this.primary = select(c.primary || 'wan',opts); this.backup = select(c.backup || 'pcie0',opts);
         this.draftOrder = [this.primary.value,this.backup.value];
         this.targets = E('input', {type:'text',value:(c.targets||[]).join(', '),inputmode:'decimal'});
-        this.interval = number(c.interval||5,2,300); this.fail = number(c.fail_count||3,1,60); this.recover = number(c.recover_count||6,1,120);
+        this.interval = number(c.interval||2,2,300); this.fail = number(c.fail_count||1,1,60); this.recover = number(c.recover_count||3,1,120); this.probeTimeout = number(c.timeout||1,1,5);
         this.headline = E('div', {'class':'fo-state'}); this.description = E('div', {'class':'fo-muted'}); this.badge = E('span', {'class':'fo-pill'});
         this.orderBox = E('div', {'class':'fo-order','aria-label':'Connection priority'});
         this.orderNote = E('div', {'class':'fo-order-note','aria-live':'polite'});
@@ -99,7 +99,7 @@ return view.extend({
             E('details', {'class':'fo-card fo-details'}, [E('summary', {}, ['Advanced settings']),E('div', {'class':'fo-details-body'}, [
                 E('div', {'class':'fo-grid'}, [field('Primary interface',this.primary),field('Secondary interface',this.backup)]),
                 field('Ping targets',this.targets),
-                E('div', {'class':'fo-grid'}, [field('Seconds between checks',this.interval),field('Failed checks before switching',this.fail),field('Healthy checks before returning to Primary',this.recover)]),
+                E('div', {'class':'fo-grid'}, [field('Seconds between checks',this.interval),field('Probe timeout (seconds)',this.probeTimeout),field('Failed checks before switching',this.fail),field('Healthy checks before returning to Primary',this.recover)]),
                 E('div', {'class':'fo-muted'}, ['Use one to six IPv4 addresses, separated by commas. Existing sessions may reconnect when the connection changes. Failover manages IPv4; IPv6 keeps its existing settings.'])
             ])]),
             E('details', {'class':'fo-card fo-details'}, [E('summary', {}, ['Connection details']),E('div', {'class':'fo-details-body fo-grid'}, [this.wanCard,this.cellCard])]),
@@ -198,7 +198,7 @@ return view.extend({
         if(this.saving)return;
         this.saving=true; this.saveButton.disabled=true; this.message.textContent='Saving…'; this.message.className='fo-result';
         try {
-            var r=await save(this.enable.checked?'1':'0',this.mode.value,this.primary.value,this.backup.value,this.targets.value,this.interval.value,this.fail.value,this.recover.value);
+            var r=await save(this.enable.checked?'1':'0',this.mode.value,this.primary.value,this.backup.value,this.targets.value,this.interval.value,this.fail.value,this.recover.value,this.probeTimeout.value);
             if(!r.success)throw new Error(r.error||'Could not save settings.');
             this.dirty=false; this.message.textContent='Saved'; this.refreshMode(); this.update(await status());
         } catch(e) { this.message.className='fo-result error'; this.message.textContent=e.message; }
