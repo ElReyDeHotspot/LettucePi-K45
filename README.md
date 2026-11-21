@@ -1,5 +1,12 @@
 # LettucePi K45P
 
+## Pending next bin
+
+Apps → Failover now includes an equal-share **Load Balance** mode for main-LAN
+IPv4 connections, with healthy-link fallback and connection tracking. It is
+installed and tested live; **no new image was built or published** for this change.
+Failover remains Off by default. See [validation and scope](integrations/LOAD-BALANCE.md).
+
 ## Bin 6 — finalized build 202611200013
 
 Version 1.0.5 / bin 6 includes the current Chester K45P UI and apps, K43P

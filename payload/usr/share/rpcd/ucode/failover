@@ -49,7 +49,7 @@ return { failover: {
         call:function(request) {
             let a=request.args, ctx=cursor();
             if (a.enabled != '0' && a.enabled != '1') return invalid('Invalid enabled value.');
-            if (a.mode != 'auto' && a.mode != 'wan' && a.mode != 'cell') return invalid('Choose Automatic, Primary only, or Secondary only.');
+            if (a.mode != 'auto' && a.mode != 'balance' && a.mode != 'wan' && a.mode != 'cell') return invalid('Choose Automatic, Load Balance, Primary only, or Secondary only.');
             if (!match(a.primary || '', /^[A-Za-z0-9_][A-Za-z0-9_.-]{0,31}$/) || !match(a.backup || '', /^[A-Za-z0-9_][A-Za-z0-9_.-]{0,31}$/)) return invalid('Choose valid uplink interfaces.');
             if (a.primary == a.backup) return invalid('Primary and backup must be different interfaces.');
             if (!validNumber(a.interval,2,300) || !validNumber(a.fail_count,1,60) || !validNumber(a.recover_count,1,120)) return invalid('Check interval must be 2–300 seconds; failure count 1–60; recovery count 1–120.');

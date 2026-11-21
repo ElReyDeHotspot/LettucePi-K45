@@ -1,0 +1,118 @@
+#!/bin/sh
+# IPv4 LAN connection balancing. Keep connection marks separate from Zapret.
+PROTO=222
+NFT=chester_balance
+MASK=0x0c000000
+OWNER='Chester K45P connection balance'
+
+owned_nft() { nft list table ip "$NFT" 2>/dev/null | grep -q "$OWNER"; }
+clear() {
+    owned_nft && nft delete table ip "$NFT"
+    for dev in $(cat /tmp/chester-balance.devices 2>/dev/null); do
+        ip -4 rule del priority 22215 oif "$dev" lookup main 2>/dev/null || true
+        ip -4 rule del priority 22216 oif "$dev" lookup main 2>/dev/null || true
+    done
+    ip -4 rule del priority 22217 iif lo lookup 222 2>/dev/null || true
+    ip -4 rule del priority 22217 iif lo lookup 223 2>/dev/null || true
+    ip -4 rule del priority 22220 fwmark 0x04000000/$MASK lookup 222 2>/dev/null || true
+    ip -4 rule del priority 22221 fwmark 0x08000000/$MASK lookup 223 2>/dev/null || true
+    ip -4 route flush table 223 proto "$PROTO" 2>/dev/null || true
+    rm -f /tmp/chester-balance.signature /tmp/chester-balance.devices
+}
+fail() { echo "$*" >&2; clear; exit 1; }
+[ "$1" = clear ] && { clear; exit 0; }
+[ "$1" = apply ] && [ "$#" = 7 ] || exit 2
+shift
+wdev=$1; wgw=$2; wok=$3; cdev=$4; cgw=$5; cok=$6
+lan=$(ubus -S call network.interface.lan status | jsonfilter -e '@.l3_device')
+for dev in "$lan" "$wdev" "$cdev"; do
+    case "$dev" in ''|*[!a-zA-Z0-9_.:-]*) fail 'Cannot identify LAN and uplink devices';; esac
+done
+[ "$wdev" != "$cdev" ] || fail 'Choose two different uplink devices'
+for table in 222 223; do
+    other=$(ip -4 route show table "$table" 2>/dev/null | grep -v "proto $PROTO" || true)
+    [ -z "$other" ] || fail 'Load Balance routing table is already in use'
+done
+for spec in '22220 222 0x4000000' '22221 223 0x8000000'; do
+    set -- $spec
+    rule=$(ip -4 rule show | grep "^$1:" || true)
+    [ -z "$rule" ] || echo "$rule" | grep -q "fwmark $3/0xc000000 lookup $2" || fail 'Load Balance routing priority is already in use'
+done
+for spec in "22215 $wdev" "22216 $cdev"; do
+    set -- $spec
+    rule=$(ip -4 rule show | grep "^$1:" || true)
+    [ -z "$rule" ] || echo "$rule" | grep -q "oif $2 lookup main" || fail 'Load Balance probe routing priority is already in use'
+done
+rule=$(ip -4 rule show | grep '^22217:' || true)
+[ -z "$rule" ] || echo "$rule" | grep -qE 'iif lo lookup 22[23]$' || fail 'Load Balance local routing priority is already in use'
+if nft list table ip "$NFT" >/dev/null 2>&1; then
+    owned_nft || fail 'Load Balance firewall table is already in use'
+fi
+routes=$(ip -4 route show table main | grep -v '^default ' | sed 's/ proto [^ ]*//')
+signature="$lan $wdev $wgw $wok $cdev $cgw $cok
+$routes"
+[ "$(cat /tmp/chester-balance.signature 2>/dev/null)" = "$signature" ] && owned_nft &&
+    ip -4 rule show | grep -q '^22217:' && ip -4 rule show | grep -q '^22220:' && ip -4 rule show | grep -q '^22221:' && exit 0
+
+route_table() {
+    local table=$1 dev=$2 gw=$3 ready=$4 route
+    # The policy rules remain installed while defaults are replaced atomically.
+    echo "$routes" | while IFS= read -r route; do
+        [ -z "$route" ] || ip -4 route replace table "$table" $route proto "$PROTO" || exit 1
+    done || return 1
+    if [ "$ready" != 1 ]; then
+        ip -4 route replace unreachable default table "$table" proto "$PROTO"
+    elif [ "$gw" != - ] && [ "$gw" != 0.0.0.0 ]; then
+        ip -4 route replace table "$table" default via "$gw" dev "$dev" proto "$PROTO"
+    else
+        ip -4 route replace table "$table" default dev "$dev" proto "$PROTO"
+    fi
+}
+route_table 222 "$wdev" "$wgw" "$wok" || fail 'Cannot route Primary connection'
+route_table 223 "$cdev" "$cgw" "$cok" || fail 'Cannot route Secondary connection'
+# Bound health probes use their interface's main-table route. Unbound local
+# traffic (including DNS forwarding) follows a healthy connection as well.
+for dev in $(cat /tmp/chester-balance.devices 2>/dev/null); do
+    ip -4 rule del priority 22215 oif "$dev" lookup main 2>/dev/null || true
+    ip -4 rule del priority 22216 oif "$dev" lookup main 2>/dev/null || true
+done
+printf '%s\n%s\n' "$wdev" "$cdev" > /tmp/chester-balance.devices
+[ "$wdev" = - ] || ip -4 rule add priority 22215 oif "$wdev" lookup main || fail 'Cannot route Primary health checks'
+[ "$cdev" = - ] || ip -4 rule add priority 22216 oif "$cdev" lookup main || fail 'Cannot route Secondary health checks'
+ip -4 rule del priority 22217 iif lo lookup 222 2>/dev/null || true
+ip -4 rule del priority 22217 iif lo lookup 223 2>/dev/null || true
+local_table=222
+[ "$wok" = 1 ] || [ "$cok" != 1 ] || local_table=223
+ip -4 rule add priority 22217 iif lo lookup "$local_table" || fail 'Cannot route router DNS and local traffic'
+
+rules=$(mktemp /tmp/chester-balance.XXXXXX) || fail 'Cannot prepare Load Balance'
+owned_nft && echo "delete table ip $NFT" > "$rules"
+cat >> "$rules" <<EOF
+table ip $NFT {
+    comment "$OWNER"
+    chain lan_connections {
+        type filter hook prerouting priority mangle; policy accept;
+        iifname != "$lan" return
+        fib daddr type { local, broadcast, multicast } return
+        ct direction != original return
+        ct state { invalid, untracked } return
+EOF
+if [ "$wok" = 1 ] && [ "$cok" = 1 ]; then
+    echo 'ct mark & 0x0c000000 == 0 numgen random mod 2 == 0 ct mark set (ct mark & 0xf3ffffff) | 0x04000000 counter comment "Primary connections"' >> "$rules"
+    echo 'ct mark & 0x0c000000 == 0 ct mark set (ct mark & 0xf3ffffff) | 0x08000000 counter comment "Secondary connections"' >> "$rules"
+elif [ "$cok" = 1 ]; then
+    echo 'ct mark & 0x0c000000 != 0x08000000 ct mark set (ct mark & 0xf3ffffff) | 0x08000000' >> "$rules"
+else
+    echo 'ct mark & 0x0c000000 != 0x04000000 ct mark set (ct mark & 0xf3ffffff) | 0x04000000' >> "$rules"
+fi
+cat >> "$rules" <<'EOF'
+        ct mark & 0x0c000000 == 0x04000000 meta mark set (meta mark & 0xf3ffffff) | 0x04000000
+        ct mark & 0x0c000000 == 0x08000000 meta mark set (meta mark & 0xf3ffffff) | 0x08000000
+    }
+}
+EOF
+nft -f "$rules"; rc=$?; rm -f "$rules"
+[ "$rc" = 0 ] || fail 'Cannot apply Load Balance connection rules'
+ip -4 rule show | grep -q '^22220:' || ip -4 rule add priority 22220 fwmark 0x04000000/$MASK lookup 222 || fail 'Cannot enable Primary routing'
+ip -4 rule show | grep -q '^22221:' || ip -4 rule add priority 22221 fwmark 0x08000000/$MASK lookup 223 || fail 'Cannot enable Secondary routing'
+printf '%s\n' "$signature" > /tmp/chester-balance.signature

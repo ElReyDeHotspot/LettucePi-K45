@@ -15,7 +15,7 @@ route_error=""
 TRIG=/tmp/failover.kick
 
 wan_state=unknown; wan_ok=0; wan_bad=0; wan_rtt=""
-cell_state=unknown; cell_rtt=""
+cell_state=unknown; cell_ok=0; cell_bad=0; cell_rtt=""
 active=wan; switches=0; last_switch=0; since=$(date +%s)
 
 log() {
@@ -38,13 +38,13 @@ load_cfg() {
 	config_get timeout main timeout 1
 	targets=""; config_list_foreach main target add_target
 	[ -n "$targets" ] || targets="1.1.1.1 8.8.8.8"
-	case "$mode" in auto|wan|cell) ;; *) mode=auto ;; esac
+	case "$mode" in auto|balance|wan|cell) ;; *) mode=auto ;; esac
 	# Health counters belong to interfaces, not the left/right position.
 	# Recheck a newly assigned primary immediately instead of carrying an
 	# unplugged WAN's failure history onto an already healthy cellular link.
 	if [ "$primary" != "$old_primary" ] || [ "$backup" != "$old_backup" ]; then
 		wan_state=unknown; wan_ok=0; wan_bad=0; wan_rtt=""
-		cell_state=unknown; cell_rtt=""; active=wan
+		cell_state=unknown; cell_ok=0; cell_bad=0; cell_rtt=""; active=wan
 	fi
 }
 
@@ -89,6 +89,7 @@ probe() {
 }
 
 clear_route() {
+    /usr/libexec/chester-load-balance clear
     ip -4 rule del priority "$RULE" lookup "$TABLE" 2>/dev/null || true
     ip -4 route flush table "$TABLE" proto "$PROTO" 2>/dev/null || true
 }
@@ -96,6 +97,7 @@ clear_route() {
 apply_route() {
     local dev gw up existing route
     route_error=""
+    /usr/libexec/chester-load-balance clear
     if [ "$1" = cell ]; then dev=$c_dev; gw=$c_gw; up=$c_up
     else dev=$w_dev; gw=$w_gw; up=$w_up; fi
     existing=$(ip -4 rule show | grep "^$RULE:" | grep -v "lookup $TABLE" || true)
@@ -193,15 +195,25 @@ while :; do
 	[ "$wan_state" = unknown ] && [ "$wan_ok" -ge 1 ] && wan_state=up
 
 	if [ "$c_up" = 1 ] && [ "$c_dev" != - ] && probe "$c_dev"; then
-		cell_state=up; cell_rtt=$RTT
+		cell_rtt=$RTT; cell_ok=$((cell_ok+1)); cell_bad=0
 	else
-		cell_state=down; cell_rtt=""
+		cell_rtt=""; cell_bad=$((cell_bad+1)); cell_ok=0
 	fi
+
+	[ "$c_up" = 1 ] || cell_bad=$fail_count
+	[ "$cell_bad" -ge "$fail_count" ] && cell_state=down
+	[ "$cell_ok" -ge "$recover_count" ] && cell_state=up
+	[ "$cell_state" = unknown ] && [ "$cell_ok" -ge 1 ] && cell_state=up
 
 	if [ "$enabled" != 1 ]; then
 		set_active wan "failover disabled"
 	else
 		case "$mode" in
+		balance)
+			if [ "$wan_state" = up ] && [ "$cell_state" = up ]; then set_active both "Both connections healthy"
+			elif [ "$cell_state" = up ]; then set_active cell "Only Secondary has internet"
+			elif [ "$wan_state" = up ]; then set_active wan "Only Primary has internet"
+			else set_active none "No healthy internet connection"; fi ;;
 		wan)  set_active wan "forced by user" ;;
 		cell) set_active cell "forced by user" ;;
 		auto)
@@ -213,7 +225,15 @@ while :; do
 		esac
 	fi
 	# re-assert our route (the cellular gateway can change on re-dial)
-	if [ "$enabled" = 1 ]; then apply_route "$active"; else clear_route; route_error=""; fi
+	if [ "$enabled" = 1 ] && [ "$mode" = balance ]; then
+        ip -4 rule del priority "$RULE" lookup "$TABLE" 2>/dev/null || true
+        w_ready=0; c_ready=0
+        [ "$wan_state" = up ] && w_ready=1
+        [ "$cell_state" = up ] && c_ready=1
+        route_error=$(/usr/libexec/chester-load-balance apply "$w_dev" "$w_gw" "$w_ready" "$c_dev" "$c_gw" "$c_ready" 2>&1)
+        if [ -n "$route_error" ]; then clear_route; fi
+    elif [ "$enabled" = 1 ]; then apply_route "$active"
+    else clear_route; route_error=""; fi
 
 	write_status
 	i=0

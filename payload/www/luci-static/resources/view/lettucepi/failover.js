@@ -18,7 +18,7 @@ var CSS = `
 .fo-page *{box-sizing:border-box}.fo-heading,.fo-between{display:flex;align-items:center;justify-content:space-between;gap:14px}.fo-heading{margin-bottom:20px}.fo-heading h2{margin:0 0 5px;font-size:27px}.fo-muted{color:#68768a;font-size:13px;line-height:1.5}.fo-card{border:1px solid #dfe6ee;border-radius:20px;padding:22px;margin-bottom:18px;background:#fff;box-shadow:0 5px 20px #20365406}.fo-card h3{font-size:17px;margin:0 0 9px}.fo-page button{font-family:inherit;cursor:pointer;line-height:1.25}.fo-heading h2{border:0;padding:0}.fo-slot{display:flex;flex-direction:column}.fo-uplink{flex:1}.fo-page button:focus-visible,.fo-page summary:focus-visible,.fo-page input:focus-visible,.fo-page select:focus-visible{outline:3px solid #76a6ef;outline-offset:3px}.fo-page button:disabled{opacity:.55;cursor:wait}.fo-pill{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:20px;background:#edf1f6;color:#59677a;font-size:12px;font-weight:700;white-space:nowrap}.fo-pill.online{background:#e4f6ec;color:#137448}.fo-pill.offline{background:#fbebed;color:#b53643}.fo-state{font-size:21px;font-weight:750;margin-bottom:5px}.fo-enable{display:flex;align-items:center;gap:14px;min-height:60px;cursor:pointer}.fo-enable strong{display:block;font-size:18px;margin-bottom:3px}.fo-enable input{appearance:none;flex:none;width:54px;height:32px;margin:0;border:0;border-radius:20px;background:#c1cbd7;position:relative;cursor:pointer;transition:background .18s}.fo-enable input:before{content:'';position:absolute;left:4px;top:4px;width:24px;height:24px;border-radius:50%;background:white;box-shadow:0 1px 5px #17203326;transition:transform .18s}.fo-enable input:checked{background:#d8273e}.fo-enable input:checked:before{transform:translateX(22px)}
 .fo-page .fo-ports{grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-flow:row;grid-auto-columns:auto;gap:8px}.fo-ports .misectel-dashboard-port-panel__port{min-width:0;min-height:86px;padding:16px 8px 12px;font-family:inherit;display:flex;flex-direction:column;align-items:stretch}.fo-ports button{appearance:none;width:100%;font-size:inherit}.fo-ports .misectel-dashboard-port-panel__name{font-size:16px}.fo-ports .misectel-dashboard-port-panel__speed{font-size:12px}.fo-help{padding:14px 16px;border-radius:14px;background:#edf5ff;color:#345778;line-height:1.5;margin-bottom:18px}
 .fo-order-heading{margin-bottom:20px}.fo-order-heading p{margin:0}.fo-order{display:grid;grid-template-columns:1fr 1fr;gap:18px}.fo-slot{min-width:0;border:2px solid transparent;border-radius:18px;padding:5px;transition:background .15s,border-color .15s}.fo-slot.is-drop{border-color:#d8273e;background:#fff0f2}.fo-role{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:15px;font-weight:750}.fo-role-number{display:grid;place-items:center;width:28px;height:28px;background:#edf1f6;border-radius:50%;font-size:13px}.fo-slot:first-child .fo-role-number{background:#e6efff;color:#255a9c}.fo-uplink{position:relative;display:flex;flex-direction:column;min-height:282px;padding:20px;border:1px solid #d7e0eb;border-radius:16px;background:#f8fafc;will-change:transform;user-select:none;-webkit-user-select:none}.fo-slot:first-child .fo-uplink{background:#f2f6ff;border-color:#bdcfe9}.fo-uplink.is-lifted{z-index:5;box-shadow:0 18px 40px #17203330;opacity:.95}.fo-uplink.is-native-drag{opacity:.45}.fo-uplink-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:18px}.fo-icon{width:52px;height:52px;display:grid;place-items:center;border-radius:14px;background:#e7edf5;color:#325778}.fo-icon svg{width:30px;height:30px}.fo-grip{display:grid;place-items:center;touch-action:none;width:44px;height:44px;min-width:44px;border:1px solid #d7e0eb;border-radius:12px;background:#fff;color:#64788e;cursor:grab!important}.fo-grip:active{cursor:grabbing!important}.fo-grip svg{width:22px;height:22px}.fo-uplink h4{margin:0 0 8px;font-size:23px;font-weight:750;line-height:1.2;overflow-wrap:anywhere}.fo-uplink-status{align-self:flex-start;margin-bottom:9px}.fo-uplink-detail{min-height:40px;font-size:13px;color:#62738a;line-height:1.45;margin-bottom:17px;overflow-wrap:anywhere}.fo-uplink-action{min-height:48px;width:100%;padding:10px 8px;border:1px solid #bfcddd;background:white;border-radius:12px;color:#294c72;font-size:13px;font-weight:700;margin-top:auto}.fo-uplink-action:hover{background:#eaf1fa}.fo-in-use{display:none;color:#225fa5;font-weight:700;font-size:12px;margin-bottom:8px}.fo-in-use.visible{display:block}.fo-order-note{margin-top:16px;min-height:20px;font-size:13px;color:#60748c;line-height:1.5}
-.fo-modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}.fo-mode{min-height:56px;border:1px solid #d7e0eb;border-radius:13px;padding:10px 7px;background:#f8fafc;color:#52657e;font-size:14px;font-weight:650}.fo-mode[aria-pressed=true]{border-color:#d8273e;background:#fff0f2;color:#b71e34;box-shadow:inset 0 0 0 1px #d8273e}.fo-mode-note{margin-top:12px;min-height:22px}
+.fo-modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}.fo-mode{min-height:56px;border:1px solid #d7e0eb;border-radius:13px;padding:10px 7px;background:#f8fafc;color:#52657e;font-size:14px;font-weight:650}.fo-mode[aria-pressed=true]{border-color:#d8273e;background:#fff0f2;color:#b71e34;box-shadow:inset 0 0 0 1px #d8273e}.fo-mode-note{margin-top:12px;min-height:22px}
 .fo-page .fo-lan-action{min-height:44px;border:1px solid #b8cbe2;background:#edf4ff;color:#23588b;gap:7px;padding:8px 10px;cursor:pointer}.fo-page .fo-lan-action:hover{background:#deebff;border-color:#7c9fca}
 .fo-details{padding:0}.fo-details summary{min-height:60px;padding:19px 22px;font-size:15px;font-weight:700;cursor:pointer}.fo-details-body{padding:0 22px 22px}.fo-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.fo-field{display:flex;flex-direction:column;gap:8px;font-size:13px;margin-bottom:18px}.fo-page input:not([type=checkbox]),.fo-page select{width:100%;min-width:0;min-height:48px;border:1px solid #cad5e2;border-radius:11px;padding:10px 12px;background:#fafcff;font-size:15px}.fo-kv{display:grid;grid-template-columns:90px 1fr;gap:8px;font-size:13px}.fo-kv span:nth-child(odd){color:#69778b}.fo-kv span:nth-child(even){overflow-wrap:anywhere}.fo-link-detail h4{font-size:15px;margin:0 0 14px}.fo-log{max-height:210px;overflow:auto;white-space:pre-wrap;font-size:12px;color:#53647b;margin:0}.fo-actions{position:sticky;bottom:12px;z-index:8;display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:76px;padding:13px 16px;border:1px solid #dfe6ee;border-radius:16px;background:#fffffff5;box-shadow:0 8px 26px #17203312;margin:20px 0}.fo-save{min-height:48px;padding:12px 24px;border:0;border-radius:12px;background:#d8273e;color:white;font-size:15px;font-weight:700;white-space:nowrap}.fo-result{color:#63748b;font-size:13px;line-height:1.4}.fo-result.error{color:#b53643}
 @media(max-width:600px){.fo-page{padding:12px 0 24px}.fo-card{padding:16px;border-radius:17px}.fo-heading h2{font-size:25px}.fo-order{gap:8px}.fo-slot{padding:2px}.fo-uplink{padding:12px;min-height:288px;border-radius:13px}.fo-uplink h4{font-size:20px}.fo-icon{width:43px;height:43px;border-radius:11px}.fo-icon svg{width:26px;height:26px}.fo-uplink-top{gap:4px;margin-bottom:15px}.fo-role{font-size:13px;gap:6px}.fo-role-number{width:25px;height:25px}.fo-uplink-detail{font-size:12px;min-height:49px}.fo-pill{padding:6px 9px;font-size:11px}.fo-modes{gap:7px}.fo-mode{font-size:12px;min-height:55px}.fo-grid{grid-template-columns:1fr;gap:0}.fo-details{padding:0}.fo-details summary{padding:18px 16px}.fo-details-body{padding:0 16px 16px}.fo-actions{bottom:8px;padding:11px 12px;gap:10px}.fo-save{padding:12px 17px}.fo-enable strong{font-size:17px}}
@@ -65,7 +65,7 @@ return view.extend({
         this.wanNotice = E('div', {'class':'fo-help'}, ['The WAN socket is in LAN mode. Tap its icon above to use it for internet.']);
         this.enable = E('input', {type:'checkbox',role:'switch','aria-label':'Enable Failover'}); this.enable.checked = !!c.enabled;
         this.enableNote = E('div', {'class':'fo-muted'});
-        this.mode = select(c.mode || 'auto', [['auto','Automatic'],['wan','Primary only'],['cell','Secondary only']]);
+        this.mode = select(c.mode || 'auto', [['auto','Automatic'],['balance','Load Balance'],['wan','Primary only'],['cell','Secondary only']]);
         var opts = names.map(function(n) { return [n,self.connectionName(n)+' ('+n+')']; });
         this.primary = select(c.primary || 'wan',opts); this.backup = select(c.backup || 'pcie0',opts);
         this.draftOrder = [this.primary.value,this.backup.value];
@@ -76,7 +76,7 @@ return view.extend({
         this.orderNote = E('div', {'class':'fo-order-note','aria-live':'polite'});
         this.wanCard = E('div', {'class':'fo-link-detail'}); this.cellCard = E('div', {'class':'fo-link-detail'});
         this.events = E('pre', {'class':'fo-log'}); this.message = E('span', {'class':'fo-result','aria-live':'polite'}, ['Changes apply when you save.']);
-        this.modeButtons = [['auto','Automatic'],['wan','Primary only'],['cell','Secondary only']].map(function(m) {
+        this.modeButtons = [['auto','Automatic'],['balance','Load Balance'],['wan','Primary only'],['cell','Secondary only']].map(function(m) {
             return E('button', {type:'button','class':'fo-mode','aria-pressed':String(self.mode.value===m[0]),click:function() { self.mode.value=m[0]; self.refreshMode(); self.markDirty(); }}, [m[1]]);
         });
         this.modeNote = E('div', {'class':'fo-muted fo-mode-note'});
@@ -84,7 +84,7 @@ return view.extend({
         this.primary.addEventListener('change', function() { if(self.primary.value===self.backup.value) self.backup.value=self.draftOrder[0]; self.drawOrder(); self.markDirty(); });
         this.backup.addEventListener('change', function() { if(self.backup.value===self.primary.value) self.primary.value=self.draftOrder[1]; self.drawOrder(); self.markDirty(); });
         var root = E('div', {'class':'fo-page'}, [
-            E('div', {'class':'fo-heading'}, [E('div', {}, [E('h2', {}, ['Failover']),E('div', {'class':'fo-muted'}, ['Choose which connection comes first.'])]),this.badge]),
+            E('div', {'class':'fo-heading'}, [E('div', {}, [E('h2', {}, ['Failover']),E('div', {'class':'fo-muted'}, ['Choose a backup connection or use both together.'])]),this.badge]),
             E('div', {'class':'fo-card'}, [this.portBox,E('div', {'class':'fo-muted',style:'margin-top:14px'}, ['Tap WAN to switch this socket between internet and LAN.'])]),
             this.wanNotice,
             E('section', {'class':'fo-card','aria-label':'Set connection priority'}, [
@@ -100,7 +100,7 @@ return view.extend({
                 E('div', {'class':'fo-grid'}, [field('Primary interface',this.primary),field('Secondary interface',this.backup)]),
                 field('Ping targets',this.targets),
                 E('div', {'class':'fo-grid'}, [field('Seconds between checks',this.interval),field('Probe timeout (seconds)',this.probeTimeout),field('Failed checks before switching',this.fail),field('Healthy checks before returning to Primary',this.recover)]),
-                E('div', {'class':'fo-muted'}, ['Use one to six IPv4 addresses, separated by commas. Existing sessions may reconnect when the connection changes. Failover manages IPv4; IPv6 keeps its existing settings.'])
+                E('div', {'class':'fo-muted'}, ['Use one to six IPv4 addresses, separated by commas. Load Balance applies to devices on this LAN and shares connections, not individual packets or one download. Existing sessions may reconnect if their uplink fails. These modes manage IPv4; IPv6 keeps its existing settings.'])
             ])]),
             E('details', {'class':'fo-card fo-details'}, [E('summary', {}, ['Connection details']),E('div', {'class':'fo-details-body fo-grid'}, [this.wanCard,this.cellCard])]),
             E('details', {'class':'fo-card fo-details'}, [E('summary', {}, ['Recent events']),E('div', {'class':'fo-details-body'}, [this.events])]),
@@ -189,10 +189,10 @@ return view.extend({
     refreshMode: function() {
         if(!this.modeButtons)return;
         var self=this;
-        ['auto','wan','cell'].forEach(function(m,i) { self.modeButtons[i].setAttribute('aria-pressed',String(self.mode.value===m)); });
+        ['auto','balance','wan','cell'].forEach(function(m,i) { self.modeButtons[i].setAttribute('aria-pressed',String(self.mode.value===m)); });
         this.enableNote.textContent=this.enable.checked?'Use the order and mode below.':'Off · your existing routing stays unchanged.';
-        this.modeNote.textContent=this.mode.value==='auto'?'Use Primary first. Switch to Secondary if needed, then return when Primary recovers.':this.mode.value==='wan'?'Use only your Primary connection. No automatic switching.':'Use only your Secondary connection. No automatic switching.';
-        this.orderNote.textContent='Primary is tried first. Secondary takes over if Primary loses internet.';
+        this.modeNote.textContent=this.mode.value==='balance'?'Use both connections. New connections are shared roughly 50/50; if one fails, new traffic uses the healthy connection. One download uses one connection.':this.mode.value==='auto'?'Use Primary first. Switch to Secondary if needed, then return when Primary recovers.':this.mode.value==='wan'?'Use only your Primary connection. No automatic switching.':'Use only your Secondary connection. No automatic switching.';
+        this.orderNote.textContent=this.mode.value==='balance'?'Both connections share traffic equally. Left and right do not set priority in Load Balance.':'Primary is tried first. Secondary takes over if Primary loses internet.';
     },
     saveSettings: async function() {
         if(this.saving)return;
@@ -206,7 +206,7 @@ return view.extend({
     },
     updatePriorityVitals: function() {
         var s=this.lastStatus||{}, c=s.config||{}, self=this;
-        var inUse=s.active==='cell'?c.backup:c.primary;
+        var inUse=s.active==='cell'?c.backup:s.active==='none'?null:c.primary;
         (this.priorityRefs||[]).forEach(function(r) {
             var v=[s.wan,s.cell].find(function(v) { return v && v.iface===r.name; }) || {};
             var known=!!s.running && typeof v.up==='boolean',healthy=known && v.up && v.health==='up';
@@ -217,7 +217,7 @@ return view.extend({
             var recovering=known && v.up && v.health==='down' && v.rtt!=='' && v.rtt!=null;
             r.health.className='fo-pill fo-uplink-status'+(lanMode?'':healthy?' online':known && (!v.up || v.health==='down') && !recovering?' offline':'');
             r.health.textContent=lanMode?'LAN mode':!known?'Not checked':!v.up?'Not connected':healthy?'Online':recovering?'Recovering':v.health==='down'?'No internet':'Checking…';
-            r.active.classList.toggle('visible',!!c.enabled && inUse===r.name);
+            r.active.classList.toggle('visible',!!c.enabled && !s.error && (s.active==='both' || inUse===r.name));
             r.detail.textContent=lanMode?'Tap LAN mode to use this socket for internet.':v.ip && v.ip!=='-' ? v.ip+(v.rtt?' · '+v.rtt+' ms':'') : self.connectionKind(r.name)==='wan'?'Connect your internet cable to WAN.':self.connectionKind(r.name)==='cell'?'Your mobile data connection.':r.name;
         });
     },
@@ -259,8 +259,8 @@ return view.extend({
         this.wanNotice.style.display=s.wan_is_lan?'':'none';
         this.badge.className='fo-pill'+(enabled?' online':''); this.badge.textContent=enabled?'On':'Off';
         var active=s.active==='cell'?c.backup:c.primary;
-        this.headline.textContent=!enabled?'Failover is off':!s.running?'Starting connection checks':'Using '+this.connectionName(active);
-        this.description.textContent=s.error||(!s.running?'Connection monitoring is stopped.':!enabled?'Arrange your connections below, then turn Failover on and save.':c.mode==='auto'?'Returns to '+this.connectionName(c.primary)+' after '+c.recover_count+' healthy checks.':c.mode==='wan'?'Primary only is selected.':'Secondary only is selected.');
+        this.headline.textContent=!enabled?'Failover is off':!s.running?'Starting connection checks':s.error?'Connection setup needs attention':s.active==='both'?'Using both connections':s.active==='none'?'No internet connection':'Using '+this.connectionName(active);
+        this.description.textContent=s.error||(!s.running?'Connection monitoring is stopped.':!enabled?'Arrange your connections below, then turn Failover on and save.':c.mode==='balance'?'Load Balance shares new IPv4 connections across both uplinks. If one fails, the healthy link carries new traffic.':c.mode==='auto'?'Returns to '+this.connectionName(c.primary)+' after '+c.recover_count+' healthy checks.':c.mode==='wan'?'Primary only is selected.':'Secondary only is selected.');
         function details(card,title,v) {
             v=v||{}; card.replaceChildren(E('h4',{},[title]),E('div',{'class':'fo-kv'},[
                 E('span',{},['Interface']),E('span',{},[v.iface||'—']),E('span',{},['Device']),E('span',{},[v.dev==='-'?'—':v.dev||'—']),

@@ -11,6 +11,7 @@ start_service() {
 }
 
 stop_service() {
+	/usr/libexec/chester-load-balance clear
 	# never leave a forced cellular route behind
 	ip -4 rule del priority 22222 lookup 222 2>/dev/null
 	ip -4 route flush table 222 proto 222 2>/dev/null
