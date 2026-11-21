@@ -1,0 +1,7 @@
+{
+  "luci-app-chester-sim": {
+    "description": "Read and manage Chester SIM selection",
+    "read": {"ubus": {"chester.sim": ["status"]}},
+    "write": {"ubus": {"chester.sim": ["refresh", "switch", "save", "run_selection", "cancel"]}}
+  }
+}

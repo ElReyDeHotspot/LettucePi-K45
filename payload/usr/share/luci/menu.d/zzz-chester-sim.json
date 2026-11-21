@@ -1,0 +1,8 @@
+{
+  "admin/modem/sim": {
+    "title": "SIM Selection",
+    "order": 65,
+    "action": {"type": "view", "path": "misectel-modem/sim"},
+    "depends": {"acl": ["luci-app-chester-sim"]}
+  }
+}

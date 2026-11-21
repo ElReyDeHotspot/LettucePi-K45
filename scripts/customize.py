@@ -200,3 +200,8 @@ for name in ['usr/bin/speedtest','usr/libexec/chester-ndt7']:
     engine=root/name
     assert engine.is_file() and engine.stat().st_size>100000, 'Missing bundled test engine: '+name
     engine.chmod(0o755)
+
+# SIM policy daemon ships in Manual mode and starts its local status reader.
+for link in ['S99chester_sim','K09chester_sim']:
+    target=root/'etc/rc.d'/link
+    if not target.exists() and not target.is_symlink():target.symlink_to('../init.d/chester_sim')

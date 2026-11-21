@@ -1,0 +1,113 @@
+{
+  "device": "Inseego FX4200/FX4210",
+  "captured_date": "2026-11-21",
+  "scope": "Read-only native SIM presence and event capture; subscriber identifiers omitted",
+  "readers": [
+    "sysinterface.sim.slot.get_all_slots_info",
+    "sysinterface.sim.get_active_slot"
+  ],
+  "event_topics": [
+    "modem2.uim_state",
+    "simStatus",
+    "simSwitchStatus"
+  ],
+  "snapshots": [
+    {
+      "elapsed_seconds": 0.078,
+      "active": {
+        "slot": 2
+      },
+      "slots": [
+        {
+          "slot": 1,
+          "card_state": 2,
+          "sim_state": 7,
+          "sim_status": 0,
+          "conn_status": 0,
+          "oper_name": "Verizon "
+        },
+        {
+          "slot": 2,
+          "card_state": 2,
+          "sim_state": 7,
+          "sim_status": 1,
+          "conn_status": 2,
+          "oper_name": "T-Mobile"
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "physical_transition_observed": false,
+  "duration_seconds": 326.059,
+  "removal_test": {
+    "slot": 1,
+    "active_slot": 2,
+    "active_carrier": "T-Mobile",
+    "user_reported_removed_seconds": [
+      10,
+      15
+    ],
+    "slot_record_changed": false,
+    "relevant_ubus_event_observed": false,
+    "interpretation": "The inactive slot record stayed cached through the reported removal/reinsertion. This capture does not establish live inactive-slot insertion detection."
+  },
+  "native_mechanism_evidence": {
+    "reader": "sysinterface.sim.slot.get_all_slots_info",
+    "per_slot_reader": "sysinterface.sim.slot.get_slot_info",
+    "binary_exports": [
+      "libsysintclient.so: enumMapperToSysPhysicalCardState",
+      "libsysintclient.so: enumMapperToSysPhysicalSlotState",
+      "libsysintclient.so: modem2_sim_mgr_get_slot_state",
+      "libmodem2_api.so: modem2_uim_get_physical_slot_status"
+    ],
+    "native_request_label": "MODEM2_MSG_UIM_GET_PHYSICAL_SLOT_STATUS",
+    "notification_labels_found_in_binary": [
+      "modem2.uim_state",
+      "simStatus",
+      "simSwitchStatus"
+    ],
+    "evidence_limit": "Exports and labels were found in native binaries; a real insertion notification was not observed."
+  },
+  "k45p_readbacks": {
+    "model": "RM551E-GL",
+    "native_slots": [
+      "1",
+      "2"
+    ],
+    "active_slot": "1",
+    "qsimstat": [
+      0,
+      1
+    ],
+    "qsimdet": [
+      0,
+      1
+    ],
+    "meaning": "Insertion reporting and hardware hot-plug detection are disabled; active SIM reports inserted. Inactive slot presence is not exposed by the existing QModem API.",
+    "uqmi_uim_query": "Request timed out / failed to connect to service",
+    "hardware_detection_settings_changed": false
+  },
+  "subscriber_identifiers_included": false,
+  "physical_status_cli": {
+    "command": "modem2_cli uim_get_physical_slot_status",
+    "verified_read_only": true,
+    "slots": [
+      {
+        "slot": 1,
+        "presence_value": 2,
+        "presence": "PRESENT",
+        "state_value": 0,
+        "state": "INACTIVE"
+      },
+      {
+        "slot": 2,
+        "presence_value": 2,
+        "presence": "PRESENT",
+        "state_value": 1,
+        "state": "ACTIVE"
+      }
+    ],
+    "identifier_bytes_omitted": true
+  }
+}

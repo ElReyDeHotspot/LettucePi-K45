@@ -18,6 +18,7 @@ routes_clear() {
 }
 case "$1" in
 start)
+    if [ -d /tmp/chester-sim.lock ] && [ "${CHESTER_SIM_TEST:-0}" != 1 ]; then reply 0 'Wait for SIM selection to finish.'; exit; fi
     role=$2
     valid_role "$role" || { reply 0 'Choose Primary or Secondary.'; exit; }
     if [ -d "$LOCK" ]; then

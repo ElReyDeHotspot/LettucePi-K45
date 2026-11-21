@@ -1,5 +1,12 @@
 # LettucePi K45P
 
+## Pending next image — SIM Selection
+
+The revamped SIM page adds Manual, startup speed selection, automatic monitoring,
+per-SIM APNs and verified rollback. Live validation and hardware detection limits
+are documented in [SIM Selection](integrations/sim/README.md). Published bin7
+remains unchanged; no new image has been built for these changes.
+
 ## Bin 7 — version 1.0.6, build 202611210001
 
 Both speed-test engines are bundled in the immutable image: the official Ookla

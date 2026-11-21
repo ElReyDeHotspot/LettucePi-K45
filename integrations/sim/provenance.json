@@ -1,0 +1,12 @@
+{
+  "built_date": "2026-11-21",
+  "go": "go1.27.4 linux/amd64",
+  "target": "linux/arm64, CGO_ENABLED=0",
+  "dependencies": "Go standard library only",
+  "binary_sha256": "fafcc6169911f96b54b4c44dfd967a70c6df9b2101a9ca8946324b505a697160",
+  "sources_sha256": {
+    "main.go": "d81d950acf9ebd6320977b365f6aa7eb687b9912044cbb4304f56e5fa4ec6afb",
+    "main_test.go": "6a0272ad02b0ac0255cfdc4346d370f55c9248e0e538c327666b246c62bcd025",
+    "go.mod": "55ac0dc4724db0940ef06bc93e5dc45acb9c362d1b08269a0d272b097b5d2d36"
+  }
+}

@@ -70,6 +70,7 @@ case "${1:-status}" in
         else printf '{"ok":false,"error":"builtin_engine_missing"}\n'; fi
         ;;
 	start)
+		if [ -d /tmp/chester-sim.lock ]; then printf '{"ok":false,"error":"Wait for SIM selection to finish."}\n'; exit 0; fi
 		bin="$(speedtest_bin 2>/dev/null || true)"
 		[ -n "$bin" ] || { printf '{"ok":false,"error":"official_cli_not_installed"}\n'; exit 0; }
 		if is_running; then printf '{"ok":false,"error":"already_running"}\n'; exit 0; fi

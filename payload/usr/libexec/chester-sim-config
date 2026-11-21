@@ -1,0 +1,19 @@
+#!/usr/bin/ucode
+'use strict';
+import {cursor} from 'uci';
+let u=cursor(),modems=[];
+u.foreach('qmodem','modem-device',function(s){push(modems,s['.name']);});
+function get(k,d){let v=u.get('chester_sim','main',k);return v==null?d:v;}
+function number(k,d){return +get(k,''+d);}
+function flag(k,d){return get(k,d?'1':'0')=='1';}
+let modem=get('modem',modems[0]||'');
+let iface=u.get('qmodem',modem,'alias')||'';
+if(!iface)u.foreach('network','interface',function(s){if(s.modem_config==modem&&s.proto!='dhcpv6')iface=s['.name'];});
+print(sprintf('%J\n',{
+ mode:get('mode','manual'),modem:modem,interface:iface,preferred:get('preferred','1'),criteria:get('criteria','DLUL'),
+ min_down:number('min_down',10),min_up:number('min_up',10),include1:flag('include1',true),include2:flag('include2',true),
+ compare_both:flag('compare_both',true),only_threshold:flag('only_threshold',false),signal:flag('signal',true),
+ rsrp:number('rsrp',-110),dwell:number('dwell',45),connection:flag('connection',true),failures:number('failures',3),
+ cooldown:number('cooldown',3600),max_switches:number('max_switches',6),failback:flag('failback',true),
+ failback_seconds:number('failback_seconds',600),attach_seconds:number('attach_seconds',90),apn1:get('apn1',''),apn2:get('apn2','')
+}));
