@@ -20,6 +20,45 @@ function validNumber(s, lo, hi) {
     return match(s || '', /^[0-9]+$/) && +s >= lo && +s <= hi;
 }
 function invalid(message) { return {success:false, error:message}; }
+function readText(path) {
+    let f=open(path,'r'); if (!f) return '';
+    let s=f.read('all') || ''; f.close(); return s;
+}
+function exists(path) { let f=open(path,'r'); if (!f) return false; f.close(); return true; }
+function testStatus() {
+    let base='/tmp/chester-link-test/', lock='/tmp/chester-link-test.lock/';
+    let pid=trim(readText(lock+'pid')), role=trim(readText(lock+'role'));
+    let running=!!match(pid,/^[0-9]+$/) && !!length(readText('/proc/'+pid+'/status'));
+    let out={running:running,role:running?role:'',results:[]};
+    for (let r in ['primary','secondary']) {
+        let path=base+r+'/', text=readText(path+'meta.json'), meta;
+        if (!length(text)) continue;
+        try { meta=json(text); } catch(e) { continue; }
+        let result={role:r,iface:meta.iface,device:meta.device,timestamp:meta.timestamp,phase:'starting'};
+        let summary=null;
+        for (let line in split(readText(path+'output.jsonl'),'\n')) {
+            let ev; try { ev=json(line); } catch(e) { continue; }
+            if (ev.Key=='starting' || ev.Key=='connected') result.phase=ev.Value.Test;
+            if (ev.ServerFQDN) summary=ev;
+        }
+        if (summary) {
+            result.server=summary.ServerFQDN;
+            if (summary.Download) {
+                result.download_mbps=summary.Download.Throughput.Value;
+                result.latency_ms=summary.Download.Latency.Value;
+            }
+            if (summary.Upload) result.upload_mbps=summary.Upload.Throughput.Value;
+        }
+        if (exists(path+'cancelled')) result.phase='cancelled';
+        else if (exists(path+'done') && summary && summary.Download && summary.Upload) result.phase='completed';
+        else if (exists(path+'failed') || (!running || role!=r)) {
+            result.phase='failed';
+            result.error='NDT7 could not complete on this link. Check its internet access and try again.';
+        }
+        push(out.results,result);
+    }
+    return out;
+}
 function usesWanSocket(ctx, name) {
     if (name == 'wan') return true;
     let dev = ctx.get('network', name, 'device');
@@ -42,7 +81,26 @@ return { failover: {
         out.config=config(ctx);
         out.wan_is_lan=ctx.get('misectel','network_defaults','optional_wan_mode') == 'lan';
         out.vendor_failover=ctx.get('misectel','wan5g_switch','enabled') == '1';
+        out.link_tests=testStatus();
         return out;
+    }},
+    test_start: {
+        args:{role:'String',notice:'String'},
+        call:function(request) {
+            let a=request.args;
+            if (a.role!='primary' && a.role!='secondary') return invalid('Choose Primary or Secondary.');
+            if (a.notice!='1') return invalid('Review the M-Lab privacy notice before starting.');
+            let f=popen('/usr/libexec/chester-link-test start '+a.role,'r');
+            if (!f) return invalid('The link-test service is unavailable.');
+            let text=f.read('all');f.close();
+            try { return json(text); } catch(e) { return invalid('The link-test service returned an invalid response.'); }
+        }
+    },
+    test_cancel: {call:function() {
+        let f=popen('/usr/libexec/chester-link-test cancel','r');
+        if (!f) return invalid('The link-test service is unavailable.');
+        let text=f.read('all');f.close();
+        try {return json(text);} catch(e) {return invalid('Could not cancel the test.');}
     }},
     set_config: {
         args:{enabled:'String',mode:'String',primary:'String',backup:'String',targets:'String',interval:'String',fail_count:'String',recover_count:'String',timeout:'String'},

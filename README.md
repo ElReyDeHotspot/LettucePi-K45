@@ -7,6 +7,12 @@ IPv4 connections, with healthy-link fallback and connection tracking. It is
 installed and tested live; **no new image was built or published** for this change.
 Failover remains Off by default. See [validation and scope](integrations/LOAD-BALANCE.md).
 
+Failover also includes independent **Test Primary / Test Secondary** controls
+using interface-bound M-Lab NDT7. They show each link's download, upload and
+latency without changing the selected mode. These are manual tests with a
+privacy notice, progress and cancellation; [details](integrations/ndt7/README.md).
+This addition is live and pending the next bin; the published image is unchanged.
+
 ## Bin 6 — finalized build 202611200013
 
 Version 1.0.5 / bin 6 includes the current Chester K45P UI and apps, K43P

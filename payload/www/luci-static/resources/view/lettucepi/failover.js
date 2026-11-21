@@ -6,6 +6,8 @@
 'require uci';
 
 var status = rpc.declare({object:'failover', method:'status', expect:{}});
+var startLinkTest = rpc.declare({object:'failover',method:'test_start',params:['role','notice'],expect:{}});
+var cancelLinkTest = rpc.declare({object:'failover',method:'test_cancel',expect:{}});
 var interfaces = rpc.declare({object:'network.interface', method:'dump', expect:{interface:[]}});
 var save = rpc.declare({object:'failover', method:'set_config', params:['enabled','mode','primary','backup','targets','interval','fail_count','recover_count','timeout'], expect:{}});
 var builtinPorts = rpc.declare({object:'luci', method:'getBuiltinEthernetPorts', expect:{result:[]}});
@@ -18,8 +20,10 @@ var CSS = `
 .fo-page *{box-sizing:border-box}.fo-heading,.fo-between{display:flex;align-items:center;justify-content:space-between;gap:14px}.fo-heading{margin-bottom:20px}.fo-heading h2{margin:0 0 5px;font-size:27px}.fo-muted{color:#68768a;font-size:13px;line-height:1.5}.fo-card{border:1px solid #dfe6ee;border-radius:20px;padding:22px;margin-bottom:18px;background:#fff;box-shadow:0 5px 20px #20365406}.fo-card h3{font-size:17px;margin:0 0 9px}.fo-page button{font-family:inherit;cursor:pointer;line-height:1.25}.fo-heading h2{border:0;padding:0}.fo-slot{display:flex;flex-direction:column}.fo-uplink{flex:1}.fo-page button:focus-visible,.fo-page summary:focus-visible,.fo-page input:focus-visible,.fo-page select:focus-visible{outline:3px solid #76a6ef;outline-offset:3px}.fo-page button:disabled{opacity:.55;cursor:wait}.fo-pill{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:20px;background:#edf1f6;color:#59677a;font-size:12px;font-weight:700;white-space:nowrap}.fo-pill.online{background:#e4f6ec;color:#137448}.fo-pill.offline{background:#fbebed;color:#b53643}.fo-state{font-size:21px;font-weight:750;margin-bottom:5px}.fo-enable{display:flex;align-items:center;gap:14px;min-height:60px;cursor:pointer}.fo-enable strong{display:block;font-size:18px;margin-bottom:3px}.fo-enable input{appearance:none;flex:none;width:54px;height:32px;margin:0;border:0;border-radius:20px;background:#c1cbd7;position:relative;cursor:pointer;transition:background .18s}.fo-enable input:before{content:'';position:absolute;left:4px;top:4px;width:24px;height:24px;border-radius:50%;background:white;box-shadow:0 1px 5px #17203326;transition:transform .18s}.fo-enable input:checked{background:#d8273e}.fo-enable input:checked:before{transform:translateX(22px)}
 .fo-page .fo-ports{grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-flow:row;grid-auto-columns:auto;gap:8px}.fo-ports .misectel-dashboard-port-panel__port{min-width:0;min-height:86px;padding:16px 8px 12px;font-family:inherit;display:flex;flex-direction:column;align-items:stretch}.fo-ports button{appearance:none;width:100%;font-size:inherit}.fo-ports .misectel-dashboard-port-panel__name{font-size:16px}.fo-ports .misectel-dashboard-port-panel__speed{font-size:12px}.fo-help{padding:14px 16px;border-radius:14px;background:#edf5ff;color:#345778;line-height:1.5;margin-bottom:18px}
 .fo-order-heading{margin-bottom:20px}.fo-order-heading p{margin:0}.fo-order{display:grid;grid-template-columns:1fr 1fr;gap:18px}.fo-slot{min-width:0;border:2px solid transparent;border-radius:18px;padding:5px;transition:background .15s,border-color .15s}.fo-slot.is-drop{border-color:#d8273e;background:#fff0f2}.fo-role{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:15px;font-weight:750}.fo-role-number{display:grid;place-items:center;width:28px;height:28px;background:#edf1f6;border-radius:50%;font-size:13px}.fo-slot:first-child .fo-role-number{background:#e6efff;color:#255a9c}.fo-uplink{position:relative;display:flex;flex-direction:column;min-height:282px;padding:20px;border:1px solid #d7e0eb;border-radius:16px;background:#f8fafc;will-change:transform;user-select:none;-webkit-user-select:none}.fo-slot:first-child .fo-uplink{background:#f2f6ff;border-color:#bdcfe9}.fo-uplink.is-lifted{z-index:5;box-shadow:0 18px 40px #17203330;opacity:.95}.fo-uplink.is-native-drag{opacity:.45}.fo-uplink-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:18px}.fo-icon{width:52px;height:52px;display:grid;place-items:center;border-radius:14px;background:#e7edf5;color:#325778}.fo-icon svg{width:30px;height:30px}.fo-grip{display:grid;place-items:center;touch-action:none;width:44px;height:44px;min-width:44px;border:1px solid #d7e0eb;border-radius:12px;background:#fff;color:#64788e;cursor:grab!important}.fo-grip:active{cursor:grabbing!important}.fo-grip svg{width:22px;height:22px}.fo-uplink h4{margin:0 0 8px;font-size:23px;font-weight:750;line-height:1.2;overflow-wrap:anywhere}.fo-uplink-status{align-self:flex-start;margin-bottom:9px}.fo-uplink-detail{min-height:40px;font-size:13px;color:#62738a;line-height:1.45;margin-bottom:17px;overflow-wrap:anywhere}.fo-uplink-action{min-height:48px;width:100%;padding:10px 8px;border:1px solid #bfcddd;background:white;border-radius:12px;color:#294c72;font-size:13px;font-weight:700;margin-top:auto}.fo-uplink-action:hover{background:#eaf1fa}.fo-in-use{display:none;color:#225fa5;font-weight:700;font-size:12px;margin-bottom:8px}.fo-in-use.visible{display:block}.fo-order-note{margin-top:16px;min-height:20px;font-size:13px;color:#60748c;line-height:1.5}
+.fo-test-button{min-height:46px;width:100%;margin:0 0 10px;padding:10px 5px;border:1px solid #aac3e2;border-radius:12px;background:#eaf3ff;color:#215d98;font-size:13px;font-weight:700}.fo-test-result{font-size:12px;line-height:1.5;margin-bottom:12px;overflow-wrap:anywhere;user-select:text}.fo-test-row{display:flex;justify-content:space-between;gap:5px;flex-wrap:wrap}.fo-test-row strong{color:#254c71}.fo-test-result.error{color:#b53643}.fo-test-notice{margin:0 0 16px}.fo-test-notice a{color:#255f9e;text-decoration:underline}
 .fo-modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}.fo-mode{min-height:56px;border:1px solid #d7e0eb;border-radius:13px;padding:10px 7px;background:#f8fafc;color:#52657e;font-size:14px;font-weight:650}.fo-mode[aria-pressed=true]{border-color:#d8273e;background:#fff0f2;color:#b71e34;box-shadow:inset 0 0 0 1px #d8273e}.fo-mode-note{margin-top:12px;min-height:22px}
 .fo-page .fo-lan-action{min-height:44px;border:1px solid #b8cbe2;background:#edf4ff;color:#23588b;gap:7px;padding:8px 10px;cursor:pointer}.fo-page .fo-lan-action:hover{background:#deebff;border-color:#7c9fca}
+.fo-uplink h4{min-height:56px}.fo-test-row{display:grid;grid-template-columns:1fr;gap:0;margin-bottom:6px}.fo-test-row strong{font-size:15px}
 .fo-details{padding:0}.fo-details summary{min-height:60px;padding:19px 22px;font-size:15px;font-weight:700;cursor:pointer}.fo-details-body{padding:0 22px 22px}.fo-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.fo-field{display:flex;flex-direction:column;gap:8px;font-size:13px;margin-bottom:18px}.fo-page input:not([type=checkbox]),.fo-page select{width:100%;min-width:0;min-height:48px;border:1px solid #cad5e2;border-radius:11px;padding:10px 12px;background:#fafcff;font-size:15px}.fo-kv{display:grid;grid-template-columns:90px 1fr;gap:8px;font-size:13px}.fo-kv span:nth-child(odd){color:#69778b}.fo-kv span:nth-child(even){overflow-wrap:anywhere}.fo-link-detail h4{font-size:15px;margin:0 0 14px}.fo-log{max-height:210px;overflow:auto;white-space:pre-wrap;font-size:12px;color:#53647b;margin:0}.fo-actions{position:sticky;bottom:12px;z-index:8;display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:76px;padding:13px 16px;border:1px solid #dfe6ee;border-radius:16px;background:#fffffff5;box-shadow:0 8px 26px #17203312;margin:20px 0}.fo-save{min-height:48px;padding:12px 24px;border:0;border-radius:12px;background:#d8273e;color:white;font-size:15px;font-weight:700;white-space:nowrap}.fo-result{color:#63748b;font-size:13px;line-height:1.4}.fo-result.error{color:#b53643}
 @media(max-width:600px){.fo-page{padding:12px 0 24px}.fo-card{padding:16px;border-radius:17px}.fo-heading h2{font-size:25px}.fo-order{gap:8px}.fo-slot{padding:2px}.fo-uplink{padding:12px;min-height:288px;border-radius:13px}.fo-uplink h4{font-size:20px}.fo-icon{width:43px;height:43px;border-radius:11px}.fo-icon svg{width:26px;height:26px}.fo-uplink-top{gap:4px;margin-bottom:15px}.fo-role{font-size:13px;gap:6px}.fo-role-number{width:25px;height:25px}.fo-uplink-detail{font-size:12px;min-height:49px}.fo-pill{padding:6px 9px;font-size:11px}.fo-modes{gap:7px}.fo-mode{font-size:12px;min-height:55px}.fo-grid{grid-template-columns:1fr;gap:0}.fo-details{padding:0}.fo-details summary{padding:18px 16px}.fo-details-body{padding:0 16px 16px}.fo-actions{bottom:8px;padding:11px 12px;gap:10px}.fo-save{padding:12px 17px}.fo-enable strong{font-size:17px}}
 @media(prefers-reduced-motion:reduce){.fo-page *{transition:none!important}}
@@ -89,7 +93,7 @@ return view.extend({
             this.wanNotice,
             E('section', {'class':'fo-card','aria-label':'Set connection priority'}, [
                 E('div', {'class':'fo-order-heading'}, [E('h3', {}, ['Your connection order']),E('p', {'class':'fo-muted'}, ['Drag the handle to switch sides, or use the button on either card.'])]),
-                this.orderBox,this.orderNote
+                E('div',{'class':'fo-muted fo-test-notice'},['Test each link with M-Lab NDT. Tests use data and may slow other traffic. M-Lab publishes results and your public IP address. ',E('a',{href:'https://www.measurementlab.net/privacy/',target:'_blank',rel:'noopener noreferrer'},['Privacy policy'])]),this.orderBox,this.orderNote
             ]),
             E('div', {'class':'fo-card'}, [
                 E('label', {'class':'fo-enable misectel-inline-check'}, [this.enable,E('div', {}, [E('strong', {}, ['Failover']),this.enableNote])]),
@@ -129,11 +133,13 @@ return view.extend({
             var grip=E('button', {type:'button','class':'fo-grip','aria-label':'Drag '+title+' to change priority',title:'Drag to the other side'});
             grip.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>';
             var health=E('span', {'class':'fo-pill fo-uplink-status'}), detail=E('div', {'class':'fo-uplink-detail'}), active=E('div', {'class':'fo-in-use'}, ['Currently in use']);
+            var testResult=E('div',{'class':'fo-test-result','aria-live':'polite'});
+            var testButton=E('button',{type:'button','class':'fo-test-button',click:ui.createHandlerFn(self,function(){return self.runLinkTest(index);})},[index?'Test Secondary':'Test Primary']);
             var lanAction=E('button', {type:'button','class':'fo-pill fo-uplink-status fo-lan-action','aria-label':'Switch Ethernet socket from LAN to WAN',title:'Tap to use this socket for internet',click:ui.createHandlerFn(self,function() { return self.toggleWanPort(); })}, ['LAN mode',E('span',{'aria-hidden':'true'},['↗'])]);
-            card.append(E('div', {'class':'fo-uplink-top'}, [icon(self.connectionKind(name)),grip]),E('h4', {}, [title]),health,lanAction,active,detail,
+            card.append(E('div', {'class':'fo-uplink-top'}, [icon(self.connectionKind(name)),grip]),E('h4', {}, [title]),health,lanAction,active,detail,testButton,testResult,
                 E('button', {type:'button','class':'fo-uplink-action','aria-label':'Make '+title+' '+(index?'primary':'secondary'),click:function() { self.swapOrder(); }}, [index?'Make primary':'Make secondary']));
             slot.append(E('div', {'class':'fo-role'}, [E('span', {'class':'fo-role-number'}, [String(index+1)]),E('span', {}, [index?'Secondary · right':'Primary · left'])]),card);
-            self.priorityRefs.push({name:name,card:card,health:health,lanAction:lanAction,detail:detail,active:active,slot:slot});
+            self.priorityRefs.push({name:name,card:card,health:health,lanAction:lanAction,detail:detail,active:active,slot:slot,testButton:testButton,testResult:testResult,index:index});
             self.bindDrag(card,grip,index);
             slot.addEventListener('dragover',function(e) { if(self.nativeDragFrom==null)return; e.preventDefault(); e.dataTransfer.dropEffect='move'; self.showDrop(index); });
             slot.addEventListener('drop',function(e) { if(self.nativeDragFrom==null)return; e.preventDefault(); var from=self.nativeDragFrom; self.clearDrag(); if(from!==index)self.swapOrder(); });
@@ -204,6 +210,22 @@ return view.extend({
         } catch(e) { this.message.className='fo-result error'; this.message.textContent=e.message; }
         finally { this.saving=false; this.saveButton.disabled=false; }
     },
+    runLinkTest: async function(index) {
+        if(this.testRequest)return;
+        var tests=(this.lastStatus||{}).link_tests||{},c=(this.lastStatus||{}).config||{};
+        this.testRequest=true;this.updatePriorityVitals();
+        try {
+            var r;
+            if(tests.running)r=await cancelLinkTest();
+            else {
+                if(this.primary.value!==c.primary || this.backup.value!==c.backup)throw new Error('Save your connection order before testing.');
+                r=await startLinkTest(index?'secondary':'primary','1');
+            }
+            if(!r.success)throw new Error(r.error||'Could not start the link test.');
+            this.update(await status());
+        } catch(e) {ui.addNotification(null,E('p',{},[e.message]));}
+        finally {this.testRequest=false;this.updatePriorityVitals();}
+    },
     updatePriorityVitals: function() {
         var s=this.lastStatus||{}, c=s.config||{}, self=this;
         var inUse=s.active==='cell'?c.backup:s.active==='none'?null:c.primary;
@@ -211,6 +233,21 @@ return view.extend({
             var v=[s.wan,s.cell].find(function(v) { return v && v.iface===r.name; }) || {};
             var known=!!s.running && typeof v.up==='boolean',healthy=known && v.up && v.health==='up';
             var lanMode=self.connectionKind(r.name)==='wan' && self.wanIsLan;
+            var tests=s.link_tests||{},result=(tests.results||[]).filter(function(t){return t.iface===r.name;}).sort(function(a,b){return b.timestamp-a.timestamp;})[0];
+            var activeTest=!!tests.running && result && result.role===tests.role;
+            r.testButton.disabled=!!self.testRequest || !!self.portBusy || lanMode || (!!tests.running && !activeTest) || (!activeTest && (self.primary.value!==c.primary || self.backup.value!==c.backup || !v.up));
+            r.testButton.textContent=activeTest?'Cancel test':r.index?'Test Secondary':'Test Primary';
+            r.testResult.className='fo-test-result'+(result && result.phase==='failed'?' error':'');
+            r.testResult.replaceChildren();
+            if(result) {
+                if(result.phase==='completed') {
+                    [['Download',result.download_mbps,'Mbps'],['Upload',result.upload_mbps,'Mbps'],['Latency',result.latency_ms,'ms']].forEach(function(m){
+                        r.testResult.append(E('div',{'class':'fo-test-row'},[E('span',{},[m[0]]),E('strong',{},[Number.isFinite(m[1])?m[1].toFixed(1)+' '+m[2]:'—'])]));
+                    });
+                    r.testResult.title='M-Lab NDT · '+(result.server||'')+' · '+new Date(result.timestamp*1000).toLocaleString();
+                    r.testResult.append(E('div',{'class':'fo-muted',style:'font-size:10px;margin-top:5px'},['M-Lab · '+new Date(result.timestamp*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})]));
+                } else r.testResult.textContent=result.phase==='failed'?result.error:result.phase==='cancelled'?'Test cancelled':result.phase==='download'?'Testing download…':result.phase==='upload'?'Testing upload…':'Finding an M-Lab server…';
+            }
             r.health.style.display=lanMode?'none':'';
             r.lanAction.style.display=lanMode?'inline-flex':'none';
             r.lanAction.disabled=self.portBusy;

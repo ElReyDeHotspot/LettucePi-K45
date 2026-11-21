@@ -1,0 +1,98 @@
+#!/bin/sh
+# On-demand NDT7 tests. Only the test process carries this routing mark.
+. /lib/functions.sh
+. /usr/share/libubox/jshn.sh
+STATE=/tmp/chester-link-test
+LOCK=/tmp/chester-link-test.lock
+mkdir -p "$STATE"
+reply() { json_init; json_add_boolean success "$1"; json_add_string error "$2"; json_dump; }
+valid_role() { case "$1" in primary|secondary) return 0;; *) return 1;; esac; }
+owned_pid() {
+    testpid=$(cat "$LOCK/pid" 2>/dev/null)
+    case "$testpid" in ''|*[!0-9]*) return 1;; esac
+    kill -0 "$testpid" 2>/dev/null && grep -q 'chester-link-test' "/proc/$testpid/cmdline" 2>/dev/null
+}
+routes_clear() {
+    ip -4 rule del priority 22190 fwmark 0x10000000/0x10000000 lookup 225 2>/dev/null || true
+    ip -4 route flush table 225 proto 225 2>/dev/null || true
+}
+case "$1" in
+start)
+    role=$2
+    valid_role "$role" || { reply 0 'Choose Primary or Secondary.'; exit; }
+    if [ -d "$LOCK" ]; then
+        if owned_pid; then reply 0 'Another link test is running. Wait or cancel it first.'; exit; fi
+        # A recently created lock can belong to a start request still launching.
+        age=$(($(date +%s)-$(stat -c %Y "$LOCK")))
+        [ "$age" -ge 75 ] || { reply 0 'A link test is starting. Try again shortly.'; exit; }
+        routes_clear; rm -rf "$LOCK"
+    fi
+    mkdir "$LOCK" 2>/dev/null || { reply 0 'Another link test is starting.'; exit; }
+    config_load failover
+    if [ "$role" = primary ]; then config_get iface main primary wan
+    else config_get iface main backup pcie0; fi
+    case "$iface" in ''|*[!a-zA-Z0-9_.-]*) rmdir "$LOCK"; reply 0 'Invalid uplink interface.'; exit;; esac
+    info=$(ubus -S call "network.interface.$iface" status 2>/dev/null)
+    up=$(jsonfilter -s "$info" -e '@.up')
+    dev=$(jsonfilter -s "$info" -e '@.l3_device')
+    addr=$(jsonfilter -s "$info" -e '@["ipv4-address"][0].address')
+    gw=$(jsonfilter -s "$info" -e '@.route[@.target="0.0.0.0"].nexthop' | head -n1)
+    case "$dev" in ''|*[!a-zA-Z0-9_.:-]*) up=false;; esac
+    if [ "$up" != true ] || [ -z "$addr" ]; then rmdir "$LOCK"; reply 0 'This connection has no IPv4 link. Connect it first.'; exit; fi
+    if [ "$dev" = wan ] && [ "$(uci -q get misectel.network_defaults.optional_wan_mode)" = lan ]; then rmdir "$LOCK"; reply 0 'Change this socket from LAN to WAN first.'; exit; fi
+    if [ ! -x /usr/libexec/chester-ndt7 ]; then rmdir "$LOCK"; reply 0 'The NDT7 engine is not installed.'; exit; fi
+    other=$(ip -4 route show table 225 2>/dev/null | grep -v 'proto 225' || true)
+    rule=$(ip -4 rule show | grep '^22190:' || true)
+    if [ -n "$other$rule" ]; then rmdir "$LOCK"; reply 0 'The link-test routing slot is already in use.'; exit; fi
+    mkdir -p "$STATE/$role"
+    rm -f "$STATE/$role/done" "$STATE/$role/failed" "$STATE/$role/cancelled"
+    : > "$STATE/$role/output.jsonl"; : > "$STATE/$role/error.log"
+    json_init; json_add_string role "$role"; json_add_string iface "$iface"; json_add_string device "$dev"
+    json_add_string address "$addr"; json_add_string gateway "${gw:--}"; json_add_int timestamp "$(date +%s)"
+    json_dump > "$STATE/$role/meta.json"
+    printf '%s\n' "$role" > "$LOCK/role"
+    /bin/sh -c 'trap "" HUP; exec "$@"' _ "$0" run "$role" >"$STATE/$role/worker.log" 2>&1 </dev/null &
+    echo $! > "$LOCK/pid"
+    reply 1 ''
+    ;;
+cancel)
+    if owned_pid; then
+        role=$(cat "$LOCK/role")
+        valid_role "$role" && touch "$STATE/$role/cancelled"
+        kill -TERM "$testpid" 2>/dev/null || true
+    fi
+    reply 1 ''
+    ;;
+run)
+    role=$2; valid_role "$role" || exit 2
+    [ "$(cat "$LOCK/role" 2>/dev/null)" = "$role" ] || exit 2
+    echo $$ > "$LOCK/pid"
+    job="$STATE/$role"; engine=; timer=
+    cleanup() {
+        trap - EXIT TERM INT
+        [ -z "$engine" ] || { kill "$engine" 2>/dev/null || true; wait "$engine" 2>/dev/null || true; }
+        [ -z "$timer" ] || kill "$timer" 2>/dev/null || true
+        routes_clear
+        rm -rf "$LOCK"
+    }
+    trap cleanup EXIT
+    trap 'touch "$job/failed"; exit 1' TERM INT
+    json_load "$(cat "$job/meta.json")"
+    json_get_var dev device; json_get_var addr address; json_get_var gw gateway
+    # The unreachable guard prevents falling through to another uplink if the
+    # selected interface disappears halfway through a test.
+    ip -4 route add unreachable default table 225 metric 32767 proto 225 || { touch "$job/failed"; exit 1; }
+    if [ "$gw" != - ] && [ "$gw" != 0.0.0.0 ]; then
+        ip -4 route add table 225 default via "$gw" dev "$dev" onlink proto 225 || { touch "$job/failed"; exit 1; }
+    else
+        ip -4 route add table 225 default dev "$dev" proto 225 || { touch "$job/failed"; exit 1; }
+    fi
+    ip -4 rule add priority 22190 fwmark 0x10000000/0x10000000 lookup 225 || { touch "$job/failed"; exit 1; }
+    /usr/libexec/chester-ndt7 -interface "$dev" -source "$addr" >"$job/output.jsonl" 2>"$job/error.log" &
+    engine=$!
+    (sleep 65; kill -TERM $$ 2>/dev/null) & timer=$!
+    if wait "$engine"; then touch "$job/done"; else touch "$job/failed"; fi
+    engine=
+    ;;
+*) exit 2;;
+esac

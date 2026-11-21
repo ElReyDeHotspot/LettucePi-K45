@@ -1,0 +1,125 @@
+{
+  "upstream": "https://github.com/m-lab/ndt7-client-go",
+  "commit": "1f6adcf81a3f29cae933a2e317e86e24826e2900",
+  "go": "go1.27.4 linux/amd64",
+  "target": "linux/arm64, CGO_ENABLED=0",
+  "sha256": "5799bb22d8d396679faa1e9a2206284b6df8f8c4f30455b6e5287a66aa246f39",
+  "size": 9764988,
+  "wrapper": "integrations/ndt7/main.go",
+  "modules": [
+    {
+      "module": "ndt7-client-go",
+      "licenses": [
+        "ndt7-client-go-LICENSE"
+      ]
+    },
+    {
+      "module": "dateparse@v0.0.0-20210429162001-6b43995a97de",
+      "licenses": [
+        "dateparse@v0.0.0-20210429162001-6b43995a97de-LICENSE"
+      ]
+    },
+    {
+      "module": "perks@v1.0.1",
+      "licenses": [
+        "perks@v1.0.1-LICENSE"
+      ]
+    },
+    {
+      "module": "v2@v2.3.0",
+      "licenses": [
+        "v2@v2.3.0-LICENSE.txt"
+      ]
+    },
+    {
+      "module": "websocket@v1.5.4-0.20250319132907-e064f32e3674",
+      "licenses": [
+        "websocket@v1.5.4-0.20250319132907-e064f32e3674-LICENSE"
+      ]
+    },
+    {
+      "module": "go@v0.1.76",
+      "licenses": [
+        "go@v0.1.76-LICENSE"
+      ]
+    },
+    {
+      "module": "locate@v0.19.0",
+      "licenses": [
+        "locate@v0.19.0-LICENSE"
+      ]
+    },
+    {
+      "module": "ndt-server@v0.25.0",
+      "licenses": [
+        "ndt-server@v0.25.0-LICENSE"
+      ]
+    },
+    {
+      "module": "tcp-info@v1.9.0",
+      "licenses": [
+        "tcp-info@v1.9.0-LICENSE"
+      ]
+    },
+    {
+      "module": "goautoneg@v0.0.0-20191010083416-a7dc8b61c822",
+      "licenses": [
+        "goautoneg@v0.0.0-20191010083416-a7dc8b61c822-LICENSE"
+      ]
+    },
+    {
+      "module": "client_golang@v1.23.2",
+      "licenses": [
+        "client_golang@v1.23.2-NOTICE",
+        "client_golang@v1.23.2-LICENSE"
+      ]
+    },
+    {
+      "module": "client_model@v0.6.2",
+      "licenses": [
+        "client_model@v0.6.2-NOTICE",
+        "client_model@v0.6.2-LICENSE"
+      ]
+    },
+    {
+      "module": "common@v0.67.5",
+      "licenses": [
+        "common@v0.67.5-NOTICE",
+        "common@v0.67.5-LICENSE"
+      ]
+    },
+    {
+      "module": "procfs@v0.19.2",
+      "licenses": [
+        "procfs@v0.19.2-NOTICE",
+        "procfs@v0.19.2-LICENSE"
+      ]
+    },
+    {
+      "module": "v2@v2.4.3",
+      "licenses": [
+        "v2@v2.4.3-NOTICE",
+        "v2@v2.4.3-LICENSE.libyaml",
+        "v2@v2.4.3-LICENSE"
+      ]
+    },
+    {
+      "module": "net@v0.49.0",
+      "licenses": [
+        "net@v0.49.0-LICENSE"
+      ]
+    },
+    {
+      "module": "sys@v0.40.0",
+      "licenses": [
+        "sys@v0.40.0-LICENSE"
+      ]
+    },
+    {
+      "module": "protobuf@v1.36.11",
+      "licenses": [
+        "protobuf@v1.36.11-LICENSE"
+      ]
+    }
+  ]
+}

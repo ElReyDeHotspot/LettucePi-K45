@@ -26,7 +26,9 @@
     "write": {
       "ubus": {
         "failover": [
-          "set_config"
+          "set_config",
+          "test_start",
+          "test_cancel"
         ],
         "misectel": [
           "set_wan_to_lan"
