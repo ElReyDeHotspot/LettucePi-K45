@@ -1,0 +1,8 @@
+{
+  "version": "1.2.0",
+  "architecture": "linux-aarch64",
+  "url": "https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-linux-aarch64.tgz",
+  "archive_sha256": "3953d231da3783e2bf8904b6dd72767c5c6e533e163d3742fd0437affa431bd3",
+  "engine_sha256": "d99fa13293f658b53eaa79fe81f4b210db39fdfc1e9698f33da3f234a6008df7",
+  "size": 2541880
+}

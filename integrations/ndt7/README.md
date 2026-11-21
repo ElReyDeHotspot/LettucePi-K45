@@ -1,4 +1,4 @@
-# Independent uplink tests (pending next bin)
+# Independent uplink tests (included in bin 7)
 
 Apps → Failover includes **Test Primary** and **Test Secondary** on the connection
 cards. Each runs M-Lab NDT7 download/upload measurements on the router, bound to
@@ -57,5 +57,5 @@ cleanup and unchanged Load Balance configuration were verified. The latest
 successful measurements were restored after these cancellation/failure checks.
 
 These measurements reflect those test times, not guaranteed link capacity.
-Source and live components are updated; no new firmware image was built or
-published. Include this payload in the next owner-authorized bin.
+Bin 7 includes the engine, wrapper, UI and dependency licenses in ROM, so no
+engine installation is required after a factory reset.

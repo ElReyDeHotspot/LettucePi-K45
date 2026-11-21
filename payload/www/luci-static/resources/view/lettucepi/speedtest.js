@@ -7,7 +7,6 @@
 
 var callStatus = rpc.declare({ object: 'luci.lettucepi.speedtest', method: 'status' });
 var callHistory = rpc.declare({ object: 'luci.lettucepi.speedtest', method: 'history' });
-var callInstall = rpc.declare({ object: 'luci.lettucepi.speedtest', method: 'install' });
 var callStart = rpc.declare({ object: 'luci.lettucepi.speedtest', method: 'start' });
 var callCancel = rpc.declare({ object: 'luci.lettucepi.speedtest', method: 'cancel' });
 
@@ -17,20 +16,17 @@ return view.extend({
 	render: function(data) {
 		var self = this;
 		var root = E('div', { class: 'cbi-map lp-speedtest' }, [
-			E('style', {}, '.lp-speedtest{max-width:980px;margin:auto;color:#fff}.lp-st-card{background:radial-gradient(circle at 50% 28%,#182f4a 0,#0b1c31 42%,#061426 100%);border:1px solid #243c56;border-radius:20px;padding:28px 34px 32px;box-shadow:0 22px 55px rgba(0,0,0,.25);color:#fff}.lp-st-brand{text-align:center;font-size:15px;font-weight:800;letter-spacing:.16em}.lp-st-brand span{color:#8798aa;font-size:11px;font-weight:500;letter-spacing:.06em}.lp-st-title{text-align:center;font-size:14px;font-weight:500;color:#8fa1b5;margin:8px 0 22px}.lp-st-grid{display:grid;grid-template-columns:repeat(3,1fr);max-width:660px;margin:0 auto;gap:20px}.lp-st-metric{text-align:center;padding:8px}.lp-st-value{font-size:35px;line-height:1.1;font-weight:400;font-variant-numeric:tabular-nums}.lp-st-metric-download .lp-st-value{color:#21c5ef}.lp-st-metric-upload .lp-st-value{color:#be77ff}.lp-st-metric-ping .lp-st-value{color:#fff}.lp-st-label{font-size:11px;color:#9cabbc;margin-top:7px;letter-spacing:.08em}.lp-st-dial{width:220px;height:220px;margin:18px auto 6px;position:relative;border-radius:50%;display:flex;align-items:center;justify-content:center;background:conic-gradient(#21c5ef 0deg,#be77ff 115deg,#223b57 116deg 360deg);box-shadow:0 0 36px rgba(33,197,239,.13)}.lp-st-dial:before{content:"";position:absolute;inset:5px;border-radius:50%;background:#0b1c31}.lp-st-go{position:relative;z-index:1;width:176px;height:176px!important;min-width:0!important;border-radius:50%!important;border:2px solid #21c5ef!important;background:rgba(7,25,43,.96)!important;color:#fff!important;font-size:38px!important;font-weight:300!important;letter-spacing:.04em;box-shadow:inset 0 0 28px rgba(33,197,239,.12),0 0 22px rgba(33,197,239,.18);cursor:pointer}.lp-st-go:hover{background:#102b44!important;transform:scale(1.02)}.lp-st-go:disabled{cursor:default;opacity:.8}.lp-st-dial.running{animation:lp-st-spin 1.35s linear infinite}.lp-st-dial.running .lp-st-go{animation:lp-st-counterspin 1.35s linear infinite;font-size:16px!important;color:#b8cadb!important}.lp-st-dial.upload{background:conic-gradient(#be77ff 0 150deg,#223b57 151deg 360deg)}@keyframes lp-st-spin{to{transform:rotate(360deg)}}@keyframes lp-st-counterspin{to{transform:rotate(-360deg)}}.lp-st-msg{text-align:center;min-height:24px;margin:8px 0 20px;color:#a8bbcf}.lp-st-details{display:grid;grid-template-columns:1fr 1fr;gap:0 28px;max-width:760px;margin:10px auto 20px}.lp-st-details div{padding:11px 0;border-bottom:1px solid #20384f;color:#9eb0c2}.lp-st-details strong{color:#fff;font-weight:500}.lp-st-result{grid-column:1/-1;text-align:center}.lp-st-result a,.lp-st-history a{color:#21c5ef;text-decoration:none}.lp-st-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.lp-st-actions button:not(.lp-st-go){min-width:140px}.lp-st-foot{text-align:center;color:#70869b;margin:20px 0 0;font-size:11px}.lp-st-history{margin-top:22px;background:#07192b;border:1px solid #243c56;border-radius:18px;padding:20px;color:#eef7ff}.lp-st-history h3{margin:0 0 14px;font-weight:500}.lp-st-history table{width:100%;border-collapse:collapse}.lp-st-history th,.lp-st-history td{padding:11px 8px;border-bottom:1px solid #1c354d;text-align:right;font-variant-numeric:tabular-nums}.lp-st-history th{color:#8195a9;font-size:11px;font-weight:500;text-transform:uppercase}.lp-st-history th:first-child,.lp-st-history td:first-child{text-align:left}.lp-st-empty{text-align:center;color:#7894aa;padding:16px}@media(max-width:650px){.lp-st-card{padding:22px 14px}.lp-st-grid{gap:2px}.lp-st-value{font-size:27px}.lp-st-dial{width:190px;height:190px}.lp-st-go{width:150px;height:150px!important}.lp-st-details{grid-template-columns:1fr}.lp-st-result{grid-column:auto}.lp-st-history{overflow-x:auto}.lp-st-history table{min-width:650px}}'),
-			E('style', {}, '.lp-st-dial{width:220px!important;height:220px!important;min-width:220px!important;min-height:220px!important;aspect-ratio:1/1!important;box-sizing:border-box!important;flex:0 0 220px!important;border-radius:9999px!important}.lp-st-go.btn{display:block!important;position:relative!important;box-sizing:border-box!important;width:176px!important;height:176px!important;min-width:176px!important;min-height:176px!important;max-width:176px!important;max-height:176px!important;aspect-ratio:1/1!important;padding:0!important;margin:0!important;line-height:1!important;flex:0 0 176px!important;border-radius:9999px!important;text-align:center!important}.lp-st-go-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;width:100%;height:100%;padding:0;margin:0;line-height:1;text-align:center;transform:translateY(-1px);pointer-events:none}@media(max-width:650px){.lp-st-dial{width:190px!important;height:190px!important;min-width:190px!important;min-height:190px!important;flex-basis:190px!important}.lp-st-go.btn{width:150px!important;height:150px!important;min-width:150px!important;min-height:150px!important;max-width:150px!important;max-height:150px!important;flex-basis:150px!important}}'),
+ E('style',{},'.lp-speedtest{max-width:1040px;margin:auto;padding:18px 8px 30px;color:#172033;font-size:14px}.lp-speedtest *{box-sizing:border-box}.lp-st-card,.lp-st-history{background:#fff;border:1px solid #dfe6ee;border-radius:20px;padding:26px;margin-bottom:22px;box-shadow:0 3px 12px #243d5805}.lp-st-header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}.lp-st-brand{display:flex;align-items:center;gap:13px;font-size:19px;font-weight:650}.lp-st-brand-icon{display:grid;place-items:center;background:#edf4ff;color:#4d84ca;width:44px;height:44px;border-radius:13px;font-size:25px}.lp-st-caption{font-size:13px;color:#8190a3;font-weight:400;margin-top:5px}.lp-st-go.btn{border:0!important;border-radius:24px!important;background:#4285eb!important;color:#fff!important;font-size:13px!important;font-weight:650!important;min-height:44px!important;padding:11px 20px!important;cursor:pointer}.lp-st-go.btn:hover{background:#2f70ce!important}.lp-st-go.btn:disabled{opacity:.55}.lp-st-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.lp-st-metric{background:#f7f9fc;border:1px solid #f0f3f7;border-radius:13px;padding:18px 15px;min-width:0;display:flex;flex-direction:column-reverse;gap:10px;align-items:flex-start}.lp-st-value{font-size:30px;line-height:1.2;color:#24374c;font-weight:650;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.lp-st-label{color:#7a8798;font-size:11px}.lp-st-msg{color:#8190a3;font-size:12px;min-height:20px;margin:18px 0}.lp-st-details{display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;margin:22px 0 16px;padding-top:18px;border-top:1px solid #edf1f6;font-size:12px;color:#7b8899;overflow-wrap:anywhere}.lp-st-details strong{color:#52677f;font-weight:550}.lp-st-result{grid-column:1/-1}.lp-speedtest a{color:#4485d8;text-decoration:none}.lp-speedtest a:hover{text-decoration:underline}.lp-st-actions{display:flex;justify-content:flex-end;gap:10px}.lp-st-actions button{min-height:44px;border:1px solid #cfdae6;border-radius:24px;background:#fff;color:#516782;padding:10px 18px}.lp-st-foot{color:#8794a5;font-size:11px;line-height:1.6;margin:18px 0 0}.lp-st-history h3{font-size:17px;font-weight:650;margin:0 0 18px}.lp-st-history table{width:100%;border-collapse:collapse}.lp-st-history th,.lp-st-history td{padding:13px 9px;border-bottom:1px solid #edf1f6;text-align:left;font-size:12px;color:#52677f}.lp-st-history th{color:#8996a7;font-size:10px;font-weight:500}.lp-st-empty{color:#91a0b1;text-align:center;padding:24px 12px;font-size:13px}.lp-st-progress{height:5px;background:#eaf0f8;border-radius:5px;overflow:hidden;margin:18px 0}.lp-st-progress-bar{height:100%;background:#4b8bec;transition:width .4s;width:0}.lp-speedtest button:focus-visible,.lp-speedtest a:focus-visible{outline:3px solid #85b2ef;outline-offset:3px}@media(max-width:650px){.lp-speedtest{padding:12px 0 24px}.lp-st-card,.lp-st-history{padding:18px 16px;border-radius:17px}.lp-st-header{gap:16px}.lp-st-go.btn{width:100%}.lp-st-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.lp-st-metric{padding:16px 12px}.lp-st-value{font-size:28px}.lp-st-details{grid-template-columns:1fr;gap:9px}.lp-st-result{grid-column:auto}.lp-st-history table,.lp-st-history tbody{display:block}.lp-st-history thead{display:none}.lp-st-history tr{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #edf1f6;padding:12px 0}.lp-st-history td{border:0;padding:7px 4px;overflow-wrap:anywhere}.lp-st-history td:first-child,.lp-st-history td:nth-last-child(2),.lp-st-history td:last-child{grid-column:1/-1}.lp-st-history td[data-label]:before{content:attr(data-label);display:block;color:#8a98a9;font-size:10px;margin-bottom:4px}}@media(prefers-reduced-motion:reduce){.lp-st-progress-bar{transition:none}}'),
 			E('div', { class: 'lp-st-card' }, [
-				E('div', { class: 'lp-st-brand' }, [ 'SPEEDTEST ', E('span', {}, 'BY OOKLA') ]),
-				E('div', { class: 'lp-st-title' }, 'LettucePi connection test'),
+                E('div',{class:'lp-st-header'},[E('div',{class:'lp-st-brand'},[E('span',{class:'lp-st-brand-icon','aria-hidden':'true'},'◴'),E('div',{},['Ookla Speedtest',E('div',{class:'lp-st-caption'},'Your router’s built-in connection test.')])]),E('button',{type:'button',class:'btn lp-st-go',id:'lp-st-start',click:ui.createHandlerFn(self,self.start)},E('span',{id:'lp-st-go-label'},'Run speed test'))]),
+                E('div', { id: 'lp-st-msg', class: 'lp-st-msg', 'aria-live':'polite' }),
 				E('div', { class: 'lp-st-grid' }, [
-					self.metric('download', '—', 'DOWNLOAD · Mbps'),
-					self.metric('ping', '—', 'PING · ms'),
-					self.metric('upload', '—', 'UPLOAD · Mbps')
+					self.metric('download', '—', '↓ Download · Mbps'),
+					self.metric('upload', '—', '↑ Upload · Mbps'),
+                    self.metric('ping', '—', 'Latency · ms'),
+                    self.metric('jitter', '—', 'Jitter · ms')
 				]),
-				E('div', { id: 'lp-st-dial', class: 'lp-st-dial' }, [
-					E('button', { class: 'btn lp-st-go', id: 'lp-st-start', click: ui.createHandlerFn(self, self.start) }, E('span', { id: 'lp-st-go-label', class: 'lp-st-go-label' }, 'GO'))
-				]),
-				E('div', { id: 'lp-st-msg', class: 'lp-st-msg' }),
+                E('div',{id:'lp-st-progress',class:'lp-st-progress',role:'progressbar','aria-label':'Speed test progress','aria-valuemin':'0','aria-valuemax':'100'},E('div',{id:'lp-st-progress-bar',class:'lp-st-progress-bar'})),
 				E('div', { class: 'lp-st-details' }, [
 					E('div', {}, [ E('strong', {}, 'Provider: '), E('span', { id: 'lp-st-isp' }, '—') ]),
 					E('div', {}, [ E('strong', {}, 'Server: '), E('span', { id: 'lp-st-server' }, '—') ]),
@@ -39,10 +35,9 @@ return view.extend({
 					E('div', { class: 'lp-st-result' }, [ E('strong', {}, 'Result: '), E('span', { id: 'lp-st-result' }, 'Available when the test finishes') ])
 				]),
 				E('div', { class: 'lp-st-actions' }, [
-					E('button', { class: 'btn', id: 'lp-st-install', click: ui.createHandlerFn(self, self.install) }, 'Install Ookla Engine'),
 					E('button', { class: 'btn', id: 'lp-st-cancel', click: ui.createHandlerFn(self, self.cancel) }, 'Cancel')
 				]),
-				E('p', { class: 'lp-st-foot' }, 'Uses the official Ookla Speedtest CLI. A test can consume significant cellular data.')
+				E('p', { class: 'lp-st-foot' }, 'Runs directly on this router. Tests use your internet connection and mobile data. Powered by Ookla.')
 			]),
 			E('div', { class: 'lp-st-history' }, [ E('h3', {}, 'Recent Tests'), E('div', { id: 'lp-st-history' }) ])
 		]);
@@ -65,18 +60,21 @@ return view.extend({
 		set('lp-st-download', Number(r.download_mbps || 0) > 0 ? Number(r.download_mbps).toFixed(2) : '—');
 		set('lp-st-upload', Number(r.upload_mbps || 0) > 0 ? Number(r.upload_mbps).toFixed(2) : '—');
 		set('lp-st-ping', r.latency_ms ? Number(r.latency_ms).toFixed(1) : '—');
-		set('lp-st-isp', r.isp || '—'); set('lp-st-server', r.server || '—');
-		set('lp-st-location', r.location || '—'); set('lp-st-loss', r.packet_loss != null ? r.packet_loss + '%' : '—');
+		set('lp-st-jitter', Number.isFinite(r.jitter_ms) ? r.jitter_ms.toFixed(1) : '—');
+        set('lp-st-isp', r.isp || '—'); set('lp-st-server', r.server || '—');
+		set('lp-st-location', r.location || '—'); set('lp-st-loss', r.packet_loss != null ? Number(r.packet_loss).toFixed(1) + '%' : '—');
 		var result = document.getElementById('lp-st-result');
 		if (result) result.replaceChildren(r.result_url ? E('a', { href: r.result_url, target: '_blank', rel: 'noopener noreferrer' }, 'View on Speedtest.net') : document.createTextNode('Available when the test finishes'));
 		var stage = r.test_phase === 'ping' ? 'Measuring ping…' : r.test_phase === 'download' ? 'Measuring download…' : r.test_phase === 'upload' ? 'Measuring upload…' : 'Testing your connection…';
-		var msg = !r.installed ? 'Official Ookla CLI is not installed.' : r.running ? stage : r.phase === 'completed' ? 'Test complete.' : r.phase === 'failed' ? ('Test failed. ' + (r.error || '')) : 'Ready.';
+		var msg = !r.installed ? 'The built-in speed-test engine is unavailable.' : r.running ? stage : r.phase === 'completed' ? 'Last test complete' : r.phase === 'cancelled' ? 'Test cancelled' : r.phase === 'failed' ? 'The test could not complete. Check your connection and try again.' : 'Ready to test';
 		set('lp-st-msg', msg);
-		var install = document.getElementById('lp-st-install'), start = document.getElementById('lp-st-start'), cancel = document.getElementById('lp-st-cancel'), dial = document.getElementById('lp-st-dial');
-		if (install) { install.disabled = !!r.running; install.style.display = r.installed ? 'none' : ''; }
+		var start = document.getElementById('lp-st-start'), cancel = document.getElementById('lp-st-cancel'), dial = document.getElementById('lp-st-dial');
 		if (start) start.disabled = !r.installed || !!r.running;
-		set('lp-st-go-label', r.running ? (r.test_phase === 'upload' ? 'UPLOAD' : r.test_phase === 'download' ? 'DOWNLOAD' : 'PING') : 'GO');
-		if (cancel) cancel.disabled = !r.running;
+		set('lp-st-go-label', r.running ? (r.test_phase === 'upload' ? 'UPLOAD' : r.test_phase === 'download' ? 'DOWNLOAD' : 'PING') : 'Run speed test');
+		if (cancel) {cancel.disabled = !r.running;cancel.style.display=r.running?'':'none';}
+        var progress=document.getElementById('lp-st-progress'),bar=document.getElementById('lp-st-progress-bar');
+        var pct=r.test_phase==='upload'?50+Math.min(1,r.progress||0)*50:r.test_phase==='download'?Math.max(5,Math.min(1,r.progress||0)*50):3;
+        if(progress){progress.style.display=r.running?'':'none';progress.setAttribute('aria-valuenow',String(Math.round(pct)));}if(bar)bar.style.width=pct+'%';
 		if (dial) dial.className = 'lp-st-dial' + (r.running ? ' running' : '') + (r.test_phase === 'upload' ? ' upload' : '');
 	},
 
@@ -85,31 +83,20 @@ return view.extend({
 		if (!target) return;
 		var rows = (payload && payload.results) || [];
 		if (!rows.length) { target.replaceChildren(E('div', { class: 'lp-st-empty' }, 'No completed tests yet.')); return; }
-		rows = rows.slice().reverse();
+		rows = rows.slice().reverse().slice(0,5);
 		var body = rows.map(function(r) {
 			var when = r.timestamp ? new Date(Number(r.timestamp) * 1000).toLocaleString() : '—';
 			return E('tr', {}, [
-				E('td', {}, when), E('td', {}, Number(r.download_mbps || 0).toFixed(2)),
-				E('td', {}, Number(r.upload_mbps || 0).toFixed(2)), E('td', {}, Number(r.latency_ms || 0).toFixed(1)),
-				E('td', {}, (r.server || '—') + (r.location ? ' · ' + r.location : '')),
+				E('td', {}, when), E('td', {'data-label':'Download · Mbps'}, Number(r.download_mbps || 0).toFixed(2)),
+				E('td', {'data-label':'Upload · Mbps'}, Number(r.upload_mbps || 0).toFixed(2)), E('td', {'data-label':'Latency · ms'}, Number(r.latency_ms || 0).toFixed(1)),
+				E('td', {'data-label':'Jitter · ms'}, Number.isFinite(r.jitter_ms)?r.jitter_ms.toFixed(1):'—'),
+                E('td', {}, (r.server || '—') + (r.location ? ' · ' + r.location : '')),
 				E('td', {}, r.result_url ? E('a', { href: r.result_url, target: '_blank', rel: 'noopener noreferrer' }, 'View') : '—')
 			]);
 		});
-		target.replaceChildren(E('table', {}, [ E('thead', {}, E('tr', {}, [ E('th', {}, 'Date'), E('th', {}, 'Down'), E('th', {}, 'Up'), E('th', {}, 'Ping'), E('th', {}, 'Server'), E('th', {}, 'Result') ])), E('tbody', {}, body) ]));
+		target.replaceChildren(E('table', {}, [ E('thead', {}, E('tr', {}, [ E('th', {}, 'Date'), E('th', {}, 'Down'), E('th', {}, 'Up'), E('th', {}, 'Latency'),E('th',{},'Jitter'), E('th', {}, 'Server'), E('th', {}, 'Result') ])), E('tbody', {}, body) ]));
 	},
 
-	install: function() {
-		var self = this, button = document.getElementById('lp-st-install'), message = document.getElementById('lp-st-msg');
-		if (button) button.disabled = true;
-		if (message) message.textContent = 'Downloading and verifying the official Ookla engine…';
-		return callInstall().then(function(r) {
-			if (!r || !r.ok) ui.addNotification(null, E('p', {}, 'Engine installation failed: ' + ((r && r.error) || 'unknown error')));
-			return self.refresh();
-		}).catch(function(err) {
-			ui.addNotification(null, E('p', {}, 'Engine installation failed: ' + err));
-			return self.refresh();
-		});
-	},
 	start: function() { var self = this; return callStart().then(function(r) { if (r && r.error) ui.addNotification(null, E('p', {}, r.error)); return self.refresh(); }); },
 	cancel: function() { var self = this; return callCancel().then(function() { return self.refresh(); }); },
 

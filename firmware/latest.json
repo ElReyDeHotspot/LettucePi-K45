@@ -1,12 +1,12 @@
 {
   "product": "K45P",
   "board": "misectel,m02k45",
-  "version": "1.0.5",
-  "build": "202611200013",
-  "bin": "6",
-  "built": "2026-11-20",
-  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.5-sysupgrade.itb",
-  "sha256": "21b1dbb3bf9822b97d03865c3955818457164cce4b1f33c8625160a99fcf4ec7",
-  "size": 25977086,
-  "notes": "Bin 6 fast failover: parallel one-second probes and 2s/1-failure/3-recovery default thresholds, measured under 5 seconds in controlled tests; intuitive Failover priority cards with drag or tap, Primary/Secondary modes, tappable LAN-to-WAN badge, quiet port switching and corrected WAN/LAN safety; K43P Quick Start with timezone, US APN, Wi-Fi and password steps; factory-reset LAN 192.168.100.1 and root/admin login; all Chester K45P UI and apps refinements including Overview Reboot, Software Update, Speedtest and Failover shortcuts; Carp4 Zapret2 with matching NFQUEUE modules; patched uHTTPd; signed OTA and rollback protection. Original vendor Linux 6.12.94 kernel and device tree preserved. Standard HTTP management."
+  "version": "1.0.6",
+  "build": "202611210001",
+  "bin": "7",
+  "built": "2026-11-21",
+  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.6-sysupgrade.itb",
+  "sha256": "a22b617238940cafcea2fa0e1b0dd411e8bdac2642d393b6b359becac7909551",
+  "size": 29749502,
+  "notes": "Bin 7: Ookla CLI and M-Lab NDT7 engines preinstalled in ROM, ready after factory reset; Inseego-style Ookla status page with download, upload, latency, jitter, progress, cancellation and history; independent Primary/Secondary link tests; connection load balancing and fast failover; all previous Chester K45P UI/apps, Quick Start, Carp4 Zapret2 and matching NFQUEUE modules, patched uHTTPd and signed OTA protections. Vendor Linux 6.12.94 kernel and device tree unchanged. Standard HTTP management."
 }

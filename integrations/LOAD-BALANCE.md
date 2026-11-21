@@ -1,9 +1,8 @@
-# LAN load balancing (pending next firmware build)
+# LAN load balancing (included in bin 7)
 
 Apps → Failover has a Load Balance mode alongside Automatic, Primary only,
 and Secondary only. The existing enable switch controls all four modes.
-Shipping defaults remain Off / Automatic. No firmware image was built for
-this change; the source and live router have been updated.
+Shipping defaults remain Off / Automatic. The tested implementation is included in bin 7.
 
 Load Balance distributes new IPv4 connections from the main LAN approximately
 50/50 across healthy uplinks. It uses conntrack marks to keep a connection on

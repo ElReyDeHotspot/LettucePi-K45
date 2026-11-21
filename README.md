@@ -1,19 +1,18 @@
 # LettucePi K45P
 
-## Pending next bin
+## Bin 7 — version 1.0.6, build 202611210001
 
-Apps → Failover now includes an equal-share **Load Balance** mode for main-LAN
-IPv4 connections, with healthy-link fallback and connection tracking. It is
-installed and tested live; **no new image was built or published** for this change.
-Failover remains Off by default. See [validation and scope](integrations/LOAD-BALANCE.md).
+Both speed-test engines are bundled in the immutable image: the official Ookla
+CLI 1.2.0 and the interface-bound M-Lab NDT7 engine. No engine download or install
+step is required after factory reset. Ookla uses an Inseego-style light status
+card with Download, Upload, Latency, Jitter, progress, cancellation and history.
+Apps → Failover includes Automatic, Load Balance, Primary only and Secondary only,
+plus independent Test Primary / Test Secondary buttons. Shipping defaults remain
+Off / Automatic; the previous Chester UI, apps, signed OTA, patched uHTTPd and
+matching NFQUEUE modules are retained. Vendor Linux 6.12.94 and DTB are unchanged.
+See [load balancing](integrations/LOAD-BALANCE.md) and [link tests](integrations/ndt7/README.md).
 
-Failover also includes independent **Test Primary / Test Secondary** controls
-using interface-bound M-Lab NDT7. They show each link's download, upload and
-latency without changing the selected mode. These are manual tests with a
-privacy notice, progress and cancellation; [details](integrations/ndt7/README.md).
-This addition is live and pending the next bin; the published image is unchanged.
-
-## Bin 6 — finalized build 202611200013
+## Previous bin 6 — finalized build 202611200013
 
 Version 1.0.5 / bin 6 includes the current Chester K45P UI and apps, K43P
 layout, four-by-four band grid, mobile controls, fan shortcut, consistent

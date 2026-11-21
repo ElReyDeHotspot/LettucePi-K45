@@ -1,0 +1,27 @@
+#!/usr/bin/ucode
+'use strict';
+import {open} from 'fs';
+function read(path){let f=open(path,'r');if(!f)return '';let s=f.read('all')||'';f.close();return s;}
+function exists(path){let f=open(path,'r');if(!f)return false;f.close();return true;}
+let base='/tmp/lettucepi-speedtest/',pid=trim(read(base+'pid'));
+let proc=match(pid,/^[0-9]+$/)?read('/proc/'+pid+'/status'):'';
+let out={installed:exists('/usr/bin/speedtest'),running:length(proc)>0&&!match(proc,/State:\s+Z/),phase:'idle',test_phase:'',download_mbps:null,upload_mbps:null,latency_ms:null,jitter_ms:null,packet_loss:null,progress:0,isp:'',server:'',location:'',result_url:''};
+if(out.running)out.phase='running';
+for(let line in split(read(base+'output.jsonl'),'\n')){
+    let v;try{v=json(line);}catch(e){continue;}
+    if(v.type)out.test_phase=v.type;
+    if(v.download && v.download.bandwidth!=null)out.download_mbps=+v.download.bandwidth*8.0/1000000.0;
+    if(v.upload && v.upload.bandwidth!=null)out.upload_mbps=+v.upload.bandwidth*8.0/1000000.0;
+    if(v.ping){if(v.ping.latency!=null)out.latency_ms=+v.ping.latency;if(v.ping.jitter!=null)out.jitter_ms=+v.ping.jitter;}
+    if(v.type=='download' && v.download.progress!=null)out.progress=+v.download.progress;
+    if(v.type=='upload' && v.upload.progress!=null)out.progress=+v.upload.progress;
+    if(v.packetLoss!=null)out.packet_loss=+v.packetLoss;
+    if(v.isp)out.isp=v.isp;
+    if(v.server){out.server=v.server.name||out.server;out.location=v.server.location||out.location;}
+    if(v.result && v.result.url)out.result_url=v.result.url;
+    if(v.type=='result')out.phase='completed';
+}
+if(exists(base+'cancelled'))out.phase='cancelled';
+else if(exists(base+'failed'))out.phase='failed';
+else if(exists(base+'done') && out.result_url)out.phase='completed';
+print(sprintf('%J\n',out));

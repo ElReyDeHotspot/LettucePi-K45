@@ -194,3 +194,9 @@ for name in ('etc/config/misectel_uplink',):
 # Shared modem helpers copied from the vendor tree must remain executable.
 for p in (repo/'payload/usr/share/qmodem').rglob('*.sh'):
     (root/p.relative_to(repo/'payload')).chmod(0o755)
+
+# Both on-demand speed-test engines are immutable image content.
+for name in ['usr/bin/speedtest','usr/libexec/chester-ndt7']:
+    engine=root/name
+    assert engine.is_file() and engine.stat().st_size>100000, 'Missing bundled test engine: '+name
+    engine.chmod(0o755)
