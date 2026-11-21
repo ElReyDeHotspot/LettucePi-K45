@@ -19,6 +19,19 @@ function validNumber(s, lo, hi) {
     return match(s || '', /^[0-9]+$/) && +s >= lo && +s <= hi;
 }
 function invalid(message) { return {success:false, error:message}; }
+function usesWanSocket(ctx, name) {
+    if (name == 'wan') return true;
+    let dev = ctx.get('network', name, 'device');
+    if (type(dev) == 'array') {
+        for (let d in dev) if (d == 'wan' || d == '@wan') return true;
+        return false;
+    }
+    return dev == 'wan' || dev == '@wan';
+}
+function needsWanSocket(ctx, a) {
+    return (a.mode != 'cell' && usesWanSocket(ctx, a.primary)) ||
+           (a.mode != 'wan' && usesWanSocket(ctx, a.backup));
+}
 
 return { failover: {
     status: { call: function() {
@@ -35,7 +48,7 @@ return { failover: {
         call:function(request) {
             let a=request.args, ctx=cursor();
             if (a.enabled != '0' && a.enabled != '1') return invalid('Invalid enabled value.');
-            if (a.mode != 'auto' && a.mode != 'wan' && a.mode != 'cell') return invalid('Choose Automatic, WAN only, or Cellular only.');
+            if (a.mode != 'auto' && a.mode != 'wan' && a.mode != 'cell') return invalid('Choose Automatic, Primary only, or Secondary only.');
             if (!match(a.primary || '', /^[A-Za-z0-9_][A-Za-z0-9_.-]{0,31}$/) || !match(a.backup || '', /^[A-Za-z0-9_][A-Za-z0-9_.-]{0,31}$/)) return invalid('Choose valid uplink interfaces.');
             if (a.primary == a.backup) return invalid('Primary and backup must be different interfaces.');
             if (!validNumber(a.interval,2,300) || !validNumber(a.fail_count,1,60) || !validNumber(a.recover_count,1,120)) return invalid('Check interval must be 2–300 seconds; failure count 1–60; recovery count 1–120.');
@@ -49,7 +62,7 @@ return { failover: {
             if (!length(targets) || length(targets)>6) return invalid('Enter between one and six ping targets.');
             if (a.enabled == '1') {
                 if (ctx.get('misectel','wan5g_switch','enabled') == '1') return invalid('Turn off the existing WAN/cellular switch before enabling Failover.');
-                if (a.mode != 'cell' && ctx.get('misectel','network_defaults','optional_wan_mode') == 'lan') return invalid('Change the WAN socket from LAN to WAN on Overview before enabling this mode.');
+                if (needsWanSocket(ctx,a) && ctx.get('misectel','network_defaults','optional_wan_mode') == 'lan') return invalid('Change the Ethernet socket from LAN to WAN before using it as an uplink.');
             }
             for (let key in ['enabled','mode','primary','backup','interval','fail_count','recover_count']) ctx.set('failover','main',key,a[key]);
             ctx.set('failover','main','target',targets);

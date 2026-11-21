@@ -1,5 +1,5 @@
 #!/bin/sh
-# WAN failover: physical WAN primary, cellular backup.
+# Failover between configurable primary and secondary uplinks.
 # Health = any target answers a ping sent OUT that interface (ping -I <dev>).
 # K45P adaptation: select an uplink in policy table 222, with connected LAN
 # routes copied into it. netifd's main routing table is never changed.
@@ -26,6 +26,7 @@ log() {
 
 add_target() { targets="$targets $1"; }
 load_cfg() {
+	local old_primary="$primary" old_backup="$backup"
 	config_load failover
 	config_get enabled main enabled 0
 	config_get mode main mode auto
@@ -38,6 +39,13 @@ load_cfg() {
 	targets=""; config_list_foreach main target add_target
 	[ -n "$targets" ] || targets="1.1.1.1 8.8.8.8"
 	case "$mode" in auto|wan|cell) ;; *) mode=auto ;; esac
+	# Health counters belong to interfaces, not the left/right position.
+	# Recheck a newly assigned primary immediately instead of carrying an
+	# unplugged WAN's failure history onto an already healthy cellular link.
+	if [ "$primary" != "$old_primary" ] || [ "$backup" != "$old_backup" ]; then
+		wan_state=unknown; wan_ok=0; wan_bad=0; wan_rtt=""
+		cell_state=unknown; cell_rtt=""; active=wan
+	fi
 }
 
 # iface -> "up dev gw ip"
@@ -181,9 +189,9 @@ while :; do
 		cell) set_active cell "forced by user" ;;
 		auto)
 			if [ "$wan_state" = down ] && [ "$cell_state" = up ]; then
-				set_active cell "WAN lost internet"
+				set_active cell "Primary lost internet"
 			elif [ "$wan_state" = up ]; then
-				set_active wan "WAN healthy again"
+				set_active wan "Primary healthy again"
 			fi ;;
 		esac
 	fi
