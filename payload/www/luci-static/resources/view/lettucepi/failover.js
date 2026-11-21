@@ -19,6 +19,7 @@ var CSS = `
 .fo-page .fo-ports{grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-flow:row;grid-auto-columns:auto;gap:8px}.fo-ports .misectel-dashboard-port-panel__port{min-width:0;min-height:86px;padding:16px 8px 12px;font-family:inherit;display:flex;flex-direction:column;align-items:stretch}.fo-ports button{appearance:none;width:100%;font-size:inherit}.fo-ports .misectel-dashboard-port-panel__name{font-size:16px}.fo-ports .misectel-dashboard-port-panel__speed{font-size:12px}.fo-help{padding:14px 16px;border-radius:14px;background:#edf5ff;color:#345778;line-height:1.5;margin-bottom:18px}
 .fo-order-heading{margin-bottom:20px}.fo-order-heading p{margin:0}.fo-order{display:grid;grid-template-columns:1fr 1fr;gap:18px}.fo-slot{min-width:0;border:2px solid transparent;border-radius:18px;padding:5px;transition:background .15s,border-color .15s}.fo-slot.is-drop{border-color:#d8273e;background:#fff0f2}.fo-role{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:15px;font-weight:750}.fo-role-number{display:grid;place-items:center;width:28px;height:28px;background:#edf1f6;border-radius:50%;font-size:13px}.fo-slot:first-child .fo-role-number{background:#e6efff;color:#255a9c}.fo-uplink{position:relative;display:flex;flex-direction:column;min-height:282px;padding:20px;border:1px solid #d7e0eb;border-radius:16px;background:#f8fafc;will-change:transform;user-select:none;-webkit-user-select:none}.fo-slot:first-child .fo-uplink{background:#f2f6ff;border-color:#bdcfe9}.fo-uplink.is-lifted{z-index:5;box-shadow:0 18px 40px #17203330;opacity:.95}.fo-uplink.is-native-drag{opacity:.45}.fo-uplink-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:18px}.fo-icon{width:52px;height:52px;display:grid;place-items:center;border-radius:14px;background:#e7edf5;color:#325778}.fo-icon svg{width:30px;height:30px}.fo-grip{display:grid;place-items:center;touch-action:none;width:44px;height:44px;min-width:44px;border:1px solid #d7e0eb;border-radius:12px;background:#fff;color:#64788e;cursor:grab!important}.fo-grip:active{cursor:grabbing!important}.fo-grip svg{width:22px;height:22px}.fo-uplink h4{margin:0 0 8px;font-size:23px;font-weight:750;line-height:1.2;overflow-wrap:anywhere}.fo-uplink-status{align-self:flex-start;margin-bottom:9px}.fo-uplink-detail{min-height:40px;font-size:13px;color:#62738a;line-height:1.45;margin-bottom:17px;overflow-wrap:anywhere}.fo-uplink-action{min-height:48px;width:100%;padding:10px 8px;border:1px solid #bfcddd;background:white;border-radius:12px;color:#294c72;font-size:13px;font-weight:700;margin-top:auto}.fo-uplink-action:hover{background:#eaf1fa}.fo-in-use{display:none;color:#225fa5;font-weight:700;font-size:12px;margin-bottom:8px}.fo-in-use.visible{display:block}.fo-order-note{margin-top:16px;min-height:20px;font-size:13px;color:#60748c;line-height:1.5}
 .fo-modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}.fo-mode{min-height:56px;border:1px solid #d7e0eb;border-radius:13px;padding:10px 7px;background:#f8fafc;color:#52657e;font-size:14px;font-weight:650}.fo-mode[aria-pressed=true]{border-color:#d8273e;background:#fff0f2;color:#b71e34;box-shadow:inset 0 0 0 1px #d8273e}.fo-mode-note{margin-top:12px;min-height:22px}
+.fo-page .fo-lan-action{min-height:44px;border:1px solid #b8cbe2;background:#edf4ff;color:#23588b;gap:7px;padding:8px 10px;cursor:pointer}.fo-page .fo-lan-action:hover{background:#deebff;border-color:#7c9fca}
 .fo-details{padding:0}.fo-details summary{min-height:60px;padding:19px 22px;font-size:15px;font-weight:700;cursor:pointer}.fo-details-body{padding:0 22px 22px}.fo-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.fo-field{display:flex;flex-direction:column;gap:8px;font-size:13px;margin-bottom:18px}.fo-page input:not([type=checkbox]),.fo-page select{width:100%;min-width:0;min-height:48px;border:1px solid #cad5e2;border-radius:11px;padding:10px 12px;background:#fafcff;font-size:15px}.fo-kv{display:grid;grid-template-columns:90px 1fr;gap:8px;font-size:13px}.fo-kv span:nth-child(odd){color:#69778b}.fo-kv span:nth-child(even){overflow-wrap:anywhere}.fo-link-detail h4{font-size:15px;margin:0 0 14px}.fo-log{max-height:210px;overflow:auto;white-space:pre-wrap;font-size:12px;color:#53647b;margin:0}.fo-actions{position:sticky;bottom:12px;z-index:8;display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:76px;padding:13px 16px;border:1px solid #dfe6ee;border-radius:16px;background:#fffffff5;box-shadow:0 8px 26px #17203312;margin:20px 0}.fo-save{min-height:48px;padding:12px 24px;border:0;border-radius:12px;background:#d8273e;color:white;font-size:15px;font-weight:700;white-space:nowrap}.fo-result{color:#63748b;font-size:13px;line-height:1.4}.fo-result.error{color:#b53643}
 @media(max-width:600px){.fo-page{padding:12px 0 24px}.fo-card{padding:16px;border-radius:17px}.fo-heading h2{font-size:25px}.fo-order{gap:8px}.fo-slot{padding:2px}.fo-uplink{padding:12px;min-height:288px;border-radius:13px}.fo-uplink h4{font-size:20px}.fo-icon{width:43px;height:43px;border-radius:11px}.fo-icon svg{width:26px;height:26px}.fo-uplink-top{gap:4px;margin-bottom:15px}.fo-role{font-size:13px;gap:6px}.fo-role-number{width:25px;height:25px}.fo-uplink-detail{font-size:12px;min-height:49px}.fo-pill{padding:6px 9px;font-size:11px}.fo-modes{gap:7px}.fo-mode{font-size:12px;min-height:55px}.fo-grid{grid-template-columns:1fr;gap:0}.fo-details{padding:0}.fo-details summary{padding:18px 16px}.fo-details-body{padding:0 16px 16px}.fo-actions{bottom:8px;padding:11px 12px;gap:10px}.fo-save{padding:12px 17px}.fo-enable strong{font-size:17px}}
 @media(prefers-reduced-motion:reduce){.fo-page *{transition:none!important}}
@@ -128,10 +129,11 @@ return view.extend({
             var grip=E('button', {type:'button','class':'fo-grip','aria-label':'Drag '+title+' to change priority',title:'Drag to the other side'});
             grip.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>';
             var health=E('span', {'class':'fo-pill fo-uplink-status'}), detail=E('div', {'class':'fo-uplink-detail'}), active=E('div', {'class':'fo-in-use'}, ['Currently in use']);
-            card.append(E('div', {'class':'fo-uplink-top'}, [icon(self.connectionKind(name)),grip]),E('h4', {}, [title]),health,active,detail,
+            var lanAction=E('button', {type:'button','class':'fo-pill fo-uplink-status fo-lan-action','aria-label':'Switch Ethernet socket from LAN to WAN',title:'Tap to use this socket for internet',click:ui.createHandlerFn(self,function() { return self.toggleWanPort(); })}, ['LAN mode',E('span',{'aria-hidden':'true'},['↗'])]);
+            card.append(E('div', {'class':'fo-uplink-top'}, [icon(self.connectionKind(name)),grip]),E('h4', {}, [title]),health,lanAction,active,detail,
                 E('button', {type:'button','class':'fo-uplink-action','aria-label':'Make '+title+' '+(index?'primary':'secondary'),click:function() { self.swapOrder(); }}, [index?'Make primary':'Make secondary']));
             slot.append(E('div', {'class':'fo-role'}, [E('span', {'class':'fo-role-number'}, [String(index+1)]),E('span', {}, [index?'Secondary · right':'Primary · left'])]),card);
-            self.priorityRefs.push({name:name,card:card,health:health,detail:detail,active:active,slot:slot});
+            self.priorityRefs.push({name:name,card:card,health:health,lanAction:lanAction,detail:detail,active:active,slot:slot});
             self.bindDrag(card,grip,index);
             slot.addEventListener('dragover',function(e) { if(self.nativeDragFrom==null)return; e.preventDefault(); e.dataTransfer.dropEffect='move'; self.showDrop(index); });
             slot.addEventListener('drop',function(e) { if(self.nativeDragFrom==null)return; e.preventDefault(); var from=self.nativeDragFrom; self.clearDrag(); if(from!==index)self.swapOrder(); });
@@ -209,11 +211,14 @@ return view.extend({
             var v=[s.wan,s.cell].find(function(v) { return v && v.iface===r.name; }) || {};
             var known=!!s.running && typeof v.up==='boolean',healthy=known && v.up && v.health==='up';
             var lanMode=self.connectionKind(r.name)==='wan' && self.wanIsLan;
+            r.health.style.display=lanMode?'none':'';
+            r.lanAction.style.display=lanMode?'inline-flex':'none';
+            r.lanAction.disabled=self.portBusy;
             var recovering=known && v.up && v.health==='down' && v.rtt!=='' && v.rtt!=null;
             r.health.className='fo-pill fo-uplink-status'+(lanMode?'':healthy?' online':known && (!v.up || v.health==='down') && !recovering?' offline':'');
             r.health.textContent=lanMode?'LAN mode':!known?'Not checked':!v.up?'Not connected':healthy?'Online':recovering?'Recovering':v.health==='down'?'No internet':'Checking…';
             r.active.classList.toggle('visible',!!c.enabled && inUse===r.name);
-            r.detail.textContent=lanMode?'Switch the socket above to WAN to use it for internet.':v.ip && v.ip!=='-' ? v.ip+(v.rtt?' · '+v.rtt+' ms':'') : self.connectionKind(r.name)==='wan'?'Connect your internet cable to WAN.':self.connectionKind(r.name)==='cell'?'Your mobile data connection.':r.name;
+            r.detail.textContent=lanMode?'Tap LAN mode to use this socket for internet.':v.ip && v.ip!=='-' ? v.ip+(v.rtt?' · '+v.rtt+' ms':'') : self.connectionKind(r.name)==='wan'?'Connect your internet cable to WAN.':self.connectionKind(r.name)==='cell'?'Your mobile data connection.':r.name;
         });
     },
     updatePorts: function(map,role) {
@@ -227,6 +232,7 @@ return view.extend({
             if(p.isWan) { p.node.disabled=this.portBusy; p.node.setAttribute('aria-label',role.enabled?'Switch LAN socket to WAN':'Switch WAN socket to LAN'); }
         },this);
         this.wanNotice.style.display=role.enabled?'':'none';
+        this.updatePriorityVitals();
     },
     toggleWanPort: async function() {
         if(this.portBusy)return;
@@ -236,16 +242,16 @@ return view.extend({
             this.message.className='fo-result error'; this.message.textContent='Turn Failover off, or select a mode that uses only Cellular and save, before making this socket LAN.';
             ui.addNotification(null,E('p',{},[this.message.textContent])); return;
         }
-        this.portBusy=true; this.portEntries.forEach(function(p) { if(p.isWan)p.node.disabled=true; });
+        this.portBusy=true; this.portEntries.forEach(function(p) { if(p.isWan)p.node.disabled=true; }); this.updatePriorityVitals();
         try {
             var r=await setWanRole(this.wanIsLan?'0':'1');
             if(!r.success)throw new Error(r.message||'Could not change the socket role.');
             this.wanIsLan=!!r.enabled;
+            if(this.lastStatus)this.lastStatus.wan_is_lan=!!r.enabled;
             this.portEntries.forEach(function(p) { if(p.isWan) { p.label.textContent=r.enabled?'LAN':'WAN'; p.node.setAttribute('aria-label',r.enabled?'Switch LAN socket to WAN':'Switch WAN socket to LAN'); } });
             this.wanNotice.style.display=r.enabled?'':'none';
-            ui.addNotification(null,E('p',{},['Socket changed to '+(r.enabled?'LAN':'WAN')+'. The network is reconnecting.']));
         } catch(e) { ui.addNotification(null,E('p',{},[e.message])); }
-        finally { this.portBusy=false; this.portEntries.forEach(function(p) { if(p.isWan)p.node.disabled=false; }); }
+        finally { this.portBusy=false; this.portEntries.forEach(function(p) { if(p.isWan)p.node.disabled=false; }); this.updatePriorityVitals(); }
     },
     update: function(s) {
         this.lastStatus=s;

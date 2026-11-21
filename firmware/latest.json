@@ -2,11 +2,11 @@
   "product": "K45P",
   "board": "misectel,m02k45",
   "version": "1.0.5",
-  "build": "202611200011",
+  "build": "202611200012",
   "bin": "6",
   "built": "2026-11-20",
   "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.5-sysupgrade.itb",
-  "sha256": "82a183a0154d5992ba0f8d70e5725dde2c5aa38dfa9eb212e7136e0e702d5cbd",
+  "sha256": "097876635c62f57361bfb564742b8c17ed30732a4f72810c07704dcf5625fbe9",
   "size": 25977086,
-  "notes": "Bin 6 touch update: intuitive Failover priority cards with drag or tap, Primary/Secondary modes and corrected WAN/LAN safety; K43P Quick Start with timezone, US APN, Wi-Fi and password steps; factory-reset LAN 192.168.100.1 and root/admin login; all Chester K45P UI and apps refinements including Overview Reboot, Software Update, Speedtest and Failover shortcuts; Carp4 Zapret2 with matching NFQUEUE modules; patched uHTTPd; signed OTA and rollback protection. Original vendor Linux 6.12.94 kernel and device tree preserved. Standard HTTP management."
+  "notes": "Bin 6 touch update: intuitive Failover priority cards with drag or tap, Primary/Secondary modes, tappable LAN-to-WAN badge, quiet port switching and corrected WAN/LAN safety; K43P Quick Start with timezone, US APN, Wi-Fi and password steps; factory-reset LAN 192.168.100.1 and root/admin login; all Chester K45P UI and apps refinements including Overview Reboot, Software Update, Speedtest and Failover shortcuts; Carp4 Zapret2 with matching NFQUEUE modules; patched uHTTPd; signed OTA and rollback protection. Original vendor Linux 6.12.94 kernel and device tree preserved. Standard HTTP management."
 }

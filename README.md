@@ -1,6 +1,6 @@
 # LettucePi K45P
 
-## Bin 6 — finalized build 202611200011
+## Bin 6 — finalized build 202611200012
 
 Version 1.0.5 / bin 6 includes the current Chester K45P UI and apps, K43P
 layout, four-by-four band grid, mobile controls, fan shortcut, consistent
@@ -15,10 +15,12 @@ included. The vendor Linux 6.12.94 kernel and device tree remain byte-identical.
 Standard HTTP management is retained by owner choice; no certificate setup
 is required after factory reset.
 
-Build 202611200011 includes touch-friendly Failover priority cards: Primary
+Build 202611200012 includes touch-friendly Failover priority cards: Primary
 on the left and Secondary on the right, drag handles and tap alternatives,
 large mode buttons, and advanced details collapsed by default. Swapped
 priorities retain correct WAN/LAN safety and independent health checks.
+The LAN mode badge switches the socket back to WAN with one tap. Successful
+port switches update in place without a notification popup.
 
 It supersedes earlier bin 6 builds, including the
 last Overview shortcuts, explicit clean-install LAN/login defaults, and the
