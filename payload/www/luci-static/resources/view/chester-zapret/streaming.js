@@ -1506,7 +1506,7 @@ return view.extend({
 				E('div', { 'class': 'cz-result-value' }, [value, spin]), extra || ''
 			]);
 		}
-		var page = E('div', { 'class': 'z2-page cz-page' }, [
+		var page = E('div', { 'class': 'z2-page cz-page chester-ios' }, [
 			E('style', {}, `
 .cz-page{max-width:1080px;margin:0 auto;gap:18px;color:#213547}
 .cz-page .cz-card{background:#fff;border:1px solid #e2e8ee;border-radius:18px;padding:24px;box-shadow:0 3px 12px rgba(16,38,57,.035);min-width:0}
@@ -1547,9 +1547,11 @@ return view.extend({
 .cz-page .z2-tabbar{margin:14px 0}.cz-page .z2-tab{min-height:44px;height:auto;line-height:1.4;padding:10px}
 @media(max-width:600px){.cz-page .cz-card{padding:18px}.cz-page h2{font-size:22px}.cz-page .cz-heading{gap:10px;flex-wrap:wrap}.cz-page .cz-power{margin-left:auto}.cz-page .cz-results{grid-template-columns:1fr}.cz-page .cz-result{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px}.cz-page .cz-result-value{font-size:22px;margin:0}.cz-page .cz-test-controls .cbi-input-select{max-width:none;flex-basis:100%}.cz-page .cz-test-controls .btn{width:100%}.cz-page details.cz-card>summary{padding:18px}.cz-page .cz-details-body{padding:0 18px 18px}.cz-page .z2-grid{grid-template-columns:1fr}.cz-page .z2-strat-row{min-height:44px;overflow-wrap:anywhere}}
 			`),
+            E('link',{rel:'stylesheet',href:L.resource('chester-ui/ios.css')+'?v=f78b876c6b61'}),
+            E('div',{'class':'cz-page-head'},[E('div',{'class':'ios-title',role:'heading','aria-level':'2'},['Zapret2']),E('p',{'class':'cz-muted'},['4K/HD streaming optimization.'])]),
 			E('section', { 'class': 'cz-card cz-hero' }, [
 				E('div', { 'class': 'cz-heading' }, [
-					E('h2', {}, '4K/HD Streaming'),
+					E('h3', {}, 'Streaming optimization'),
 					E('div', { 'class': 'cz-power' }, [this.statusBadge, makeSwitch(this.masterToggle)])
 				]),
 				this.friendlyStatus,

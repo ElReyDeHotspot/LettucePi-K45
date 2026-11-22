@@ -6,9 +6,9 @@ BASE=${1:?Usage: build.sh base.itb [work-directory]}
 WORK=${2:-/var/tmp/k45p-build}
 APK=${APK_TOOLS:-/usr/local/bin/apk3}
 FWTOOL=${FWTOOL:-fwtool}
-BUILD=${BUILD_ID:-202611210001}
-VERSION=${VERSION:-1.0.6}
-BIN=${BIN_NUMBER:-7}
+BUILD=${BUILD_ID:-202611220001}
+VERSION=${VERSION:-1.0.7}
+BIN=${BIN_NUMBER:-8}
 case "$WORK" in /var/tmp/k45p-*|/tmp/k45p-*) ;; *) echo 'Use a dedicated /var/tmp/k45p-* directory' >&2; exit 1 ;; esac
 mkdir -p "$WORK" "$REPO/firmware"
 [ ! -e "$WORK/root" ] || { echo 'Work root already exists; choose a fresh work directory' >&2; exit 1; }
@@ -30,7 +30,7 @@ sed -i -e '/\/misectel\//d' -e '/\/qmodem\//d' -e '/\/video\//d' "$R/etc/apk/rep
 "$APK" --root "$R" --arch aarch64_cortex-a53 --no-scripts --allow-untrusted add \
   "$REPO"/integrations/secure-web/packages/*.apk
 python3 "$REPO/scripts/customize.py" "$R"
-printf 'version=%s\nbuilt=2026-11-21\nbuild=%s\nbin=%s\nproduct=K45P\n' "$VERSION" "$BUILD" "$BIN" > "$R/etc/chester-version"
+printf 'version=%s\nbuilt=2026-11-22\nbuild=%s\nbin=%s\nproduct=K45P\n' "$VERSION" "$BUILD" "$BIN" > "$R/etc/chester-version"
 cp "$WORK/image0" "$WORK/kernel.bin"
 cp "$WORK/image1" "$WORK/k45p.dtb"
 cp "$REPO/scripts/k45p.its" "$WORK/k45p.its"

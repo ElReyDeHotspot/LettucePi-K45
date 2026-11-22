@@ -5,11 +5,11 @@ in `payload/www/luci-static/resources/chester-ui/ios.css`: grouped light gray
 backgrounds, white rounded cards, blue segmented controls, clear type and generous
 touch targets. SIM and connection cards stack on phones. Technical SIM information
 remains available under SIM details. Save actions no longer cover card controls.
-The stylesheet is applied only to `.chester-ios` page roots. Sidebar definitions,
-menu rendering, crown, global theme CSS and menu labels are unchanged.
+The stylesheet is applied only to `.chester-ios` page roots. The initial page-only restyle left the sidebar untouched; the owner-approved
+bin 8 menu refinements are described below.
 
-Chester Speeds replaces the content at the existing Ookla page URL, retaining the
-existing sidebar entry as requested. Its top selector offers:
+Chester Speeds uses the existing Ookla page URL so Overview shortcuts continue
+to work. Its sidebar entry is now named Chester Speeds. Its top selector offers:
 
 - Ookla: the bundled official CLI, running on the router's current routing.
 - M-Lab: the bundled NDT7 engine and existing Failover RPC, with an explicit
@@ -34,4 +34,23 @@ Netflix's embedded official test loaded and displayed a completed speed. The
 Netflix frame was closed afterward. No horizontal overflow was observed. The
 selected SIM, Manual mode and owner Failover configuration were unchanged, both
 native test engines were idle, and temporary test routing rule 22190 was absent.
-No firmware image was built or flashed; these changes are pending the next bin.
+These live checks did not flash firmware. The changes are included in bin 8.
+
+## Bin 8 final menu and Zapret2
+
+The owner requested the standalone M-Lab sidebar entry removed and the existing
+Ookla entry renamed Chester Speeds. M-Lab remains a provider inside that page.
+All connection-page containers use the same centered maximum width (1120px);
+large-desktop browser measurement confirmed a zero-pixel center difference.
+Zapret2 now joins Chester Mods and uses the same shared stylesheet, white cards,
+blue actions, grouped settings and native-style switch. Its service handlers,
+configuration, site lists, strategies and A/B streaming test are unchanged. The
+previous Apps URL remains usable for existing Overview shortcuts; its duplicate
+menu entry is hidden. Desktop and phone layouts were visually checked without
+starting a streaming A/B test or changing the running service/settings.
+These refinements are included in bin 8 / 1.0.7, not a separate image.
+
+The final bin 8 artifact passed stock `sysupgrade -T` and signed-manifest
+verification. Its packed payload was compared to source, and its kernel/DTB
+were compared byte-for-byte with the original vendor capture. It was not flashed
+as part of this release task.

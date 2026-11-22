@@ -1,8 +1,8 @@
 /* Chester connection pages only. Sidebar and system theme are intentionally out of scope. */
-.chester-ios.cs-page,.chester-ios.fo-page,.chester-ios.lp-speedtest {
+.chester-ios.cs-page,.chester-ios.fo-page,.chester-ios.lp-speedtest,.chester-ios.cz-page {
  --ios-blue:#007aff;--ios-ink:#1c1c1e;--ios-muted:#6e6e73;--ios-line:#e5e5ea;--ios-group:#f2f2f7;
  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
- color:var(--ios-ink);background:var(--ios-group);max-width:1120px;padding:28px;border-radius:26px;
+ color:var(--ios-ink);background:var(--ios-group);max-width:1120px;margin:0 auto;padding:28px;border-radius:26px;
  font-size:14px;line-height:1.45;letter-spacing:-.015em;
 }
 .chester-ios :is(button,input,select){font-family:inherit;letter-spacing:inherit}
@@ -101,7 +101,7 @@
 .chester-ios .lp-st-progress-bar{background:var(--ios-blue)}
 .chester-ios .lp-st-details{border-color:var(--ios-line)}
 @media(max-width:700px){
- .chester-ios.cs-page,.chester-ios.fo-page,.chester-ios.lp-speedtest{padding:18px 12px;border-radius:19px}
+ .chester-ios.cs-page,.chester-ios.fo-page,.chester-ios.lp-speedtest,.chester-ios.cz-page{padding:18px 12px;border-radius:19px}
  .chester-ios :is(.cs-head .ios-title,.fo-heading .ios-title){font-size:30px}
  .chester-ios .cs-grid,.chester-ios .fo-order{grid-template-columns:1fr;gap:14px}
  .chester-ios .cs-card{padding:19px;margin-bottom:0}
@@ -175,5 +175,43 @@
  .chester-speeds .sp-metric strong{font-size:26px}
  .chester-speeds .sp-details{grid-template-columns:1fr}
  .chester-speeds .sp-fast iframe{height:650px}
+}
+.chester-ios.cz-page{gap:18px}
+.chester-ios.cz-page .cz-page-head{margin-bottom:6px}
+.chester-ios.cz-page .ios-title{font-size:34px!important;line-height:1.15!important;font-weight:750!important;letter-spacing:-.045em;color:var(--ios-ink)!important}
+.chester-ios.cz-page :is(.cz-card,.z2-card,.z2-maint-card){background:#fff;border:1px solid var(--ios-line);border-radius:20px;box-shadow:0 2px 8px #00000003;padding:22px}
+.chester-ios.cz-page .cz-hero{border-top:1px solid var(--ios-line)}
+.chester-ios.cz-page h3{color:var(--ios-ink);font-size:21px;letter-spacing:-.025em;font-weight:650}
+.chester-ios.cz-page :is(.cz-muted,.cz-status-copy,.cz-result-label,.z2-note,.z2-muted){color:var(--ios-muted);font-size:12px}
+.chester-ios.cz-page .cz-page-head p{margin-top:6px}
+.chester-ios.cz-page .z2-badge{border:0;border-radius:20px;padding:5px 10px;font-size:12px;font-weight:600;background:#ededf0;color:var(--ios-muted)}
+.chester-ios.cz-page .z2-running{background:#e2f8e9;color:#248a3d}
+.chester-ios.cz-page .z2-error{background:#fff0ef;color:#c9342b}
+.chester-ios.cz-page .btn{min-height:44px;border:1px solid var(--ios-blue);background:#fff;border-radius:11px;color:var(--ios-blue)!important;font-size:13px;font-weight:600;box-shadow:none}
+.chester-ios.cz-page .cz-test-controls .btn,.chester-ios.cz-page .cz-actions .cbi-button-apply{background:var(--ios-blue)!important;border-color:var(--ios-blue)!important;color:white!important}
+.chester-ios.cz-page :is(select,input[type=text],textarea){background:#f9f9fb;border:1px solid var(--ios-line);border-radius:10px;color:var(--ios-ink);font-family:inherit;font-size:13px}
+.chester-ios.cz-page .cz-results{gap:12px}
+.chester-ios.cz-page .cz-result{border:0;border-radius:14px;background:#f5f5f9;padding:18px}
+.chester-ios.cz-page .cz-result-value{color:var(--ios-ink);font-size:27px;letter-spacing:-.035em;font-weight:650}
+.chester-ios.cz-page .z2-speed-value{color:var(--ios-ink)}
+.chester-ios.cz-page .cz-details-body{border-color:var(--ios-line);padding:0 20px 20px}
+.chester-ios.cz-page details.cz-card{padding:0;border-radius:15px}
+.chester-ios.cz-page details.cz-card>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;list-style:none;padding:17px 20px;min-height:58px;font-size:15px;font-weight:500}
+.chester-ios.cz-page details.cz-card>summary::after{content:'›';font-size:25px;font-weight:300;color:#a2a2a7;line-height:1}
+.chester-ios.cz-page details.cz-card[open]>summary::after{transform:rotate(90deg)}
+.chester-ios.cz-page .z2-tabbar{background:#e6e6eb;border:1px solid #dedee5;border-radius:12px;padding:4px;gap:3px}
+.chester-ios.cz-page .z2-tab{background:transparent;border:0;border-radius:8px;color:#363639;min-height:42px;font-size:13px;font-weight:500;box-shadow:none}
+.chester-ios.cz-page .z2-tab-active{background:var(--ios-blue);color:white!important;box-shadow:0 1px 4px #00000012}
+.chester-ios.cz-page .z2-switch-input:checked+.z2-switch-track{background:#34c759;border-color:#34c759}
+.chester-ios.cz-page .z2-switch-input:focus-visible+.z2-switch-track{outline:3px solid #007aff55;outline-offset:3px}
+@media(max-width:700px){
+ .chester-ios.cz-page .cz-card{padding:18px}
+ .chester-ios.cz-page .cz-heading{gap:12px;flex-wrap:wrap}
+ .chester-ios.cz-page .cz-results{grid-template-columns:1fr}
+ .chester-ios.cz-page .cz-result{padding:15px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+ .chester-ios.cz-page .cz-result-value{font-size:24px;margin:0}
+ .chester-ios.cz-page details.cz-card{padding:0}
+ .chester-ios.cz-page details.cz-card>summary{padding:16px 17px}
+ .chester-ios.cz-page .cz-details-body{padding:0 17px 17px}
 }
 @media(prefers-reduced-motion:reduce){.chester-ios *{transition:none!important}}

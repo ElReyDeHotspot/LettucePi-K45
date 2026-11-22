@@ -34,7 +34,7 @@
     }
   },
   "admin/chester/ookla": {
-    "title": "Ookla Speedtest",
+    "title": "Chester Speeds",
     "order": 30,
     "action": {
       "type": "view",
@@ -46,17 +46,21 @@
       ]
     }
   },
-  "admin/chester/mlab": {
-    "title": "M-Lab NDT",
+  "admin/chester/zapret": {
+    "title": "Zapret2",
     "order": 40,
     "action": {
       "type": "view",
-      "path": "lettucepi/mlab"
+      "path": "chester-zapret/streaming"
     },
     "depends": {
       "acl": [
-        "luci-app-k45p-failover"
-      ]
+        "luci-app-zapret2"
+      ],
+      "fs": {
+        "/etc/init.d/zapret2": "executable",
+        "/opt/zapret2/config": "file"
+      }
     }
   }
 }

@@ -88,7 +88,7 @@ return view.extend({
         this.primary.addEventListener('change', function() { if(self.primary.value===self.backup.value) self.backup.value=self.draftOrder[0]; self.drawOrder(); self.markDirty(); });
         this.backup.addEventListener('change', function() { if(self.backup.value===self.primary.value) self.primary.value=self.draftOrder[1]; self.drawOrder(); self.markDirty(); });
         var root = E('div', {'class':'fo-page chester-ios'}, [
-            E('link',{rel:'stylesheet',href:L.resource('chester-ui/ios.css')+'?v=4ca34f0484d4'}),
+            E('link',{rel:'stylesheet',href:L.resource('chester-ui/ios.css')+'?v=f78b876c6b61'}),
             E('div', {'class':'fo-heading'}, [E('div', {}, [E('div',{'class':'ios-title',role:'heading','aria-level':'2'},['Failover']),E('div', {'class':'fo-muted'}, ['Choose a backup connection or use both together.'])]),this.badge]),
             E('div', {'class':'fo-card'}, [this.portBox,E('div', {'class':'fo-muted',style:'margin-top:14px'}, ['Tap WAN to switch this socket between internet and LAN.'])]),
             this.wanNotice,

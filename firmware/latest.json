@@ -1,12 +1,12 @@
 {
   "product": "K45P",
   "board": "misectel,m02k45",
-  "version": "1.0.6",
-  "build": "202611210001",
-  "bin": "7",
-  "built": "2026-11-21",
-  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.6-sysupgrade.itb",
-  "sha256": "a22b617238940cafcea2fa0e1b0dd411e8bdac2642d393b6b359becac7909551",
-  "size": 29749502,
-  "notes": "Bin 7: Ookla CLI and M-Lab NDT7 engines preinstalled in ROM, ready after factory reset; Inseego-style Ookla status page with download, upload, latency, jitter, progress, cancellation and history; independent Primary/Secondary link tests; connection load balancing and fast failover; all previous Chester K45P UI/apps, Quick Start, Carp4 Zapret2 and matching NFQUEUE modules, patched uHTTPd and signed OTA protections. Vendor Linux 6.12.94 kernel and device tree unchanged. Standard HTTP management."
+  "version": "1.0.7",
+  "build": "202611220001",
+  "bin": "8",
+  "built": "2026-11-22",
+  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.7-sysupgrade.itb",
+  "sha256": "2975b02e8f4a8ce31411b09f1ea5942796d4b632452b670ab57bfa3ec331e87e",
+  "size": 30818558,
+  "notes": "Bin 8: iOS-inspired SIM Selection and Failover; Manual SIM selection stays on the chosen slot without data; serialized SIM operations and queued cancellation; per-SIM M-Lab tests and IPv4 rows; Chester Speeds combines bundled Ookla and M-Lab plus the official browser-based Netflix FAST.com test. Chester Mods contains Failover, SIM Selection, Chester Speeds and Zapret2; separate M-Lab sidebar entry removed. Chester Speeds is centered to match the other pages. Zapret2 has the matching iOS-style design. All prior apps, Quick Start, signed OTA, patched uHTTPd, matching NFQUEUE modules and US defaults retained. Vendor Linux 6.12.94 kernel and device tree unchanged."
 }

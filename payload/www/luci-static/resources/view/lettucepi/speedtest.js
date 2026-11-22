@@ -30,7 +30,7 @@ return view.extend({
   this.detail=E('div',{'class':'sp-details'});this.notice=E('p',{'class':'sp-muted sp-notice'});this.fastHost=E('div',{'class':'sp-fast'});
   this.history=E('div',{'class':'sp-history'});this.historyCard=E('details',{'class':'sp-history-card'},[E('summary',{},['Recent results']),this.history]);
   var root=E('div',{'class':'lp-speedtest chester-ios chester-speeds'},[
-   E('link',{rel:'stylesheet',href:L.resource('chester-ui/ios.css')+'?v=4ca34f0484d4'}),
+   E('link',{rel:'stylesheet',href:L.resource('chester-ui/ios.css')+'?v=f78b876c6b61'}),
    E('div',{'class':'sp-head'},[E('div',{'class':'ios-title',role:'heading','aria-level':'2'},['Chester Speeds']),E('p',{'class':'sp-muted'},['One place for your connection tests.'])]),
    E('div',{'class':'sp-tabs',role:'tablist','aria-label':'Speed test provider'},this.tabs),
    E('section',{id:'chester-speeds-panel',role:'tabpanel','class':'sp-panel'},[

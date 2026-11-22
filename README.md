@@ -1,15 +1,21 @@
 # LettucePi K45P
 
-## Pending next image — SIM Selection and Chester Speeds
+## Bin 8 — version 1.0.7, build 202611220001
 
-The revamped SIM page adds Manual, startup speed selection, automatic monitoring,
-per-SIM APNs and verified rollback. Live validation and hardware detection limits
-are documented in [SIM Selection](integrations/sim/README.md). Published bin7
-remains unchanged; no new image has been built for these changes.
+SIM Selection, Failover, Chester Speeds and Zapret2 share the iOS-inspired design.
+Chester Mods contains Failover, SIM Selection, Chester Speeds and Zapret2. The
+separate M-Lab menu entry is removed; M-Lab remains available in Chester Speeds.
+Chester Speeds is centered to match the other pages, with Ookla, M-Lab and the
+official browser-based Netflix FAST.com test. Ookla and NDT7 remain bundled in ROM.
 
-SIM Selection and Failover now share an iOS-inspired page design, and Chester
-Speeds combines Ookla, M-Lab and an official browser-based Netflix FAST.com tab.
-The left menu is unchanged. See [connection-page design](integrations/CHESTER-UI.md).
+Manual SIM selection keeps the chosen physical slot even without data. Automatic
+selection and speed tests retain their timeout and rollback. Per-SIM IPv4 rows,
+independent tests, queued-operation serialization and cancellation are included.
+Factory defaults remain Manual SIM selection and Failover Off / Automatic.
+All earlier apps, Quick Start, signed OTA, matching NFQUEUE modules and patched
+uHTTPd are retained. Vendor Linux 6.12.94 and the device tree are byte-identical.
+See [SIM Selection](integrations/sim/README.md) and
+[connection-page design](integrations/CHESTER-UI.md).
 
 ## Bin 7 — version 1.0.6, build 202611210001
 
@@ -72,13 +78,14 @@ Firmware and over-the-air updates for the **K45P**, hardware board
 
 - K43P-style Overview: cellular signal and carriers, temperature, clients,
   Ethernet ports, LED switch, TTL/HL switch and 4K/HD switch.
-- Apps: Tailscale, Speedtest by Ookla, 4K/HD Video, Smart Queue, Failover.
+- Chester Mods: Failover, SIM Selection, Chester Speeds and Zapret2.
+- Apps: Tailscale and Smart Queue.
 - Cellular IPv6 tools, US APN presets, and browser terminal.
 - English interface with Chinese language packages, catalogs and text removed.
 - US Wi-Fi country configuration and generation defaults.
 - System Update, using this repository's K45P-only manifest.
 
-Tailscale and the official Ookla engine install on demand from their panels.
+Tailscale can be installed from its panel. Ookla and M-Lab engines ship in ROM.
 Traffic shaping and the video engine stay off until enabled by the operator.
 Automatic firmware installation is off by default.
 

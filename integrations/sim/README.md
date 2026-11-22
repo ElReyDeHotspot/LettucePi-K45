@@ -142,3 +142,7 @@ unchanged. These changes are committed as pending the next firmware image.
 Final queue/cancel verification also confirmed a queued test can be cancelled
 before any hardware action. All four Chester Mods routes, crown placement, IPv4
 rows and absence of the top individual-test banner were verified in the browser.
+
+The SIM Selection implementation and its UI refinements are included in bin 8
+(version 1.0.7, build 202611220001). Earlier pending-image notes above describe
+the validation state at the time each change was made.
