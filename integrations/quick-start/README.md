@@ -12,7 +12,11 @@ performs selection after Apply. Manual selection retains the chosen SIM even
 without data. Quick Start does not run speed tests or enable automatic selection.
 
 TTL/HL uses the existing chester-ttl helper, which verifies both live firewall
-values. Timezone is resolved from the server's own LuCI zone table. A blank root
+values. Timezone uses two linked selectors: Region (America, Europe, Africa, etc.),
+then City / timezone. Only that region's cities are listed; changing region
+clears the previous city, and Back preserves a completed selection. The stored
+IANA name and server timezone mapping stay unchanged. Keep current timezone
+is available when no change is wanted. A blank root
 password keeps the existing password; root/admin continue sharing root's password.
 Wi-Fi supports shared or separate names/passwords and an explicit Disable choice.
 Disable writes both radio and AP flags, retaining saved credentials for later use.
