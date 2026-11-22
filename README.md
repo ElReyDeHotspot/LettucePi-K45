@@ -1,11 +1,11 @@
 # LettucePi K45P
 
-## Pending next image
+## Bin 10 — version 1.0.9, build 202611220003
 
 Sun/Night appearance now follows the approved Overview mockup. The top-right
 sun/moon switch works throughout LP-OpenWrt25, including login, and remembers
-the browser preference across pages, refreshes and tabs. No firmware rebuild
-has been made for these changes.
+the browser preference across pages, refreshes and tabs. All changes below
+are included in bin 10.
 
 APN Config, Band Lock, Cell Lock and Software have the shared Chester styling.
 Both lock pages reuse the live Overview Cellular card. Cell Lock opens on 5G
@@ -17,9 +17,9 @@ Terminal is now under Chester Mods, with a styled live console, bottom
 Terminal/Config navigation and themed configuration tabs. The sidebar uses
 Speeds while the page heading remains Chester Speeds. Login uses one compact
 card: live Cellular summary above credentials, expandable connection details,
-and a visible Log in button on a 375 × 568 phone screen.
+and a visible Log in button on a 375 Ã— 568 phone screen.
 
-## Bin 9 — version 1.0.8, build 202611220002
+## Bin 9 â€” version 1.0.8, build 202611220002
 
 The approved green-leaf Overview and navigation are included, with visible eNB,
 selected network mode, measured CPU/memory, a unified login card and read-only
@@ -42,7 +42,7 @@ remain included. Vendor Linux 6.12.94 and the device tree are byte-identical.
 The image passed stock `sysupgrade -T`; it was built and published without
 flashing the connected router. Real-port VLAN datapath validation remains pending.
 
-## Bin 8 — version 1.0.7, build 202611220001
+## Bin 8 â€” version 1.0.7, build 202611220001
 
 SIM Selection, Failover, Chester Speeds and Zapret2 share the iOS-inspired design.
 Chester Mods contains Failover, SIM Selection, Chester Speeds and Zapret2. The
@@ -59,19 +59,19 @@ uHTTPd are retained. Vendor Linux 6.12.94 and the device tree are byte-identical
 See [SIM Selection](integrations/sim/README.md) and
 [connection-page design](integrations/CHESTER-UI.md).
 
-## Bin 7 — version 1.0.6, build 202611210001
+## Bin 7 â€” version 1.0.6, build 202611210001
 
 Both speed-test engines are bundled in the immutable image: the official Ookla
 CLI 1.2.0 and the interface-bound M-Lab NDT7 engine. No engine download or install
 step is required after factory reset. Ookla uses an Inseego-style light status
 card with Download, Upload, Latency, Jitter, progress, cancellation and history.
-Apps → Failover includes Automatic, Load Balance, Primary only and Secondary only,
+Apps â†’ Failover includes Automatic, Load Balance, Primary only and Secondary only,
 plus independent Test Primary / Test Secondary buttons. Shipping defaults remain
 Off / Automatic; the previous Chester UI, apps, signed OTA, patched uHTTPd and
 matching NFQUEUE modules are retained. Vendor Linux 6.12.94 and DTB are unchanged.
 See [load balancing](integrations/LOAD-BALANCE.md) and [link tests](integrations/ndt7/README.md).
 
-## Previous bin 6 — finalized build 202611200013
+## Previous bin 6 â€” finalized build 202611200013
 
 Version 1.0.5 / bin 6 includes the current Chester K45P UI and apps, K43P
 layout, four-by-four band grid, mobile controls, fan shortcut, consistent
@@ -132,7 +132,7 @@ Traffic shaping and the video engine stay off until enabled by the operator.
 Automatic firmware installation is off by default.
 
 Version **1.0.3** matches the K43P theme's 232px desktop sidebar, restores a
-compact 56px login logo, and adds **Apps → Failover**. Failover monitors physical
+compact 56px login logo, and adds **Apps â†’ Failover**. Failover monitors physical
 WAN and cellular health, supports automatic or manual uplink selection, and
 provides configurable failure/recovery thresholds. It starts disabled.
 The WAN socket must be configured as WAN before enabling automatic failover.
@@ -155,7 +155,7 @@ explicitly instead. See [provenance.json](provenance.json).
 
 ## Updates
 
-Open **Overview → System Update** to check or install an update. Settings are
+Open **Overview â†’ System Update** to check or install an update. Settings are
 kept by default; the page also offers an explicit settings reset option.
 The updater verifies the pinned release signature and rollback floor, board identity, manifest family, download size, SHA-256,
 and stock `sysupgrade -T` validation. It uses the original K45P FIT upgrade

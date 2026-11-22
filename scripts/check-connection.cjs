@@ -1,7 +1,7 @@
 const fs=require('node:fs');
 const assert=require('node:assert/strict');
 const path=require('node:path');
-const s=fs.readFileSync(path.join(__dirname,'../payload/www/luci-static/resources/view/misectel-dashboard/overview.js'),'utf8');
+const s=fs.readFileSync(path.join(__dirname,'../payload/www/luci-static/resources/chester-ui/overview-core.js'),'utf8');
 const helper=s.slice(s.indexOf('function k45pConnectionState'),s.indexOf('function buildModemInterfaceInfo'));
 const state=new Function('_',helper+'return k45pConnectionState;')(v=>v);
 const section={alias:'pcie0',network:'rmnet_mhi0'};

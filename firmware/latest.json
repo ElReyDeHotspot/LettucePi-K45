@@ -1,12 +1,12 @@
 {
   "product": "K45P",
   "board": "misectel,m02k45",
-  "version": "1.0.8",
-  "build": "202611220002",
-  "bin": "9",
+  "version": "1.0.9",
+  "build": "202611220003",
+  "bin": "10",
   "built": "2026-11-22",
-  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.8-sysupgrade.itb",
-  "sha256": "6023fb011ec59a3f06479dd73544c9cae5f318c9e878f02c5803dcab13a20bcc",
-  "size": 30847230,
-  "notes": "Bin 9: approved green-leaf Overview and navigation; visible eNB; measured CPU/memory; unified login and public radio-only cellular preview; Remember and Logout. Simplified Wi-Fi with verified shared/separate names, passwords and radio power. Matching Fan, Administration, System, Reboot, Update, AT Commands, Cellular Info, TTL/HL and guided VLAN pages. Independent TTL/HL rules verified on wire. Chester Mods adds Fan Control, VLANs and TTL/HL. Bundled Ookla and M-Lab, SIM Selection, Failover, Zapret2, Quick Start, signed OTA, patched uHTTPd, matching NFQUEUE modules and US defaults retained. Vendor Linux 6.12.94 kernel and device tree unchanged."
+  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.9-sysupgrade.itb",
+  "sha256": "16cef1d63e6bc0714bdcd37763f8cbcefd5827a3da45c2f8414398864d69aaf9",
+  "size": 30863614,
+  "notes": "Bin 10: global Sun/Night appearance; simplified APN Config, Band Lock, Cell Lock and Software pages; live Overview Cellular card on both lock pages; initial 5G Cell Lock editor; reordered Cellular navigation; futuristic Terminal and themed Config under Chester Mods with bottom navigation; Speeds sidebar with Chester Speeds page title; compact unified login with live cellular summary and expandable connection details. Includes all bin 9 features, bundled Ookla and M-Lab, SIM Selection, Failover, Zapret2, current Quick Start, signed OTA, patched uHTTPd, matching NFQUEUE modules and US defaults. Vendor Linux 6.12.94 kernel and device tree unchanged."
 }

@@ -6,9 +6,9 @@ BASE=${1:?Usage: build.sh base.itb [work-directory]}
 WORK=${2:-/var/tmp/k45p-build}
 APK=${APK_TOOLS:-/usr/local/bin/apk3}
 FWTOOL=${FWTOOL:-fwtool}
-BUILD=${BUILD_ID:-202611220002}
-VERSION=${VERSION:-1.0.8}
-BIN=${BIN_NUMBER:-9}
+BUILD=${BUILD_ID:-202611220003}
+VERSION=${VERSION:-1.0.9}
+BIN=${BIN_NUMBER:-10}
 case "$WORK" in /var/tmp/k45p-*|/tmp/k45p-*) ;; *) echo 'Use a dedicated /var/tmp/k45p-* directory' >&2; exit 1 ;; esac
 mkdir -p "$WORK" "$REPO/firmware"
 [ ! -e "$WORK/root" ] || { echo 'Work root already exists; choose a fresh work directory' >&2; exit 1; }
