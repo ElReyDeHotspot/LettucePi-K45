@@ -42,6 +42,7 @@
 <meta name="application-name" content="{{ appname }}">
 <meta name="apple-mobile-web-app-title" content="{{ appname }}">
 <link rel="stylesheet" href="{{ media }}/cascade.css?v=chester-k45p-live-15">
+<link rel="stylesheet" href="{{ resource }}/chester-ui/navigation.css?v=4080502b14cd">
 <link rel="icon" href="{{ media }}/favicon.ico" sizes="48x48">
 {% if (node?.css): %}
 <link rel="stylesheet" href="{{ resource }}/{{ node.css }}">
@@ -65,7 +66,7 @@
 <header>
 	<div class="fill">
 		<div class="container">
-			<span class="showSide"></span>
+			<button type="button" class="showSide" aria-label="Toggle menu"></button>
 			<div class="page-title">
 				<a class="brand" href="{{ home_url }}">{{ appname }}</a>
 			</div>
@@ -103,10 +104,7 @@
 		<div class="sidebar-brand">
 			<a class="sidebar-logo" href="{{ home_url }}">
 				<span class="sidebar-logo-mark" aria-hidden="true">
-					<svg viewBox="0 0 32 32" focusable="false">
-						<path d="M27 4C13 4 6 11 6 21c0 2.4.6 4.6 1.7 6.4l-2.4 2.4 1.4 1.4 2.4-2.4A12 12 0 0 0 15 31c10 0 12-9 12-27z"></path>
-						<path d="M26 5C18 12 12 19 9 28"></path>
-					</svg>
+					<img src="{{ media }}/green-leaf.svg" width="43" height="43" alt="">
 				</span>
 				<span class="sidebar-logo-wordmark">LettucePi</span>
 			</a>

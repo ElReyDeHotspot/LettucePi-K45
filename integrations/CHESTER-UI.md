@@ -73,3 +73,34 @@ were retained; mode changes, WAN role changes, reboot, service toggles and speed
 runs were not executed for this appearance/navigation check. These remain subject
 to the owner's function review before release. No image was built or flashed, and
 the published signed bin 8 manifest/artifact are unchanged.
+
+
+## Pending next image: match approved Overview reference
+
+The owner rejected the initial approximation and explicitly expanded scope to
+match the approved image's left navigation, including the green leaf. The revised
+Overview uses the reference's inline Online pill, stronger typography, pale page
+background, compact segmented network modes, inline desktop band rows, white
+quick-control tiles, blue icons, and five-column system strip. Four carrier slots
+stay visible; unreported carriers display dashes, and additional carriers wrap.
+The requested fourth Wi-Fi summary card and all four direct destinations remain.
+
+Shared navigation now uses a native SVG green leaf, navy background, white line
+icons, red selected Overview, and tree branches under Chester Mods. The Overview
+submenu stays hidden on the home screen and its top link returns home; other
+pages retain that submenu and the top-card shortcuts retain access to Clients and
+Update. Chester Mods opens initially on Overview and can be collapsed/reopened.
+The header retains its functioning account menu and now has an accessible mobile
+menu button. Fixed the existing resize listener to call the viewport handler
+directly instead of using a click-spinner wrapper on window, which previously
+raised a classList error during resize.
+
+Live checks: compared at the approved reference dimensions (1672 x 941), checked
+390px phone viewport, clicked all four top shortcuts through to their destination
+pages, collapsed/reopened Chester Mods, opened/closed the mobile drawer, and
+opened/closed the account menu. The phone Overview had equal client/scroll widths
+(351px) and four equal carrier columns. No browser errors appeared in the final
+session. JS syntax and git whitespace checks passed. No service/network toggles,
+radio-mode changes, speed tests, reboot or image build/flash were performed.
+Saved previews: K45P-Approved-Overview-Desktop.jpg and
+K45P-Approved-Overview-Phone.jpg in the task outputs directory.

@@ -309,9 +309,9 @@ function chesterBandFields(carriers){
 var callSendAt=rpc.declare({object:'qmodem',method:'send_at',params:['config_section','params'],expect:{}});
 const CHESTER_MODES=[
 	{id:'auto',label:'Auto',cmds:['AT+QNWPREFCFG="mode_pref",auto','AT+QNWPREFCFG="nr5g_disable_mode",0']},
-	{id:'lte', label:'LTE', cmds:['AT+QNWPREFCFG="mode_pref",LTE']},
+	{id:'sa',  label:'5G SA',  cmds:['AT+QNWPREFCFG="mode_pref",NR5G','AT+QNWPREFCFG="nr5g_disable_mode",2']},
 	{id:'nsa', label:'5G NSA', cmds:['AT+QNWPREFCFG="mode_pref",NR5G:LTE','AT+QNWPREFCFG="nr5g_disable_mode",1']},
-	{id:'sa',  label:'5G SA',  cmds:['AT+QNWPREFCFG="mode_pref",NR5G','AT+QNWPREFCFG="nr5g_disable_mode",2']}
+	{id:'lte', label:'LTE', cmds:['AT+QNWPREFCFG="mode_pref",LTE']}
 ];
 
 
@@ -464,7 +464,7 @@ function portLabelMap(){try{var v=uci.get('misectel','clients','port_labels');if
 function portLabel(n){var k=String(n||'').toLowerCase();var m=portLabelMap();return m[k]||String(n||'').toUpperCase();}
 function portDisplayOrder(name){var n=String(name||'').toUpperCase();if(n.indexOf('WAN')===0)return 999;var m=n.match(/(\d+)/);return m?parseInt(m[1],10):500;}
 function homeIcon(name){
- const paths={cellular:'M4 20v-4m5 4v-8m5 8V8m5 12V4',network:'M8 3h8v6H8zM3 16h6v5H3zm12 0h6v5h-6zM12 9v4M6 16v-3h12v3',clients:'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M16 3a4 4 0 0 1 0 8m6 10v-2a4 4 0 0 0-3-3.87M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0',wifi:'M2 8a16 16 0 0 1 20 0M5 12a11 11 0 0 1 14 0m-11 4a6 6 0 0 1 8 0m-4 4h.01',port:'M4 4h16v13h-4v3H8v-3H4zM8 7v4m4-4v4m4-4v4',video:'M3 5h13v14H3zM16 9l5-3v12l-5-3',layers:'m12 3 10 5-10 5L2 8zm-10 9 10 5 10-5M2 16l10 5 10-5',bulb:'M9 18h6m-6 3h6M8 14a6 6 0 1 1 8 0l-1 4H9z',fan:'M12 12C3 10 3 4 8 3c4 0 4 5 4 9zm0 0c2-9 8-9 9-4 0 4-5 4-9 4zm0 0c9 2 9 8 4 9-4 0-4-5-4-9zm0 0c-2 9-8 9-9 4 0-4 5-4 9-4',power:'M12 2v10M5 5a9 9 0 1 0 14 0',download:'M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5',speed:'M3 18a10 10 0 1 1 18 0M12 14l5-7M5 18h14',arrows:'M3 7h18m-4-4 4 4-4 4M21 17H3m4-4-4 4 4 4',cpu:'M7 7h10v10H7zM9 1v6m6-6v6m-6 10v6m6-6v6M1 9h6m-6 6h6m10-6h6m-6 6h6',memory:'M3 6h18v12H3zm4 3v6m5-6v6m5-6v6M6 18v3m6-3v3m6-3v3',temperature:'M9 14V5a3 3 0 0 1 6 0v9a5 5 0 1 1-6 0zm3-6v10',clock:'M12 7v5l3 2M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0'};
+ const paths={cellular:'M12 13v9m-3-7a5 5 0 1 1 6 0M6 18a9 9 0 1 1 12 0M3 21a13 13 0 1 1 18 0M12 9h.01',network:'M8 3h8v6H8zM3 16h6v5H3zm12 0h6v5h-6zM12 9v4M6 16v-3h12v3',clients:'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M16 3a4 4 0 0 1 0 8m6 10v-2a4 4 0 0 0-3-3.87M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0',wifi:'M2 8a16 16 0 0 1 20 0M5 12a11 11 0 0 1 14 0m-11 4a6 6 0 0 1 8 0m-4 4h.01',port:'M4 2h16a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm1 4h14v9h-3v4H8v-4H5zm3 0v3m3-3v3m3-3v3m3-3v3',video:'M3 3h18v14H3zM12 17v4m-5 0h10',layers:'m12 3 10 5-10 5L2 8zm-10 9 10 5 10-5M2 16l10 5 10-5',bulb:'M9 18h6m-6 3h6M8 14a6 6 0 1 1 8 0l-1 4H9z',fan:'M12 12C3 10 3 4 8 3c4 0 4 5 4 9zm0 0c2-9 8-9 9-4 0 4-5 4-9 4zm0 0c9 2 9 8 4 9-4 0-4-5-4-9zm0 0c-2 9-8 9-9 4 0-4 5-4 9-4',power:'M12 2v10M5 5a9 9 0 1 0 14 0',download:'M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5',speed:'M3 18a10 10 0 1 1 18 0M12 14l5-7M5 18h14',arrows:'M3 7h18m-4-4 4 4-4 4M21 17H3m4-4-4 4 4 4',cpu:'M7 7h10v10H7zM9 1v6m6-6v6m-6 10v6m6-6v6M1 9h6m-6 6h6m10-6h6m-6 6h6',memory:'M3 6h18v12H3zm4 3v6m5-6v6m5-6v6M6 18v3m6-3v3m6-3v3',temperature:'M9 14V5a3 3 0 0 1 6 0v9a5 5 0 1 1-6 0zm3-6v10',clock:'M12 7v5l3 2M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0'};
  const el=E('span',{'class':'ch-icon','aria-hidden':'true'});
  el.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="'+(paths[name]||paths.network)+'"/></svg>';return el;
 }
@@ -517,8 +517,8 @@ return;portNames.push(name);});const ports=await Promise.all(portNames.map(async
  const controlCard=E('section',{'class':'ch-card'},[E('h3',{},['Quick controls']),this.ledToggleWrap]);
  this.wanSection=E('section',{},[E('h4',{},['WAN status']),this.wanNode]);
  return E('div',{'class':'chester-home'},[
-  E('link',{rel:'stylesheet',href:L.resource('chester-ui/overview.css')+'?v=77023affd988'}),
-  E('div',{'class':'ch-head'},[E('div',{},[E('div',{'class':'ch-title',role:'heading','aria-level':'2'},['Overview']),E('p',{'class':'ch-muted'},['Your Chester K45P, at a glance.'])]),this.onlineBadge]),
+  E('link',{rel:'stylesheet',href:L.resource('chester-ui/overview.css')+'?v=a7bd0b071507'}),
+  E('div',{'class':'ch-head'},[E('div',{},[E('div',{'class':'ch-title-row'},[E('div',{'class':'ch-title',role:'heading','aria-level':'2'},['Overview']),this.onlineBadge]),E('p',{'class':'ch-muted'},['Your Chester K45P, at a glance.'])])]),
   this.securityNode,this.summaryNode,
   E('div',{'class':'ch-layout'},[E('section',{'class':'ch-card ch-cellular-card'},[E('div',{'class':'ch-card-heading'},[E('h3',{},['Cellular']),this.modemSelectWrap]),this.modemNode]),E('div',{'class':'ch-side'},[portCard,controlCard])]),
   this.metricsNode,
@@ -540,14 +540,14 @@ return[E('div',{'class':'misectel-dashboard-setup__main'},[E('div',{'class':'mis
   {label:carrier+(mode?' · '+mode:''),hint:sim?.active?'SIM '+sim.active+' active':modem?.status?.text||'No modem detected',icon:'cellular',href:L.url('admin','chester','sim')},
   {label:policy,hint:hint,icon:'network',href:L.url('admin','chester','failover')},
   {label:data.onlineDeviceCount+(data.onlineDeviceCount===1?' device':' devices'),hint:'Client list',icon:'clients',href:CLIENTS_URL},
-  {label:'Wi-Fi',hint:data.wifiEnabled?'Enabled · Manage Wi-Fi':'Disabled · Manage Wi-Fi',icon:'wifi',href:WIFI_SETTINGS_URL}
+  {label:'Wi-Fi',hint:data.wifiEnabled?'Enabled':'Disabled',icon:'wifi',href:WIFI_SETTINGS_URL}
  ];
  return cards.map(c=>E('a',{'class':'ch-summary-card',href:c.href},[homeIcon(c.icon),E('div',{},[E('strong',{},[c.label]),E('span',{},[c.hint])])]));
 },
 renderRuntimeMetrics(data){
  const board=data.board||{},release=board.release||{},modemTemp=hasMeaningfulValue(data.modemTemp)?normalizeTemperatureText(data.modemTemp):null,temp=modemTemp||extractTempText(data.tempInfo)||'—';
  return [
-  ['CPU',formatPercent(data.cpuPercent),'cpu',''],['Memory',formatPercent(data.memoryPercent),'memory',''],
+  ['CPU',formatPercent(data.cpuPercent).replace('.0%','%'),'cpu',''],['Memory',formatPercent(data.memoryPercent).replace('.0%','%'),'memory',''],
   ['Temperature',temp,'temperature',modemTemp?'Modem':'System'],['Uptime',formatDuration(data.systemInfo?.uptime),'clock',''],
   ['OpenWrt',release.version||'—','layers',board.kernel?'Linux '+board.kernel:'']
  ].map(([label,value,icon,hint])=>E('div',{'class':'ch-system-metric'},[homeIcon(icon),E('div',{},[E('span',{},[label]),E('strong',{},[value||'—']),hint?E('small',{},[hint]):''])]));
@@ -566,7 +566,7 @@ return options.href?E('a',{'class':className,'href':options.href},children):E('d
   E('div',{'class':'ch-carrier'},[E('strong',{},[modem.operator||modem.title||'Modem']),E('span',{'class':'ch-network-badge'},[homeNetworkName(modem.modeLabel)||modem.status.text])]),
   E('div',{'class':'ch-radio-grid'},metrics),
   E('section',{'class':'ch-mode-section'},[E('h4',{},['Network mode']),modem.id?chesterModeButtons(modem):'']),
-  E('section',{'class':'ch-band-section'},[E('h4',{},[modem.status.tone==='online'?'Connected bands':'Last reported bands']),bands.length?E('div',{'class':'ch-band-grid'},bands.map((c,i)=>E('section',{'class':'ch-band-column','aria-label':i?'SCC'+i:'PCC'},[
+  E('section',{'class':'ch-band-section'},[E('h4',{},[modem.status.tone==='online'?'Connected bands':'Last reported bands']),bands.length?E('div',{'class':'ch-band-grid'},Array.from({length:Math.max(4,bands.length)},(_,i)=>bands[i]||{}).map((c,i)=>E('section',{'class':'ch-band-column','aria-label':i?'SCC'+i:'PCC'},[
    E('strong',{'class':'ch-band-head'},[i?'SCC'+i:'PCC']),
    ...[['Band',c.band],['ARFCN',c.arfcn],['PCI',c.pci],['BW',c.bw]].map(([label,value])=>E('div',{'class':'ch-band-row'},[E('span',{},[label]),E('strong',{},[value||'—'])]))
   ]))):E('p',{'class':'ch-muted'},['Band information is not available.'])]),
