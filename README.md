@@ -1,8 +1,20 @@
 # Chester K45P
 
-![Chester K45P specifications](docs/assets/k45p-specifications.png)
-
 Custom firmware and OTA updates for the Chester K45P.
+
+## Specifications
+
+| Component | Specification |
+| --- | --- |
+| Processor | MediaTek MT7988D, up to 1.8 GHz |
+| Memory | 1 GB RAM |
+| Cellular modem | Quectel RM551E-GL |
+| Cellular modes | 5G SA, 5G NSA, LTE |
+| SIM slots | Dual SIM |
+| WAN / LAN | 1 × 2.5Gbps, switchable WAN or LAN |
+| LAN | 3 × 1Gbps |
+| Wi-Fi | 2.4 GHz and 5 GHz |
+| Firmware | LP-OpenWrt25 |
 
 ## Features
 
