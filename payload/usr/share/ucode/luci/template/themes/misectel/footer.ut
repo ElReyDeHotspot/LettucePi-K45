@@ -84,10 +84,10 @@
 			const title = document.createElement('div');
 			title.className = 'login-shell-card-title';
 			/* The leaf and the product name, not the generic vendor string.
-			   logo.svg is the same asset the dashboard header uses, so the
+			   green-leaf.svg is the same asset the dashboard header uses, so the
 			   login and the page behind it show the same mark. The sizing
 			   lives in cascade.css as .login-leaf-img. */
-			title.innerHTML = '<img class="login-leaf-img" src="/luci-static/misectel/logo.svg" alt="">'
+			title.innerHTML = '<img class="login-leaf-img" src="/luci-static/misectel/green-leaf.svg" alt="">'
 				+ '<span class="login-wordmark">LettucePi</span>';
 			container.insertBefore(title, container.firstChild);
 		}
@@ -147,7 +147,12 @@
 			window.location.replace('{{ entityencode(dispatcher.build_url("setup"), true) }}');
 	})();
 	</script>
-	<script src="/luci-static/resources/wifi-polish-plain.js?v=7"></script>
+	<script src="/luci-static/resources/wifi-polish-plain.js?v=8"></script>
 
+{% if (!ctx.authsession): %}
+<link rel="stylesheet" href="/luci-static/resources/chester-ui/overview.css?v=a7bd0b071507">
+<link rel="stylesheet" href="/luci-static/resources/chester-ui/login-cellular.css?v=20261122-remember-visible">
+<script src="/luci-static/resources/chester-ui/login-cellular.js?v=20261122-remember-visible"></script>
+{% endif %}
 </body>
 </html>

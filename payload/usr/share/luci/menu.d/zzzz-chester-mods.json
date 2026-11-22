@@ -62,5 +62,44 @@
         "/opt/zapret2/config": "file"
       }
     }
+  },
+  "admin/chester/fan": {
+    "title": "Fan Control",
+    "order": 50,
+    "action": {
+      "type": "view",
+      "path": "misectel-system/fan"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-misectel-system"
+      ]
+    }
+  },
+  "admin/chester/vlans": {
+    "title": "VLANs",
+    "order": 60,
+    "action": {
+      "type": "view",
+      "path": "lettucepi/vlans"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-chester-vlans"
+      ]
+    }
+  },
+  "admin/chester/ttl": {
+    "title": "TTL/HL",
+    "order": 70,
+    "action": {
+      "type": "view",
+      "path": "misectel-modem/ttl"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-chester-ttl"
+      ]
+    }
   }
 }

@@ -1,0 +1,24 @@
+{
+  "luci-app-chester-vlans": {
+    "description": "Manage Chester wired VLAN networks",
+    "read": {
+      "uci": [
+        "network",
+        "dhcp",
+        "firewall"
+      ],
+      "ubus": {
+        "network.interface": [
+          "dump"
+        ]
+      }
+    },
+    "write": {
+      "uci": [
+        "network",
+        "dhcp",
+        "firewall"
+      ]
+    }
+  }
+}

@@ -1,0 +1,13 @@
+const fs=require('fs'),assert=require('assert/strict');
+const path=require('path');
+const code=fs.readFileSync(path.join(__dirname,'../payload/www/luci-static/resources/chester-ui/vlans.js'),'utf8');
+const v=new Function('baseclass',code)({extend:o=>o});
+const subnet=v.cidr('192.168.20.1/24');assert.equal(subnet.mask,'255.255.255.0');assert.equal(subnet.size,256);assert.equal(v.cidr('192.168.20.1/31'),null);assert.equal(v.ipNumber('999.1.1.1'),null);
+const model={bridge:'br-lan',bridgeSid:'dev0',wanZone:'wan',networks:[{id:20,name:'Guest',cidr:'192.168.20.1/24',dhcp:true,internet:true}],ports:[{name:'lan1',native:1,tagged:[20]},{name:'lan2',native:20,tagged:[]},{name:'lan3',native:1,tagged:[]}],reserved:[v.cidr('192.168.100.1/24')],managed:[]};
+assert.deepEqual(v.validate(model),[]);const plan=v.plan(model);const set=(sid,key)=>plan.find(o=>o.sid===sid&&o.key===key)?.value;
+assert.deepEqual(set('cv1_ports','ports'),['lan1:u*','lan3:u*']);assert.deepEqual(set('cv20_ports','ports'),['lan1:t','lan2:u*']);assert.equal(set('cv20_zone','input'),'REJECT');assert.equal(set('cv20_zone','forward'),'REJECT');assert.equal(set('cv20','netmask'),'255.255.255.0');assert.equal(set('cv20_internet','dest'),'wan');assert.equal(set('cv20_dhcp','dest_port'),'67');assert.equal(set('lan','device'),'br-lan.1');
+const bad=structuredClone(model);bad.networks[0].cidr='192.168.100.1/24';assert(v.validate(bad).some(e=>e.includes('overlaps')));bad.networks[0].cidr='8.8.8.1/24';assert(v.validate(bad).some(e=>e.includes('private')));bad.networks[0].cidr='192.168.20.2/24';assert(v.validate(bad).some(e=>e.includes('first usable')));
+const noManagement=structuredClone(model);noManagement.ports.forEach(p=>p.native=20);assert(v.validate(noManagement).some(e=>e.includes('Main LAN')));
+const noInternet=structuredClone(model);noInternet.networks[0].internet=false;noInternet.networks[0].dhcp=false;assert(!v.plan(noInternet).some(o=>o.sid==='cv20_internet'||o.sid==='cv20_dhcp'));
+const removed={...model,networks:[],ports:model.ports.map(p=>({...p,native:1,tagged:[]})),wasManaged:true,managed:[{config:'network',sid:'cv20'}]};assert(v.plan(removed).some(o=>o.sid==='lan'&&o.key==='device'&&o.value==='br-lan'));
+console.log('VLAN planner: subnet validation, conflicts, management port, tagged/untagged ports, isolation, DHCP, Internet and removal passed. No live configuration applied.');

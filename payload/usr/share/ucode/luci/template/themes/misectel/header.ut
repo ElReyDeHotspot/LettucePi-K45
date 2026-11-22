@@ -42,7 +42,7 @@
 <meta name="application-name" content="{{ appname }}">
 <meta name="apple-mobile-web-app-title" content="{{ appname }}">
 <link rel="stylesheet" href="{{ media }}/cascade.css?v=chester-k45p-live-15">
-<link rel="stylesheet" href="{{ resource }}/chester-ui/navigation.css?v=4080502b14cd">
+<link rel="stylesheet" href="{{ resource }}/chester-ui/navigation.css?v=7f6c3cc79fe5">
 <link rel="icon" href="{{ media }}/favicon.ico" sizes="48x48">
 {% if (node?.css): %}
 <link rel="stylesheet" href="{{ resource }}/{{ node.css }}">
@@ -66,7 +66,7 @@
 <header>
 	<div class="fill">
 		<div class="container">
-			<button type="button" class="showSide" aria-label="Toggle menu"></button>
+			<button type="button" class="showSide" aria-label="Toggle menu"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
 			<div class="page-title">
 				<a class="brand" href="{{ home_url }}">{{ appname }}</a>
 			</div>

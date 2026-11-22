@@ -1,0 +1,59 @@
+#!/bin/sh /etc/rc.common
+START=95
+STOP=13
+USE_PROCD=1
+
+nftfile=/etc/nftables.d/99-reset-ttl-from-br-lan.nft
+helper=/usr/sbin/chester-ttl
+
+restore_acceleration() {
+ local option saved
+ for option in flow_offloading flow_offloading_hw; do
+  saved="$(uci -q get "qmodem_ttl.main.previous_$option")"
+  case "$saved" in
+   0|1) uci set "firewall.@defaults[0].$option=$saved";;
+   unset) uci -q delete "firewall.@defaults[0].$option";;
+   *) continue;;
+  esac
+  uci -q delete "qmodem_ttl.main.previous_$option"
+ done
+ uci commit firewall; uci commit qmodem_ttl
+}
+stop_service() {
+ local changed=0
+ [ -f "$nftfile" ] && { rm -f "$nftfile"; changed=1; }
+ nft list chain inet fw4 chester_ttl_postrouting >/dev/null 2>&1 && changed=1
+ restore_acceleration
+ [ "$changed" = 0 ] || /etc/init.d/firewall reload
+}
+start_service() {
+ local enable ttl hl option value work
+ enable="$(uci -q get qmodem_ttl.main.enable)"
+ [ "$enable" = 1 ] || { stop_service; return $?; }
+ ttl="$(uci -q get qmodem_ttl.main.ttl)"; hl="$(uci -q get qmodem_ttl.main.hl)"; [ -n "$hl" ] || hl="$ttl"
+ work="$(mktemp -d /tmp/chester-ttl-rules.XXXXXX)" || return 1
+ "$helper" render "$ttl" "$hl" >"$work/new" || { rm -rf "$work"; return 1; }
+ [ ! -f "$nftfile" ] || cp -p "$nftfile" "$work/old"
+ cp "$work/new" "$nftfile"
+ if ! fw4 check >"$work/check" 2>&1; then
+  if [ -f "$work/old" ]; then cp -p "$work/old" "$nftfile"; else rm -f "$nftfile"; fi
+  logger -t chester-ttl 'Firewall validation failed; kept the previous TTL/HL rules.'
+  rm -rf "$work"; return 1
+ fi
+ for option in flow_offloading flow_offloading_hw; do
+  if ! uci -q get "qmodem_ttl.main.previous_$option" >/dev/null; then
+   value="$(uci -q get "firewall.@defaults[0].$option" || printf unset)"
+   uci set "qmodem_ttl.main.previous_$option=$value"
+  fi
+  uci set "firewall.@defaults[0].$option=0"
+ done
+ uci commit qmodem_ttl; uci commit firewall
+ /etc/init.d/firewall reload
+ value=$?
+ rm -rf "$work"
+ return "$value"
+}
+# Atomic fw4 reload; avoid the old stop/start pair and its two firewall restarts.
+restart() { start_service; }
+reload_service() { start_service; }
+service_triggers() { procd_add_reload_trigger qmodem_ttl; }

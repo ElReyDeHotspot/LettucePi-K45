@@ -1,0 +1,64 @@
+#!/bin/sh
+# Numeric-only entry point shared by Overview and the TTL/HL page.
+. /usr/share/libubox/jshn.sh
+
+valid_value() { case "$1" in ''|0*|*[!0-9]*) return 1;; esac; [ "$1" -ge 1 ] && [ "$1" -le 255 ]; }
+status() {
+ local enabled ttl hl rules v4 v6 on=0 applied=0 four=0 six=0
+ enabled="$(uci -q get qmodem_ttl.main.enable)"
+ ttl="$(uci -q get qmodem_ttl.main.ttl)"; valid_value "$ttl" || ttl=64
+ hl="$(uci -q get qmodem_ttl.main.hl)"; valid_value "$hl" || hl="$ttl"
+ rules="$(nft list chain inet fw4 chester_ttl_postrouting 2>/dev/null)"
+ v4="$(printf '%s\n' "$rules" | sed -n 's/.*ip ttl set \([0-9][0-9]*\).*/\1/p')"
+ v6="$(printf '%s\n' "$rules" | sed -n 's/.*ip6 hoplimit set \([0-9][0-9]*\).*/\1/p')"
+ if [ "$enabled" = 1 ]; then
+  on=1
+  [ "$v4" = "$ttl" ] && four=1
+  [ "$v6" = "$hl" ] && six=1
+  [ "$four" = 1 ] && [ "$six" = 1 ] && applied=1
+ else
+  [ -z "$rules" ] && applied=1
+ fi
+ json_init; json_add_boolean enabled "$on"; json_add_string ttl "$ttl"; json_add_string hl "$hl"
+ json_add_boolean applied "$applied"; json_add_boolean ipv4_applied "$four"; json_add_boolean ipv6_applied "$six"
+ json_dump
+}
+render() {
+ valid_value "$1" && valid_value "$2" || return 1
+ cat <<EOF
+chain chester_ttl_postrouting {
+ type filter hook postrouting priority mangle; policy accept;
+ iifname "br-lan*" meta l4proto ipv6-icmp icmpv6 type { nd-router-solicit, nd-router-advert, nd-neighbor-solicit, nd-neighbor-advert, nd-redirect, 130, 131, 132, 143 } return comment "Preserve IPv6 neighbor and multicast discovery"
+ iifname "br-lan*" ip ttl set $1 counter comment "Chester IPv4 TTL"
+ iifname "br-lan*" ip6 hoplimit set $2 counter comment "Chester IPv6 HL"
+}
+EOF
+}
+error() { json_init; json_add_boolean success 0; json_add_string message "$1"; json_dump; }
+restore_flag() { if [ "$2" = unset ]; then uci -q delete "firewall.@defaults[0].$1"; else uci set "firewall.@defaults[0].$1=$2"; fi; }
+apply_values() {
+ local enable="$1" ttl="$2" hl="$3" old_sw old_hw work check
+ case "$enable" in 0|1) ;; *) error 'Choose enabled or disabled.'; return 1;; esac
+ if ! valid_value "$ttl" || ! valid_value "$hl"; then error 'TTL and HL must be whole numbers from 1 to 255.'; return 1; fi
+ if [ -n "$(uci -q changes firewall)$(uci -q changes qmodem_ttl)" ]; then error 'Apply or discard pending firewall and TTL changes first.'; return 1; fi
+ if ! mkdir /var/lock/chester-ttl.lock 2>/dev/null; then error 'TTL/HL is already updating. Try again in a moment.'; return 1; fi
+ work="$(mktemp -d /tmp/chester-ttl.XXXXXX)" || { rmdir /var/lock/chester-ttl.lock; return 1; }
+ trap "rm -rf '$work'; rmdir /var/lock/chester-ttl.lock 2>/dev/null" EXIT
+ cp -p /etc/config/qmodem_ttl "$work/config" || return 1
+ old_sw="$(uci -q get firewall.@defaults[0].flow_offloading || printf unset)"
+ old_hw="$(uci -q get firewall.@defaults[0].flow_offloading_hw || printf unset)"
+ uci set qmodem_ttl.main=main
+ uci set "qmodem_ttl.main.enable=$enable"; uci set "qmodem_ttl.main.ttl=$ttl"; uci set "qmodem_ttl.main.hl=$hl"
+ uci commit qmodem_ttl
+ if /etc/init.d/qmodem_ttl restart >"$work/log" 2>&1; then
+  check="$(status)"; json_load "$check"; json_get_var check applied
+ else check=0; fi
+ if [ "$check" != 1 ]; then
+  cp -p "$work/config" /etc/config/qmodem_ttl
+  restore_flag flow_offloading "$old_sw"; restore_flag flow_offloading_hw "$old_hw"; uci commit firewall
+  /etc/init.d/qmodem_ttl restart >/dev/null 2>&1
+  error 'The live firewall did not accept both values. Previous settings were restored.'; return 1
+ fi
+ check="$(status)"; json_load "$check"; json_add_boolean success 1; json_add_string message 'Live firewall verified'; json_dump
+}
+case "$1" in status) status;; render) shift; render "$@";; apply) shift; apply_values "$@";; *) error 'Unknown TTL/HL action.'; exit 1;; esac

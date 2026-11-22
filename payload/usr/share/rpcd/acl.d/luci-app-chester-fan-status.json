@@ -1,0 +1,12 @@
+{
+  "luci-app-chester-fan-status": {
+    "description": "Read the configured fan CPU temperature sensor",
+    "read": {
+      "ubus": {
+        "misectel": [
+          "temp_status"
+        ]
+      }
+    }
+  }
+}

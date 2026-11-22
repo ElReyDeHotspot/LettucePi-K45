@@ -104,3 +104,61 @@ session. JS syntax and git whitespace checks passed. No service/network toggles,
 radio-mode changes, speed tests, reboot or image build/flash were performed.
 Saved previews: K45P-Approved-Overview-Desktop.jpg and
 K45P-Approved-Overview-Phone.jpg in the task outputs directory.
+
+
+## Pending next image: settings, login and controls
+
+Applied the Overview styling to Fan Control, Administration, System, Reboot,
+Software Update, AT Commands, Cellular Info and TTL/HL. Fan Control and TTL/HL
+are under Chester Mods. Logout is directly beneath Developer. AT Commands sends
+on Enter and offers the owner's six fill-only command shortcuts; only the
+read-only AT command was sent during browser validation.
+
+Fan display supports Celsius/Fahrenheit with a browser-local preference and
+canonical Celsius thresholds. The visible "Temperature units" label was removed
+as requested. Vendor fan mode 1 is correctly described as Always on. No fan
+configuration was saved during these checks.
+
+Login now has two aligned white cards: a unified green-leaf/credentials card and
+a read-only Cellular card. At phone widths the cards stack. Remember is visibly
+labelled beside its checkbox and enables native browser password-manager
+behavior; the browser may require its own save confirmation. Only the checkbox
+preference is stored locally, never the password. The public GET-only CGI exposes
+a strict radio-metric whitelist, excludes SIM/device identifiers and IP/APN data,
+and refreshes through a private root-owned runtime directory at most every 30
+seconds. Tests cover allowed fields, ignored query arguments and POST rejection.
+
+Wi-Fi now distinguishes Use One Name & Password (Shared/Separate) from Wi-Fi
+Power (On/Off), with explanations and a Save & Apply reminder for radio power.
+Removed obsolete script-injected controls that could duplicate native switches.
+Both bands remain US; no radio, name, password or encryption settings were applied.
+
+The new guided wired IPv4 VLAN page supports network creation, DHCP, Internet
+access, isolated firewall zones, native port assignment and advanced tagged
+networks. Management VLAN 1 must retain an untagged port. Changes are staged,
+reviewed and applied through LuCI's rollback mechanism. Planner tests and draft
+browser checks passed; a temporary disconnected bridge verified kernel VLAN
+filtering. Real-port VLAN changes and traffic isolation still require field
+validation; no real port configuration was applied.
+
+TTL/HL now saves independent values through a validated, locked backend with
+configuration rollback and actual nftables readback. Includes LAN VLAN bridges,
+preserves IPv6 neighbor discovery and multicast listener control traffic, and
+reports success only when both rules match. Existing enabled 64/64 values were
+retained. Live packet captures verified client TTL 128 -> 64 and IPv6 hop limit
+128 -> 64 on cellular egress. HTTPS succeeded over IPv4 and IPv6. Syntax/range
+checks and fw4 validation passed.
+
+Overview CPU uses a one-second /proc/stat delta; memory uses MemTotal minus
+MemAvailable. Observed roughly 4-10% CPU and 22-23% memory with about 760 MiB
+available. No tuning was needed or performed; optional polling optimizations
+were reverted at the owner's request. Selected SA/NSA/LTE mode, NSA metrics,
+SIM status and requested label capitalization were corrected.
+
+Final validation: changed JS/JSON/Python syntax, VLAN planner, temperature
+conversions, selected-mode parsing, public preview contract and read-only live
+TTL/HL smoke checks passed. All 35 changed payload files matched the live router.
+Desktop Wi-Fi and desktop/390px login checks confirmed labels and layout; Logout
+position and destination were verified without signing the user out. No reboot,
+reset, firmware upload or image build/flash was performed. Published bin 8 and
+its release manifest remain unchanged.

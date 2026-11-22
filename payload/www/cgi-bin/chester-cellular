@@ -1,0 +1,10 @@
+#!/bin/sh
+# Intentional public GET endpoint for the owner's login-screen radio preview.
+# Query parameters are ignored. No control methods or identifiers are exposed.
+case "${REQUEST_METHOD:-GET}" in
+ GET) ;;
+ *) printf 'Status: 405 Method Not Allowed\r\nAllow: GET\r\nContent-Type: application/json\r\n\r\n{"error":"GET only"}\n'; exit 0;;
+esac
+printf 'Content-Type: application/json\r\nCache-Control: no-store\r\nX-Content-Type-Options: nosniff\r\n\r\n'
+/usr/sbin/chester-login-status
+/usr/sbin/chester-login-status refresh </dev/null >/dev/null 2>&1 &

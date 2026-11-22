@@ -1,0 +1,19 @@
+{
+  "luci-app-chester-ttl": {
+    "description": "Manage and verify IPv4 TTL and IPv6 hop-limit rewriting",
+    "read": {
+      "ubus": {
+        "misectel": [
+          "ttl_status"
+        ]
+      }
+    },
+    "write": {
+      "ubus": {
+        "misectel": [
+          "set_ttl_values"
+        ]
+      }
+    }
+  }
+}

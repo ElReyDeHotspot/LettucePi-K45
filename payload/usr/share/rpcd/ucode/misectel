@@ -378,40 +378,45 @@ function parseLeaseLine(line, now) {
 }
 
 const methods = {
+ runtime_metrics: {
+  call: function() {
+   try { return json(readCommandOutput('/usr/sbin/chester-runtime-metrics')); }
+   catch (e) { return {}; }
+  }
+ },
 	// TTL / hop-limit rewriting. The init script interpolates the value
 	// into an nft file that fw4 parses, so a non-numeric value takes down
 	// the whole firewall -- it is range-checked before being committed.
 	ttl_status: {
 		call: function() {
-			let ctx = cursor();
-			let value = ctx ? ctx.get('qmodem_ttl', 'main', 'enable') : null;
-			let ttl = ctx ? ctx.get('qmodem_ttl', 'main', 'ttl') : null;
-			return { enabled: (value == '1') ? true : false, ttl: ttl ? ttl : '64' };
+			try { return json(readCommandOutput('/usr/sbin/chester-ttl status')); }
+			catch (e) { return { enabled: false, applied: false, message: 'TTL/HL status unavailable' }; }
 		}
 	},
-
 	set_ttl: {
 		args: { enabled: 'String' },
 		call: function(request) {
-			let want = trimSafe(request.args.enabled);
-			let on = !(want == '0' || lc(want) == 'false' || lc(want) == 'off');
 			let ctx = cursor();
-			if (!ctx)
-				return { success: false, message: 'failed to open uci cursor' };
-			ctx.set('qmodem_ttl', 'main', null, 'main');
-			ctx.set('qmodem_ttl', 'main', 'enable', on ? '1' : '0');
-			let ttl = ctx.get('qmodem_ttl', 'main', 'ttl');
-			let n = ttl ? +ttl : 0;
-			if (!(n >= 1 && n <= 255))
-				ctx.set('qmodem_ttl', 'main', 'ttl', '64');
-			ctx.commit('qmodem_ttl');
-			// stop, not start-with-enable-0: only stop_service restores the
-			// flow offloading that enabling turned off.
-			if (on)
-				readCommandOutput('/etc/init.d/qmodem_ttl restart >/dev/null 2>&1');
-			else
-				readCommandOutput('/etc/init.d/qmodem_ttl stop >/dev/null 2>&1');
-			return { success: true, enabled: on };
+			let ttl = ctx ? ctx.get('qmodem_ttl', 'main', 'ttl') : '64';
+			let hl = ctx ? ctx.get('qmodem_ttl', 'main', 'hl') : null;
+			if (!match(ttl || '', /^[1-9][0-9]{0,2}$/) || +ttl > 255) ttl = '64';
+			if (!match(hl || '', /^[1-9][0-9]{0,2}$/) || +hl > 255) hl = ttl;
+			let want = lc(trimSafe(request.args.enabled));
+			let on = (want == '0' || want == 'false' || want == 'off') ? '0' : '1';
+			try { return json(readCommandOutput('/usr/sbin/chester-ttl apply ' + on + ' ' + ttl + ' ' + hl)); }
+			catch (e) { return { success: false, message: 'TTL/HL apply failed' }; }
+		}
+	},
+	set_ttl_values: {
+		args: { enabled: 'String', ttl: 'String', hl: 'String' },
+		call: function(request) {
+			let args = request.args;
+			if (!(args.enabled == '0' || args.enabled == '1') ||
+			    !match(args.ttl || '', /^[1-9][0-9]{0,2}$/) || +args.ttl > 255 ||
+			    !match(args.hl || '', /^[1-9][0-9]{0,2}$/) || +args.hl > 255)
+				return { success: false, message: 'TTL and HL must be whole numbers from 1 to 255.' };
+			try { return json(readCommandOutput('/usr/sbin/chester-ttl apply ' + args.enabled + ' ' + args.ttl + ' ' + args.hl)); }
+			catch (e) { return { success: false, message: 'TTL/HL apply failed' }; }
 		}
 	},
 	internet_status: {

@@ -3,8 +3,12 @@
         "description": "Grant access to the LettucePi dashboard",
         "read": {
             "ubus": {
-                "failover": ["status"],
-                "chester.sim": ["status"],
+                "failover": [
+                    "status"
+                ],
+                "chester.sim": [
+                    "status"
+                ],
                 "system": [
                     "board",
                     "info"
@@ -44,7 +48,8 @@
                     "ttl_status",
                     "update_settings",
                     "video_engine",
-                    "wan_to_lan"
+                    "wan_to_lan",
+                    "runtime_metrics"
                 ],
                 "iwinfo": [
                     "info",

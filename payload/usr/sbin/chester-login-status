@@ -1,0 +1,20 @@
+#!/bin/sh
+# Refresh only the two read-only vendor caches, at most once per 30 seconds.
+if [ "$1" != refresh ]; then exec ucode /usr/share/chester/login-cellular.uc; fi
+umask 077
+runtime=/var/run/chester-login
+mkdir -p "$runtime" || exit 0
+[ ! -L "$runtime" ] && [ "$(stat -c %u "$runtime")" = 0 ] || exit 0
+chmod 700 "$runtime"
+mkdir "$runtime/refresh.lock" 2>/dev/null || exit 0
+trap 'rmdir "$runtime/refresh.lock" 2>/dev/null' EXIT
+now=$(date +%s)
+last=$(cat "$runtime/last-refresh" 2>/dev/null)
+case "$last" in ''|*[!0-9]*) last=0;; esac
+[ $((now-last)) -ge 30 ] || exit 0
+printf '%s\n' "$now" >"$runtime/last-refresh"
+section=$(uci -q show qmodem | sed -n 's/^qmodem\.\([A-Za-z0-9_]*\)=modem-device$/\1/p' | head -1)
+[ -n "$section" ] || exit 0
+params=$(printf '{"config_section":"%s"}' "$section")
+ubus -t 5 call qmodem cell_info "$params" >/dev/null 2>&1
+ubus -t 5 call qmodem sim_info "$params" >/dev/null 2>&1
