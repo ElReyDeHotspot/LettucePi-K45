@@ -1,0 +1,6 @@
+const fs=require('fs'),path=require('path'),assert=require('assert/strict');
+const entries=[];for(const [tag,values]of [['LTE',{'Band':'66 / 2','EARFCN':'66711 / 925','Physical Cell ID':'285 / 374','DL Bandwidth':'15 / 5'}],['NR',{'Band':'41 / 41','ARFCN':'530190 / 507870','Physical Cell ID':'120 / 120','DL Bandwidth':'50 / 50'}]])for(const [key,value]of Object.entries(values))entries.push({extra_info:tag,key,value});
+for(const file of ['chester-ui/overview-core.js','chester-ui/login-cellular.js','view/misectel-modem/cellular-info.js']){
+ const source=fs.readFileSync(path.join(__dirname,'../payload/www/luci-static/resources',file),'utf8');const a=source.indexOf('function chesterSplitCa('),b=source.indexOf('function chesterNetworkLabel(',a);const fn=new Function('_',source.slice(a,b)+';return chesterCarriersFromEntries;')(x=>x);const carriers=fn(entries,'EN-DC Mode');assert.deepEqual(carriers.map(c=>c.band),['B66','B2','N41','N41']);assert.deepEqual(carriers.map(c=>c.arfcn),['66711','925','530190','507870']);assert.deepEqual(carriers.map(c=>c.bw),['15MHz','5MHz','50MHz','50MHz']);
+}
+console.log('PASS carrier display: Overview, login and Cellular Info preserve four carriers including two different N41 frequencies.');

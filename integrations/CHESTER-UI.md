@@ -328,3 +328,28 @@ No new public fields or credentials were exposed. Both Sun and Night were checke
 The Chester Mods sidebar entry is Speeds; the page title remains Chester Speeds.
 These changes were deployed as live UI files, with source retained for the next
 image. No new firmware was built, flashed or published for this work.
+
+
+## Pending next image: complete Quectel carrier aggregation
+
+The captured vendor Quectel driver queried QCAINFO only in SA mode. Its NSA
+cell_info/current_band returned the QENG LTE anchor and one NR serving cell,
+losing LTE and NR secondary carriers. The payload now includes the captured
+vendor driver plus a shared QCAINFO parser/helper. No modem settings changed.
+
+The parser handles LTE resource-block bandwidths separately from NR bandwidth
+codes and both compact five-field and extended NR carrier responses. Carrier
+identity includes channel/PCI; two N41 carriers remain separate. Missing CA
+responses retain the original QENG fallback. Serving-carrier UL bandwidth and
+SCS remain attached where QENG reports them; secondary UL values are not guessed.
+The same rows feed native current_band and the slash-separated cell_info fields
+used by Overview, Cellular Info, the lock-page cards and the login preview.
+
+Live verification on the RM551E-GL: QCAINFO, native current_band, native QModem
+Cell Information and Overview all showed B66 (66711 / 15MHz), B2 (925 / 5MHz),
+N41 (530190 / 50MHz) and N41 (507870 / 50MHz). Both N41 PCIs were 120, so
+matching on band or PCI alone would have lost a real carrier. No reboot, redial,
+band lock, network-mode or SIM write was issued. Shell/awk fixture tests cover
+mixed NSA, SA, repeated bands, LTE/NR bandwidth units, missing values and empty
+CA fallback; display tests cover Overview, login and Cellular Info. Physical
+mode changes to SA or LTE were not required for this live NSA repair.

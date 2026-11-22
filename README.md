@@ -7,6 +7,11 @@ TTL/HL → Root Password → Timezone → Wi-Fi, then Review. Wi-Fi can be disab
 or use shared/separate band names. These new wizard files are pending the next
 image; bin 10 below contains the earlier Quick Start.
 
+QModem now reads all `AT+QCAINFO` carriers in NSA, LTE and SA. The live fix
+shows B66 + B2 + N41 + N41, preserves distinct repeated-band carriers and
+handles both NR response formats. Native QModem, Overview, Cellular Info and
+login consume the corrected data. This parser fix is pending the next image.
+
 ## Bin 10 — version 1.0.9, build 202611220003
 
 Sun/Night appearance now follows the approved Overview mockup. The top-right
