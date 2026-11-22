@@ -162,3 +162,26 @@ Desktop Wi-Fi and desktop/390px login checks confirmed labels and layout; Logout
 position and destination were verified without signing the user out. No reboot,
 reset, firmware upload or image build/flash was performed. Published bin 8 and
 its release manifest remain unchanged.
+
+
+## Pending next image: visible station ID and simpler Wi-Fi
+
+Overview now shows the existing calculated station ID directly below the signal
+metrics, outside collapsed Modem details. LTE/NSA uses eNB; the existing SA gNB
+calculation remains unchanged. Live NSA displayed eNB 54712.
+
+Wi-Fi now uses the shared settings theme with two clear sections: Network setup
+(shared versus separate band credentials) and Your Wi-Fi network (power, name,
+password). Security and per-band radio tuning are expandable. Channel, width,
+standard, region and transmit power remain available; transmit power is now a
+native view control instead of depending on the legacy injected layout. Existing
+load/save behavior is retained, including configured regulatory values. The
+password input has an accessible label. A persistent desktop Save & Apply bar
+explains the brief possible Wi-Fi interruption; phone controls stack naturally.
+
+Validated JS syntax, opened radio tuning, switched between shared/separate draft
+layouts and restored Shared without saving. The 390px phone view has no horizontal
+overflow. Live wireless/misectel UCI changes remained empty. No power toggle,
+password reveal, Save & Apply, radio reconfiguration or firmware build/flash was
+performed. Saved previews: K45P-WiFi-Simple-Desktop.jpg,
+K45P-WiFi-Simple-Phone.jpg and K45P-Overview-eNB.jpg in task outputs.

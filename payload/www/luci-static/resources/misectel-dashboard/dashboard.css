@@ -2369,3 +2369,5 @@
 	filter: grayscale(100%) !important;
 	transition: opacity .2s ease;
 }
+
+.ch-station-id{display:flex;align-items:center;gap:10px;margin:12px 0 0;padding:10px 14px;background:#f3f5f9;border-radius:11px;font-size:14px}.ch-station-id>span{color:#626b78}.ch-station-id>strong{font-weight:700;color:#11151c}
