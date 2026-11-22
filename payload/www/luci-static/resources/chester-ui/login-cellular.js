@@ -100,10 +100,10 @@ if(password&&form){
  const row=make('div','login-remember'),checkbox=document.createElement('input'),label=make('label','','Remember');checkbox.type='checkbox';checkbox.id='chester-remember-password';label.htmlFor=checkbox.id;checkbox.title='Use this browser’s saved-password manager';try{checkbox.checked=window.localStorage.getItem('chester-remember-password')==='1';}catch(e){}
  const sync=()=>{form.autocomplete=checkbox.checked?'on':'off';password.autocomplete=checkbox.checked?'current-password':'off';if(username)username.autocomplete='username';try{window.localStorage.setItem('chester-remember-password',checkbox.checked?'1':'0');}catch(e){}};
  checkbox.addEventListener('change',sync);sync();row.append(checkbox,label);password.closest('.cbi-value')?.after(row);
- const help=make('p','login-remember-help','Your browser may ask to save the password after you sign in.');row.append(help);
+ const help=make('p','login-remember-help','Your browser may ask to save the password after you sign in.');label.title=help.textContent;
 }
 const panel=make('section','chester-home login-cellular');panel.setAttribute('aria-label','Cellular status');
-const card=make('div','ch-card');card.append(make('h3','','Cellular'));const body=make('div','login-cellular-body');body.append(make('p','ch-muted','Reading cellular status…'));card.append(body);panel.append(card);content.append(panel);
+const card=make('div','ch-card');card.append(make('h3','','Cellular'));const body=make('div','login-cellular-body');body.append(make('p','ch-muted','Reading cellular status…'));card.append(body);panel.append(card);const loginCard=content.querySelector(':scope > .container');if(loginCard)loginCard.prepend(panel);else content.prepend(panel);
 const age=make('p','login-cellular-age');card.append(age);
 function render(data){
  if(!data.available){body.replaceChildren(make('p','ch-muted','Cellular information is not available yet.'));age.textContent='Updates automatically.';return;}
@@ -114,7 +114,11 @@ function render(data){
  const rsrp=Number(value('rsrp')),quality=Number.isFinite(rsrp)?rsrp>=-90?'Excellent':rsrp>=-100?'Good':rsrp>=-110?'Fair':'Weak':'Unknown';const signal=make('div','ch-radio-metric ch-quality '+(/Excellent|Good/.test(quality)?'is-good':'is-fair'));signal.append(make('span','','Signal'),make('strong','',quality));metrics.append(signal);
  const bands=chesterCarriersFromEntries(entries,rawMode),section=make('section','ch-band-section');section.append(make('h4','','Connected Bands'));const grid=make('div','ch-band-grid');
  for(let i=0;i<Math.max(4,bands.length);i++){const c=bands[i]||{},column=make('section','ch-band-column');column.append(make('strong','ch-band-head',i?'SCC'+i:'PCC'));for(const [label,v] of [['Band',c.band],['ARFCN',c.arfcn],['PCI',c.pci],['BW',c.bw]]){const row=make('div','ch-band-row');row.append(make('span','',label),make('strong','',v||'—'));column.append(row);}grid.append(column);}section.append(grid);
- body.replaceChildren(carrier,metrics,section,make('p','login-cellular-signin','Sign in to manage your cellular connection.'));
+ const bandLine=make('div','login-band-summary');bandLine.append(make('span','','Bands'));
+ for(const band of bands){const chip=make('strong','',band.band||'—');bandLine.append(chip);}
+ if(!bands.length)bandLine.append(make('strong','','—'));
+ const details=make('details','login-cellular-details'),summary=make('summary','','Connection details');details.open=!!body.querySelector('details[open]');details.append(summary,section);
+ body.replaceChildren(carrier,metrics,bandLine,details);
  age.textContent=data.age==null?'Last reported status':data.age<45?'Updated just now':'Last reported '+Math.max(1,Math.floor(data.age/60))+' min ago';
 }
 let busy=false;async function refresh(){if(busy||document.hidden)return;busy=true;try{const response=await fetch('/cgi-bin/chester-cellular',{cache:'no-store',credentials:'omit'});if(response.ok)render(await response.json());}catch(e){age.textContent='Waiting for cellular status…';}finally{busy=false;}}

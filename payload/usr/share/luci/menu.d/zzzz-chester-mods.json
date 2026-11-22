@@ -34,7 +34,7 @@
     }
   },
   "admin/chester/ookla": {
-    "title": "Chester Speeds",
+    "title": "Speeds",
     "order": 30,
     "action": {
       "type": "view",
@@ -100,6 +100,38 @@
       "acl": [
         "luci-app-chester-ttl"
       ]
+    }
+  },
+  "admin/chester/terminal": {
+    "title": "Terminal",
+    "order": 80,
+    "action": {
+      "type": "view",
+      "path": "ttyd/term"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-ttyd"
+      ],
+      "uci": {
+        "ttyd": true
+      }
+    }
+  },
+  "admin/chester/terminal/config": {
+    "title": "Config",
+    "order": 2,
+    "action": {
+      "type": "view",
+      "path": "ttyd/config"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-ttyd"
+      ],
+      "uci": {
+        "ttyd": true
+      }
     }
   }
 }

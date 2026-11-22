@@ -221,3 +221,110 @@ Factory defaults remove the OEM/LettucePi aliases and register LP_OpenWrt25 with
 the existing misectel asset path, preserving theme compatibility. The live theme
 registry was migrated; Design options were visually checked without applying a
 different active design. No firmware image was rebuilt for this label change.
+
+
+## Pending next image: approved Sun/Night appearance and modem pages
+
+Sun/Night is a shared top-right sun/moon pill in LP-OpenWrt25. The early head
+script restores the browser's explicit choice before the page renders; Sun is
+the default. Only the appearance enum is stored. Storage events synchronize open
+tabs; arrow keys and pressed-state labels support keyboard/screen-reader use.
+The anonymous login uses the same control at the top right. No theme package,
+external asset, server setting or authentication permission was added.
+
+The Night palette matches the approved navy page/cards, restrained borders,
+off-white headings, muted text and blue/green/amber accents. Layout, green leaf,
+sidebar icons and red active navigation remain. Overrides cover shared Chester
+pages, native forms/tables/tabs, account menus, dialogs, loading states, IPv6,
+Smart Queue and login. Images and chart/terminal content are not color-inverted.
+Sun retains the existing light surfaces. Native body/ID rules required explicit
+specificity overrides; the account button hover no longer creates a pale box.
+
+APN Config now starts with target SIM, carrier preset, a prominent APN field and
+Save & Apply. Authentication, connection type and preset management are collapsed.
+Existing per-SIM qmodem writes, preset backend and dial-service apply path remain.
+The table omits credential columns. Merely loading the page no longer saves the
+in-memory preset list. Browser checks selected Verizon/T-Mobile presets without
+applying them; authentication and PDP controls remain available. No APN or modem
+profile change was applied during this task.
+
+Band Lock has LTE/NSA/SA tabs, large checkbox tiles, selected counts, Select all,
+Clear and Restore current draft controls. Currently selected bands missing from
+the advertised list remain visible, rather than being silently dropped. A modem
+special mask such as 0 is preserved until the user explicitly selects and saves
+bands. Empty selections cannot be applied. Saves reject reported modem errors
+and compare readback before claiming success. The touch UI and draft restoration
+were checked without issuing a set_lockband command.
+
+Band Lock and Cell Lock use the actual Overview fetch/render methods via
+chester-ui/overview-core.js and chester-ui/live-cellular.js. Overview itself is a
+small view wrapper around those same unchanged methods. A source comparison
+confirmed the extracted core preserves the pre-refactor implementation exactly.
+The embedded card refreshes modem/interface data every 15 seconds; it does not
+start the full Overview metrics/client/service poll. Existing network-mode
+buttons, signal readings, eNB and four carrier columns are retained.
+
+Cell Lock has the same settings styling, the live Cellular card above its controls,
+and a 5G-first status panel. The editor opens on 5G immediately, exposing Band and
+SCS; existing 5G lock values and the reboot-hook preference are prefilled when
+reported. LTE remains selectable. Numeric input validation and reported-error/
+lock-state readback prevent a false success message. No lock, unlock, reboot hook
+or network-mode change was applied during visual checks; physical lock mutation
+still needs an intentional operational test.
+
+Software opens on Installed packages, with actual package counts/storage, search,
+clear, paging and Installed/Available/Updates navigation. Manual install, upload,
+sources and translation filters are under Advanced package tools. Native package
+operation, dependency and confirmation handlers are preserved. Missing cached
+available lists show Refresh to browse. Search for ttyd, clear, paging and tab
+changes passed. No package refresh/install/remove/update or source write was run.
+The phone table scrolls inside its card; the root no longer expands to table width.
+
+Cellular navigation is APN Config, Cellular Info, AT Commands, IPV6, Band Lock,
+Cell Lock, QModem, followed by IP Passthrough, SMS, Network Monitoring and Traffic
+statistics. These remain siblings, explicitly not children of QModem.
+
+Validation: all changed JavaScript syntax passed; appearance persistence,
+selection state, cross-tab updates, keyboard use and blocked storage tests passed.
+Modem helper tests cover band identity comparison, numeric cell-lock validation
+and SIM-specific APN writes. Existing selected-mode and Wi-Fi save regressions
+passed. Desktop checks covered Overview, APN, both lock pages, Software and login.
+390px checks covered APN, the initial 5G editor, Wi-Fi and Software; additional
+Night views checked Failover, SIM Selection, Chester Speeds, Zapret2, Fan,
+System and IPv6. Phone headers fit with the toggle;
+Software has 375px root scroll width with a 760px table contained in its own
+251px scroll area. Login's two cards share the same Night gradient and readable
+heading colors. Account menu open/close worked. No bin was built/flashed and
+published bin 9, its manifest and signature remain unchanged.
+
+
+## Pending next image: Terminal navigation and compact login
+
+Terminal moved into Chester Mods; the System Settings entry is hidden and old
+URLs remain compatible. A navy/cyan frame wraps the existing ttyd client with
+its real login/session, full-screen support and an Open in tab shortcut.
+Presentation URL options respect saved client options and explicit URL overrides.
+Terminal and Config links appear beneath the content; native top navigation is
+hidden on both views. Config retains all 25 native option keys, dependencies,
+UCI bindings and Save/Apply behavior, grouped into Connection, Access and Advanced.
+The credential field is masked. No ttyd configuration or daemon restart was needed.
+
+Live checks loaded the embedded ttyd login prompt. A separate console session
+accepted root login, ran a harmless printf and exited. Config tabs and inactive
+SSL/UNIX-socket field hiding were verified without saving configuration. Source
+checks confirmed all native option names remain. Terminal URL tests cover IPv6,
+HTTPS, explicit URL queries and saved client presentation preferences.
+
+Login has one outer card with Cellular first and leaf/credentials beneath it.
+The default view shows carrier, mode, four signal metrics and active band badges.
+Connection details expands the full carrier table and retains its expanded state
+across status polling. The Log in button fits at 375 × 568, 390 × 667 and
+1280 × 720 without scrolling; 844 × 390 uses two columns inside the same card.
+Inputs remain 16px with 44px touch targets. Scrolling remains available for
+expanded details, the software keyboard, browser zoom or validation messages.
+Remember stays labeled and uses the existing browser password manager behavior.
+No new public fields or credentials were exposed. Both Sun and Night were checked.
+
+The Chester Mods sidebar entry is Speeds; the page title remains Chester Speeds.
+These changes were deployed as live UI files, with source retained for the next
+image. No new firmware was built, flashed or published for this work.

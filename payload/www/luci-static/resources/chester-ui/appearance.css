@@ -1,0 +1,175 @@
+/* Approved Sun / Night palette. Component overrides preserve layout and status colors. */
+:root{--ap-blue:#007aff;--ap-focus:#78baff}
+.chester-appearance{display:inline-flex;align-items:center;flex:0 0 auto;gap:2px;padding:2px;border:1px solid #c7d2e1;border-radius:99px;background:#f1f5fb;box-sizing:border-box;margin-right:10px}
+.chester-appearance>button{display:inline-flex!important;align-items:center;justify-content:center;width:44px!important;min-width:44px!important;height:30px!important;min-height:30px!important;padding:3px!important;margin:0!important;border:1px solid transparent!important;border-radius:99px!important;background:transparent!important;color:#526174!important;box-shadow:none!important;cursor:pointer!important;line-height:1!important}
+.chester-appearance>button>svg{display:block;width:23px;height:23px;pointer-events:none}
+.chester-appearance>button[aria-pressed=true]{color:#007aff!important;background:#fff!important;border-color:#81baff!important;box-shadow:0 1px 3px #103a6610!important}
+.chester-appearance>button:focus-visible{outline:2px solid var(--ap-focus)!important;outline-offset:3px!important}
+body.theme-misectel header .topbar-right{display:flex!important;align-items:center!important;gap:10px!important;flex:0 0 auto}
+body.theme-misectel header .topbar-right>.status:empty{display:none!important}
+.chester-appearance-floating{position:fixed;right:22px;top:18px;z-index:1000;margin:0;box-shadow:0 3px 14px #0002}
+@media(max-width:650px){.chester-appearance{margin-right:0}.chester-appearance>button{width:34px!important;min-width:34px!important;height:28px!important;min-height:28px!important}.chester-appearance>button>svg{width:21px;height:21px}body.theme-misectel.logged-in header .brand{font-size:18px!important;white-space:nowrap}body.theme-misectel header .topbar-right{gap:5px!important}body.theme-misectel header .account-meta{gap:4px!important}.chester-appearance-floating{right:14px;top:12px}}
+html[data-chester-appearance=night]{color-scheme:dark;--ap-page:#0b1622;--ap-card:#192938;--ap-card-bottom:#14212e;--ap-inset:#263747;--ap-border:#344657;--ap-text:#f3f6fc;--ap-muted:#aab7c8;--ap-blue:#409cff;--ap-green:#55e837;--ap-red:#ff777c;--ap-amber:#ffd45a;--ap-shadow:0 1px 3px #0002}
+html[data-chester-appearance=night] body.theme-misectel{background:var(--ap-page)!important;color:var(--ap-text)!important}
+html[data-chester-appearance=night] body.theme-misectel :is(.main,.main-right,#maincontent,#maincontent>.container){background-color:var(--ap-page)!important;color:var(--ap-text)}
+html[data-chester-appearance=night] body.theme-misectel.logged-in.node-admin-dashboard-overview .main-right>#maincontent#maincontent{background:var(--ap-page)!important}
+html[data-chester-appearance=night] body.theme-misectel.logged-in header{background:linear-gradient(110deg,#1a2c3d,#12202e)!important;border-bottom-color:var(--ap-border)!important;color:var(--ap-text)!important}
+html[data-chester-appearance=night] body.theme-misectel.logged-in header :is(.brand,.showSide,.showSide>svg,.account-menu__dots){color:var(--ap-text)!important}
+html[data-chester-appearance=night] body.theme-misectel.logged-in .account-avatar:before,html[data-chester-appearance=night] body.theme-misectel.logged-in .account-avatar:after{border-color:var(--ap-text)!important}
+html[data-chester-appearance=night] .chester-appearance{background:#172533;border-color:#53677e}
+html[data-chester-appearance=night] .chester-appearance>button{color:#c7d2e0!important}
+html[data-chester-appearance=night] .chester-appearance>button[aria-pressed=true]{background:linear-gradient(#1988ff,#0069ed)!important;color:white!important;border-color:#329fff!important}
+html[data-chester-appearance=night] :is(.account-menu__panel,.dropdown-menu,.cbi-dropdown>ul,.cbi-dropdown .dropdown,.cbi-dropdown .preview,.cbi-dropdown .more){background:var(--ap-card)!important;border-color:var(--ap-border)!important;color:var(--ap-text)!important;box-shadow:0 8px 28px #0005!important}
+html[data-chester-appearance=night] .account-menu__item{color:var(--ap-text)!important}
+html[data-chester-appearance=night] .account-menu__item:hover{background:var(--ap-inset)!important}
+html[data-chester-appearance=night] .account-menu__item--danger{color:var(--ap-red)!important}
+/* Shared tokens for every Chester view, including connection pages and public login. */
+html[data-chester-appearance=night] :is(.chester-home,.chester-settings,.chester-ios,.ck-page){--ch-blue:var(--ap-blue);--ch-ink:var(--ap-text);--ch-muted:var(--ap-muted);--ch-line:var(--ap-border);--st-blue:var(--ap-blue);--st-line:var(--ap-border);--st-muted:var(--ap-muted);--ios-blue:var(--ap-blue);--ios-ink:var(--ap-text);--ios-muted:var(--ap-muted);--ios-line:var(--ap-border);--ios-group:var(--ap-page);--ck-ink:var(--ap-text);--ck-ink-soft:var(--ap-muted);--ck-line:var(--ap-border);--ck-blue:var(--ap-blue);color:var(--ap-text)!important}
+html[data-chester-appearance=night] :is(.chester-settings,.chester-ios.cs-page,.chester-ios.fo-page,.chester-ios.lp-speedtest,.chester-ios.cz-page){background:var(--ap-page)!important}
+html[data-chester-appearance=night] :is(.ch-summary-card,.ch-card,.ch-system-bar,.st-card,.st-stat,.cs-card,.cs-panel,.fo-card,.fo-uplink,.sp-panel,.sp-history-card,.lp-st-card,.lp-st-history,.cz-card,.z2-card,.z2-maint-card,.ck-card,.ck-banner,.misectel-card,.cbi-section,.modal){background:linear-gradient(115deg,var(--ap-card),var(--ap-card-bottom))!important;color:var(--ap-text)!important;border-color:var(--ap-border)!important;box-shadow:var(--ap-shadow)!important}
+html[data-chester-appearance=night] :is(.chester-home,.chester-settings,.chester-ios,.ck-page,.misectel-page,.cbi-map) :is(h1,h2,h3,h4,h5,.st-title,.ch-title,.ios-title,.lp-st-brand,.misectel-card__title,.misectel-hero__title){color:var(--ap-text)!important}
+html[data-chester-appearance=night] :is(.ch-card,.ch-summary-card,.ch-system-bar,.st-card,.st-stat,.cs-card,.cs-panel,.fo-card,.fo-uplink,.sp-panel,.sp-history-card,.cz-card,.z2-card,.z2-maint-card,.ck-card,.cbi-section) :is(strong,dd){color:var(--ap-text)}
+html[data-chester-appearance=night] :is(.ch-muted,.ch-control-state,.ch-system-metric div>span,.ch-description dt,.ch-band-row>span,.ch-port small,.ch-station-id>span,.st-muted,.st-head p,.st-field small,.st-toggle small,.st-stat span,.cs-muted,.cs-small,.cs-kv span,.cs-live-note,.fo-muted,.fo-role,.fo-uplink-detail,.fo-test-row span,.sp-muted,.sp-metric span,.sp-metric small,.sp-details span,.sp-message,.cz-muted,.z2-note,.z2-muted,.ck-note,.ck-row__k,.misectel-card__desc,.misectel-detail__label,.misectel-kv__label,.cbi-value-description){color:var(--ap-muted)!important}
+html[data-chester-appearance=night] :is(.ch-radio-grid,.ch-radio-metric,.ch-mode-section,.ch-band-column,.ch-band-row,.ch-shortcuts,.ch-system-metric,.ch-details,.st-toggle,.wf-advanced,.cs-kv,.fo-test-result,.fo-test-row,.cs-extra,.sp-connection,.sp-details,.ci-fields dt,.ci-fields dd,.ck-row,.misectel-card__footer){border-color:var(--ap-border)!important}
+/* Overview: preserve the approved structure, with blue/green/amber semantic accents. */
+html[data-chester-appearance=night] .chester-home .ch-badge.is-online{background:#174923!important;color:#b9ffbd!important;border-color:#286638!important}
+html[data-chester-appearance=night] .chester-home .ch-badge.is-offline{background:#48262d!important;color:#ffb3b8!important;border-color:#71323e!important}
+html[data-chester-appearance=night] :is(.ch-network-badge,.cs-status,.fo-help){background:#173f65!important;color:#74c4ff!important;border-color:#2b5c84!important}
+html[data-chester-appearance=night] .chester-home .ch-radio-metric>span{color:var(--ap-muted)!important}
+html[data-chester-appearance=night] .chester-home .ch-quality.is-fair>strong{color:var(--ap-amber)!important}
+html[data-chester-appearance=night] .chester-home .ch-quality.is-good>strong{color:var(--ap-green)!important}
+html[data-chester-appearance=night] .chester-home :is(.ch-port.is-online .ch-icon,.ch-port.is-online small){color:var(--ap-green)!important}
+html[data-chester-appearance=night] .chester-home .ch-port:not(.is-online) .ch-icon{color:#a2afc0!important}
+html[data-chester-appearance=night] .chester-home .ch-station-id{background:linear-gradient(110deg,#2a3d50,#253848)!important;color:var(--ap-text)!important}
+html[data-chester-appearance=night] :is(.ch-band-head,.chester-mode__row,.cs-modes,.fo-modes,.sp-tabs,.z2-tabbar,.st-unit-options){background:linear-gradient(#2d4052,#243443)!important;color:var(--ap-text)!important;border-color:#5b7186!important}
+html[data-chester-appearance=night] .chester-home .chester-mode__btn{color:var(--ap-text)!important;border-color:var(--ap-border)!important;background:transparent!important}
+html[data-chester-appearance=night] .chester-home .chester-mode__btn.is-active{background:linear-gradient(#1686ff,#0067ef)!important;color:white!important}
+html[data-chester-appearance=night] .chester-home :is(.ch-control,.ch-control.is-off){background:linear-gradient(110deg,#233444,#182736)!important;border-color:#475a6d!important;color:var(--ap-text)!important}
+html[data-chester-appearance=night] .chester-home .ch-shortcut{background:linear-gradient(#193b5b,#162d44)!important;border-color:#315e88!important;color:#62bcff!important}
+html[data-chester-appearance=night] .chester-home .ch-shortcut.is-neutral{background:linear-gradient(#253647,#1a2939)!important;color:var(--ap-text)!important;border-color:#475a6d!important}
+html[data-chester-appearance=night] .chester-home .ch-shortcut.is-neutral .ch-icon{color:var(--ap-text)!important}
+html[data-chester-appearance=night] .chester-home .ch-network-details{background:#172633!important;border-color:var(--ap-border)!important;color:var(--ap-text)!important}
+/* Forms and native Developer pages. No image/canvas inversion. */
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=button]):not([type=submit]),select,textarea,.cbi-dropdown,.cbi-dropdown>ul>li,.cbi-dropdown .item){background:var(--ap-inset)!important;border-color:#486076!important;color:var(--ap-text)!important;box-shadow:none!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(input,textarea)::placeholder{color:#9baec4!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(input,select,textarea,button):focus-visible{outline-color:var(--ap-focus)!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(.st-field>label,.st-toggle strong,.ci-fields dd,.at-response-head strong,.misectel-field__label,.cbi-value-title,.cbi-section-descr,.cbi-map-descr,.ck-row__v){color:var(--ap-text)!important}
+html[data-chester-appearance=night] :is(.st-footer,.st-advanced,.st-mode,.st-unit-button,.st-unit-button.is-active,.misectel-kv,.misectel-detail,.fo-icon,.fo-grip,.fo-role-number,.lp-st-metric,.sp-metric,.cz-result,.fo-ports .misectel-dashboard-port-panel__port){background:var(--ap-inset)!important;color:var(--ap-text)!important;border-color:var(--ap-border)!important}
+html[data-chester-appearance=night] :is(.st-stat strong,.ci-fields dd,.misectel-kv__value,.misectel-detail__value,.lp-st-value,.cz-result-value,.z2-speed-value){color:var(--ap-text)!important}
+html[data-chester-appearance=night] .chester-settings .at-shortcut{background:var(--ap-inset)!important;color:var(--ap-text)!important;border-color:var(--ap-border)!important}
+html[data-chester-appearance=night] .chester-settings .at-shortcut code{color:var(--ap-muted)!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent textarea.at-output{background:#091522!important;color:#d5e8ff!important}
+html[data-chester-appearance=night] .chester-settings .st-unit-button.is-active{color:var(--ap-blue)!important;background:#314a62!important}
+html[data-chester-appearance=night] .chester-settings .st-switch:not(:checked){background:#4d6073!important}
+html[data-chester-appearance=night] :is(.st-mode:has(input:checked),.cs-card.current){border-color:#409cff!important}
+html[data-chester-appearance=night] .chester-settings .cbi-map,html[data-chester-appearance=night] .chester-settings .cbi-section-node{background:transparent!important}
+html[data-chester-appearance=night] .chester-settings #cbi-system#cbi-system .cbi-tabmenu{background:var(--ap-inset)!important;border-color:var(--ap-border)!important}
+html[data-chester-appearance=night] .chester-settings #cbi-system#cbi-system .cbi-tabmenu>li>a{color:var(--ap-muted)!important}
+html[data-chester-appearance=night] .chester-settings #cbi-system#cbi-system .cbi-tabmenu>li.cbi-tab{background:#007aff!important}
+html[data-chester-appearance=night] .chester-settings #cbi-system#cbi-system .cbi-tabmenu>li.cbi-tab>a{color:white!important}
+html[data-chester-appearance=night] .chester-settings #cbi-system#cbi-system .cbi-button{background:#173c60!important;color:#76c4ff!important;border-color:#39698f!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(.btn,.cbi-button,.st-button,.misectel-button-secondary,.cs-use,.cs-cancel,.fo-uplink-action,.sp-cancel,.ck-btn,.z2-tab){background:#1d344a!important;color:#78c5ff!important;border-color:#3a6387!important;box-shadow:none!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(.cbi-button-apply,.st-button:not(.is-secondary):not(.is-danger):not(.secondary),.misectel-button,.cs-save,.cs-run,.fo-save,.fo-test-button,.sp-start,.lp-st-go,.ck-btn--primary){background:#007aff!important;color:white!important;border-color:#248fff!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(.cbi-button-negative,.st-button.is-danger,.misectel-button-danger,.ck-btn--danger){background:#492a34!important;color:#ffacb5!important;border-color:#7b424e!important}
+html[data-chester-appearance=night] :is(.cs-mode,.fo-mode,.sp-tabs button,.z2-tab){color:var(--ap-text)!important;background:transparent!important}
+html[data-chester-appearance=night] :is(.cs-mode,.fo-mode)[aria-pressed=true],html[data-chester-appearance=night] .sp-tabs button[aria-selected=true],html[data-chester-appearance=night] body.theme-misectel #maincontent .z2-tab-active{background:#007aff!important;color:white!important}
+html[data-chester-appearance=night] :is(.cs-pill,.fo-pill,.z2-badge){background:#293d52!important;color:#c1d2e5!important}
+html[data-chester-appearance=night] :is(.cs-pill.active,.fo-pill.online,.z2-running){background:#1b452d!important;color:#8decaa!important}
+html[data-chester-appearance=night] :is(.fo-pill.offline,.cs-status.error,.sp-message.error,.z2-error){background:#462931!important;color:#ffadb5!important}
+html[data-chester-appearance=night] :is(.sp-progress,.lp-st-progress){background:#304358!important}
+html[data-chester-appearance=night] :is(.misectel-notice,.alert-message,.cbi-section-error,.ck-banner--info){background:#1c344d!important;color:#b3d8ff!important;border-color:#3b5d80!important}
+html[data-chester-appearance=night] :is(.alert-message.warning,.ck-banner--warn){background:#443b25!important;color:#ffe1a1!important;border-color:#6e5a34!important}
+html[data-chester-appearance=night] :is(.alert-message.error,.ck-banner--danger){background:#462931!important;color:#ffadb5!important;border-color:#7d414d!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent table,html[data-chester-appearance=night] body.theme-misectel #maincontent .table{background:var(--ap-card-bottom)!important;color:var(--ap-text)!important;border-color:var(--ap-border)!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(th,td,.tr,.th,.td){background-color:transparent!important;border-color:var(--ap-border)!important;color:var(--ap-text)!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(tr,.tr):nth-child(2n){background:#1c2c3b!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(tr,.tr):hover{background:#263c50!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(pre,code){background:#122131;color:#d4e4f6;border-color:var(--ap-border)}
+html[data-chester-appearance=night] body.theme-misectel .modal :is(input,select,textarea){background:var(--ap-inset)!important;color:var(--ap-text)!important;border-color:#486076!important}
+html[data-chester-appearance=night] body.theme-misectel .modal :is(h3,h4,label,p){color:var(--ap-text)!important}
+html[data-chester-appearance=night] body.theme-misectel a:not(.menu-link):not(.sidebar-logo):not(.brand):not(.ch-summary-card):not(.ch-shortcut):not(.ch-control):not(.account-menu__item){color:var(--ap-blue)}
+/* Login inherits the same appearance without exposing any extra router data. */
+html[data-chester-appearance=night] body.node-main-login #maincontent#maincontent>.container,html[data-chester-appearance=night] body.node-main-login #maincontent#maincontent .login-cellular>.ch-card{background:linear-gradient(115deg,var(--ap-card),var(--ap-card-bottom))!important;border-color:var(--ap-border)!important;box-shadow:var(--ap-shadow)!important}
+html[data-chester-appearance=night] body.node-main-login #maincontent#maincontent :is(.login-wordmark,.login-shell-card-title,.login-visible-label,.login-remember>label){color:var(--ap-text)!important}
+html[data-chester-appearance=night] body.node-main-login #maincontent#maincontent .login-field input{background:var(--ap-inset)!important;color:var(--ap-text)!important;border-color:#486076!important}
+html[data-chester-appearance=night] body.node-main-login #maincontent#maincontent :is(.login-remember-help,.login-cellular-age,.login-cellular-signin){color:var(--ap-muted)!important;border-color:var(--ap-border)!important}
+
+html[data-chester-appearance=night] body.theme-misectel.logged-in header>.fill>.container{background:none!important;color:var(--ap-text)!important}
+
+/* Some vendor views style #maincontent with repeated IDs; match that specificity. */
+html[data-chester-appearance=night] body.theme-misectel .main>.main-right>#maincontent#maincontent,html[data-chester-appearance=night] body.theme-misectel #maincontent#maincontent>.container{background:var(--ap-page)!important;color:var(--ap-text)!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent#maincontent #view#view{color:var(--ap-text)!important}
+html[data-chester-appearance=night] :is(.fo-card.fo-order-card,.cs-panel.cs-mode-panel){background:transparent!important;border:0!important;box-shadow:none!important}
+html[data-chester-appearance=night] .chester-ios .cs-refresh{color:var(--ap-blue)!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent .cz-test-controls .btn{background:#007aff!important;color:white!important;border-color:#248fff!important}
+
+html[data-chester-appearance=night] .chester-settings.st-apn :is(.ap-advanced,.ap-library){border-color:var(--ap-border)!important}html[data-chester-appearance=night] .chester-settings.st-apn summary{color:var(--ap-blue)!important}
+
+html[data-chester-appearance=night] .chester-settings .st-footer{background:transparent!important;border-color:var(--ap-border)!important}
+html[data-chester-appearance=night] .chester-settings.st-wifi .st-footer{background:var(--ap-card)!important}
+html[data-chester-appearance=night] .chester-settings.st-bands .bl-tabs{background:var(--ap-inset)!important;border-color:var(--ap-border)!important}
+html[data-chester-appearance=night] .chester-settings.st-bands .bl-tabs>button{color:var(--ap-text)!important}
+html[data-chester-appearance=night] .chester-settings.st-bands .bl-tabs>button[aria-selected=true]{background:#007aff!important;color:white!important}
+html[data-chester-appearance=night] .chester-settings.st-bands .bl-band{background:#223547!important;color:var(--ap-muted)!important;border-color:var(--ap-border)!important}
+html[data-chester-appearance=night] .chester-settings.st-bands .bl-band:has(input:checked){background:#193f66!important;color:#82c7ff!important;border-color:#409cff!important}
+html[data-chester-appearance=night] .chester-settings.st-bands .bl-result{color:#8decaa!important}
+html[data-chester-appearance=night] .chester-settings.st-bands .bl-result.is-error{color:var(--ap-red)!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent .st-button.secondary{background:#1d344a!important;color:#78c5ff!important;border-color:#3a6387!important}
+
+html[data-chester-appearance=night] .chester-settings.st-software :is(.sw-tabs,.cbi-progressbar){background:var(--ap-inset)!important;border-color:var(--ap-border)!important}
+html[data-chester-appearance=night] .chester-settings.st-software .sw-tabs>li>a{color:var(--ap-text)!important}
+html[data-chester-appearance=night] .chester-settings.st-software .sw-tabs>li.cbi-tab>a{color:white!important}
+html[data-chester-appearance=night] .chester-settings.st-software .sw-table-scroll{border-color:var(--ap-border)!important}
+html[data-chester-appearance=night] .chester-settings.st-software #packages th{background:#223547!important;color:var(--ap-muted)!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent .st-software #packages .cbi-button-negative{background:#492a34!important;color:#ffacb5!important;border-color:#7b424e!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent .st-software #packages .cbi-button-action{background:#007aff!important;color:white!important}
+html[data-chester-appearance=night] .chester-settings.st-software ins{background:#685c23!important;color:#fff4b8!important}
+
+html[data-chester-appearance=night] body.theme-misectel #maincontent#maincontent #view#view{background:transparent!important}
+html[data-chester-appearance=night] #maincontent#maincontent .chester-settings.st-software .sw-tabs{background:var(--ap-inset)!important;border-color:var(--ap-border)!important}
+html[data-chester-appearance=night] #maincontent#maincontent .chester-settings.st-software .sw-tabs>li>a{color:var(--ap-text)!important}
+
+html[data-chester-appearance=night] .chester-settings.st-celllock :is(.cl-status,.cl-advanced){background:var(--ap-inset);border-color:var(--ap-border)!important}
+html[data-chester-appearance=night] .chester-settings.st-celllock .cl-advanced{background:transparent}
+html[data-chester-appearance=night] .chester-settings.st-celllock .cl-pill{background:#344a60;color:#cfdaea}
+html[data-chester-appearance=night] .chester-settings.st-celllock .cl-pill.is-locked{background:#514228;color:#ffe1a1}
+
+/* Legacy/native screens use the same palette, including IPv6 and Smart Queue. */
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(h1,h2,h3,h4,h5,.cbi-value-field){color:var(--ap-text)!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(.cbi-map,.cbi-section-node,.cbi-section-node-tabbed){background:transparent!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(.cbi-tabmenu,.cbi-tabmenu>li){background:var(--ap-inset)!important;border-color:var(--ap-border)!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent .cbi-tabmenu>li>a{background:transparent!important;color:var(--ap-text)!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent .cbi-tabmenu>li.cbi-tab{background:#007aff!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(.misectel-card__head,.misectel-card__header,.misectel-card__body,.misectel-card__footer){background:transparent!important;color:var(--ap-text)!important;border-color:var(--ap-border)!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(.misectel-hero,.misectel-hero__content){background:transparent!important;color:var(--ap-text)!important}
+html[data-chester-appearance=night] :is(.v6-page,.cq-page){--v6-accent:var(--ap-blue);--v6-text:var(--ap-text);--v6-muted:var(--ap-muted);--v6-line:var(--ap-border);--v6-soft:var(--ap-inset);color:var(--ap-text)!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(.v6-window,.v6-group,.cq-window,.cq-group){background:linear-gradient(115deg,var(--ap-card),var(--ap-card-bottom))!important;border-color:var(--ap-border)!important;color:var(--ap-text)!important;box-shadow:var(--ap-shadow)!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(.v6-master,.v6-footer,.cq-master,.cq-foot,.cq-rate){background:var(--ap-inset)!important;color:var(--ap-text)!important;border-color:var(--ap-border)!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(.v6-header,.cq-header){background:transparent!important;border-color:var(--ap-border)!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(.v6-header__copy h2,.v6-group__heading h3,.v6-master__copy strong,.v6-row__value,.v6-footer strong,.cq-header h2,.cq-group h3,.cq-row__v,.cq-master strong){color:var(--ap-text)!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(.v6-row__label,.v6-group__heading p,.v6-header__copy p,.v6-master__copy span,.v6-footer span,.cq-header p,.cq-row__k,.cq-note,.cq-foot){color:var(--ap-muted)!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(.v6-row,.cq-row){border-color:var(--ap-border)!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent .v6-row--address .v6-row__value{background:var(--ap-inset)!important;border-color:var(--ap-border)!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(.v6-header__status,.v6-state,.v6-test-result,.cq-pill){background:#293d52!important;color:#cfdaea!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(.v6-header__status.is-connected,.v6-state.is-on,.v6-test-result.is-good,.cq-pill.is-on){background:#1b452d!important;color:#8decaa!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent .v6-row__value.is-good{color:#8decaa!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(.v6-row__value.is-bad,.v6-state.is-bad){color:var(--ap-red)!important}
+html[data-chester-appearance=night] body.theme-misectel #maincontent :is(.v6-button,.cq-btn){background:#1d344a!important;color:#78c5ff!important;border-color:#3a6387!important}
+
+html[data-chester-appearance=night] body.theme-misectel .main>.loading{background:rgba(11,22,34,.84)!important;color:var(--ap-muted)!important}
+html[data-chester-appearance=night] body.theme-misectel .main>.loading>span{color:var(--ap-muted)!important}
+
+/* Public login has stronger field/card selectors than authenticated pages. */
+html[data-chester-appearance=night] body.node-main-login #maincontent#maincontent>.container{background:linear-gradient(115deg,var(--ap-card),var(--ap-card-bottom))!important;color:var(--ap-text)!important}
+html[data-chester-appearance=night] body.node-main-login #maincontent#maincontent .login-cellular h3{color:var(--ap-text)!important}
+
+body.theme-misectel header .account-menu__button{background:transparent!important;border-color:transparent!important;box-shadow:none!important}
+body.theme-misectel header .account-menu__button:hover{background:#eaf0f8!important}
+html[data-chester-appearance=night] body.theme-misectel header .account-menu__button:is(:hover,:focus,:active){background:var(--ap-inset)!important;border-color:transparent!important;box-shadow:none!important}
+
+html[data-chester-appearance=night] body.theme-misectel :is(.modal .btn,.modal .cbi-button,.cbi-tooltip){background:#1d344a!important;color:#c9e6ff!important;border-color:#3a6387!important}
+html[data-chester-appearance=night] body.theme-misectel .modal :is(.cbi-button-action,.cbi-button-apply,.cbi-button-positive){background:#007aff!important;color:white!important;border-color:#248fff!important}
+html[data-chester-appearance=night] body.theme-misectel .modal .cbi-button-negative{background:#492a34!important;color:#ffacb5!important;border-color:#7b424e!important}
+
+html[data-chester-appearance=night] body.node-main-login #maincontent#maincontent>.container>.login-cellular{border-color:var(--ap-border)!important}
+html[data-chester-appearance=night] body.node-main-login #maincontent#maincontent>.container .login-cellular>.ch-card{background:transparent!important;border:0!important;box-shadow:none!important}

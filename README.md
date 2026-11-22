@@ -1,5 +1,24 @@
 # LettucePi K45P
 
+## Pending next image
+
+Sun/Night appearance now follows the approved Overview mockup. The top-right
+sun/moon switch works throughout LP-OpenWrt25, including login, and remembers
+the browser preference across pages, refreshes and tabs. No firmware rebuild
+has been made for these changes.
+
+APN Config, Band Lock, Cell Lock and Software have the shared Chester styling.
+Both lock pages reuse the live Overview Cellular card. Cell Lock opens on 5G
+and shows its current status first. The Cellular menu is ordered APN Config,
+Cellular Info, AT Commands, IPV6, Band Lock, Cell Lock, QModem, then the remaining
+items at the same level. See [UI notes](integrations/CHESTER-UI.md) for validation.
+
+Terminal is now under Chester Mods, with a styled live console, bottom
+Terminal/Config navigation and themed configuration tabs. The sidebar uses
+Speeds while the page heading remains Chester Speeds. Login uses one compact
+card: live Cellular summary above credentials, expandable connection details,
+and a visible Log in button on a 375 × 568 phone screen.
+
 ## Bin 9 — version 1.0.8, build 202611220002
 
 The approved green-leaf Overview and navigation are included, with visible eNB,

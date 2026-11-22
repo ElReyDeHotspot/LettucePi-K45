@@ -151,8 +151,8 @@
 
 {% if (!ctx.authsession): %}
 <link rel="stylesheet" href="/luci-static/resources/chester-ui/overview.css?v=a7bd0b071507">
-<link rel="stylesheet" href="/luci-static/resources/chester-ui/login-cellular.css?v=20261122-remember-visible">
-<script src="/luci-static/resources/chester-ui/login-cellular.js?v=20261122-remember-visible"></script>
+<link rel="stylesheet" href="/luci-static/resources/chester-ui/login-cellular.css?v=20261122-compact-login-2">
+<script src="/luci-static/resources/chester-ui/login-cellular.js?v=20261122-compact-login-2"></script>
 {% endif %}
 </body>
 </html>
