@@ -54,3 +54,22 @@ The final bin 8 artifact passed stock `sysupgrade -T` and signed-manifest
 verification. Its packed payload was compared to source, and its kernel/DTB
 were compared byte-for-byte with the original vendor capture. It was not flashed
 as part of this release task.
+
+
+## Pending next image: approved Overview
+
+Implemented the approved grouped-card Overview with live carrier/SIM, connection
+policy, clients and Wi-Fi summaries. The four top cards navigate respectively to
+Chester Mods / SIM Selection, Chester Mods / Failover, Client List and Wi-Fi
+settings. Wi-Fi sits immediately beside Clients. Scoped overview.css leaves the
+sidebar and other pages unchanged. Cellular details remain available under a
+disclosure; polling preserves its open state. Four carrier columns, network mode
+buttons, Ethernet port role action, quick controls and the system metrics remain.
+
+Validated on the live router at desktop width and 390px phone width: all four top
+links opened the expected pages, modem disclosure opened, live telemetry refreshed,
+and the Overview container had no horizontal overflow. Existing mutation handlers
+were retained; mode changes, WAN role changes, reboot, service toggles and speed
+runs were not executed for this appearance/navigation check. These remain subject
+to the owner's function review before release. No image was built or flashed, and
+the published signed bin 8 manifest/artifact are unchanged.

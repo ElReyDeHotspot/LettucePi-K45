@@ -3,6 +3,8 @@
         "description": "Grant access to the LettucePi dashboard",
         "read": {
             "ubus": {
+                "failover": ["status"],
+                "chester.sim": ["status"],
                 "system": [
                     "board",
                     "info"

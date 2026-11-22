@@ -1,0 +1,78 @@
+/* Overview only; the shared navigation remains under the vendor theme. */
+.chester-home{--ch-blue:#007aff;--ch-ink:#1c1c1e;--ch-muted:#74747c;--ch-line:#e8e8ed;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ch-ink);background:#f2f2f7;max-width:1240px;margin:0 auto;padding:28px;border-radius:26px;line-height:1.45;font-size:14px;letter-spacing:-.015em}
+.chester-home *{box-sizing:border-box;min-width:0}
+.chester-home a{text-decoration:none;color:inherit}
+.chester-home button{font-family:inherit;cursor:pointer}
+.chester-home :is(a,button,summary):focus-visible{outline:3px solid #007aff99;outline-offset:3px}
+.chester-home .ch-icon{display:inline-flex;flex:0 0 auto;width:24px;height:24px;color:var(--ch-blue)}
+.chester-home .ch-icon svg{width:100%;height:100%}
+.chester-home .ch-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
+.chester-home .ch-title{font-size:34px!important;font-weight:750!important;line-height:1.15;letter-spacing:-.045em}
+.chester-home .ch-muted{color:var(--ch-muted);margin:6px 0 0}
+.chester-home .ch-badge{border-radius:99px;padding:7px 13px;background:#e5e5ea;color:#636366;font-size:12px;font-weight:650;white-space:nowrap}
+.chester-home .ch-badge.is-online{background:#e5f7eb;color:#248a3d}
+.chester-home .ch-badge.is-offline{background:#fff0ee;color:#c13c31}
+.chester-home .ch-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
+.chester-home .ch-summary-card{display:flex;align-items:center;gap:12px;padding:18px 14px;background:white;border:1px solid var(--ch-line);border-radius:18px;transition:box-shadow .15s}
+.chester-home .ch-summary-card:hover{box-shadow:0 3px 12px #007aff12;border-color:#bdd7fa}
+.chester-home .ch-summary-card strong{display:block;font-size:15px;line-height:1.3;font-weight:650}
+.chester-home .ch-summary-card span:not(.ch-icon){display:block;font-size:11px;color:var(--ch-muted);margin-top:4px}
+.chester-home .ch-layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;align-items:start}
+.chester-home .ch-side{display:grid;gap:20px}
+.chester-home .ch-card{background:#fff;border:1px solid var(--ch-line);border-radius:22px;padding:22px;box-shadow:0 2px 8px #00000003}
+.chester-home h3{font-size:19px!important;font-weight:700;margin:0 0 20px;line-height:1.3}
+.chester-home h4{font-size:13px;font-weight:600;margin:0 0 12px;color:var(--ch-muted)}
+.chester-home .ch-card-heading{display:flex;justify-content:space-between;align-items:center}
+.chester-home .ch-carrier{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:20px}
+.chester-home .ch-carrier>strong{font-size:26px;font-weight:700;letter-spacing:-.035em}
+.chester-home .ch-network-badge{font-size:12px;font-weight:650;color:var(--ch-blue);background:#edf5ff;padding:5px 10px;border-radius:8px}
+.chester-home .ch-radio-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:14px 0;background:#f8f9fc;border-radius:14px;margin-bottom:22px}
+.chester-home .ch-radio-metric{text-align:center;border-left:1px solid var(--ch-line);padding:0 3px}
+.chester-home .ch-radio-metric:first-child{border:0}
+.chester-home .ch-radio-metric span{display:block;font-size:10px;color:var(--ch-muted);margin-bottom:5px}
+.chester-home .ch-radio-metric strong{font-size:15px;white-space:nowrap;font-weight:650}
+.chester-home .ch-quality.is-good strong{color:#248a3d}.chester-home .ch-quality.is-fair strong{color:#ac7500}
+.chester-home .ch-mode-section{margin-bottom:24px}
+.chester-home .chester-mode{display:flex;flex-wrap:wrap;gap:0}
+.chester-home .chester-mode__btn{flex:1;min-height:42px;margin:0;padding:8px 4px;background:#f2f2f7!important;border:1px solid #e5e5ea!important;color:#636366!important;border-radius:0;box-shadow:none!important;font-size:12px;font-weight:650}
+.chester-home .chester-mode__btn:first-of-type{border-radius:10px 0 0 10px}
+.chester-home .chester-mode__btn:last-of-type{border-radius:0 10px 10px 0}
+.chester-home .chester-mode__btn.is-active{background:var(--ch-blue)!important;color:white!important;border-color:var(--ch-blue)!important}
+.chester-home .chester-mode__status{display:block;flex-basis:100%;font-size:12px;color:var(--ch-muted);margin-top:6px}
+.chester-home .ch-band-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 0}
+.chester-home .ch-band-column{padding:0 10px;border-left:1px solid var(--ch-line)}
+.chester-home .ch-band-column:nth-child(4n+1){border:0;padding-left:0}
+.chester-home .ch-band-head{display:block;color:var(--ch-blue);font-size:12px;padding-bottom:9px}
+.chester-home .ch-band-row{padding:7px 0}
+.chester-home .ch-band-row span{display:block;color:var(--ch-muted);font-size:10px;margin-bottom:2px}
+.chester-home .ch-band-row strong{font-size:14px;white-space:nowrap;font-weight:600}
+.chester-home .ch-details{border-top:1px solid var(--ch-line);margin-top:20px;padding-top:14px}
+.chester-home summary{color:var(--ch-muted);cursor:pointer;font-size:12px;min-height:30px;list-style-position:inside}
+.chester-home .ch-description{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px;margin:14px 0 0;font-size:12px}
+.chester-home .ch-description dt{color:var(--ch-muted)}.chester-home .ch-description dd{margin:0;overflow-wrap:anywhere}
+.chester-home .ch-ports{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.chester-home .ch-port{display:flex;flex-direction:column;align-items:center;gap:7px;padding:4px 0 14px;background:none!important;border:0!important;box-shadow:none!important;color:#8e8e93!important}
+.chester-home .ch-port .ch-icon{width:40px;height:40px;color:inherit}
+.chester-home .ch-port strong{font-size:12px;font-weight:650}.chester-home .ch-port small{font-size:11px}
+.chester-home .ch-port.is-online{color:#248a3d!important}
+.chester-home .ch-shortcuts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;border-top:1px solid var(--ch-line);padding-top:16px}
+.chester-home .ch-shortcut{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;background:#f0f6ff;color:var(--ch-blue);border-radius:12px;min-height:66px;font-size:11px;font-weight:600;padding:8px 2px}
+.chester-home .ch-shortcut.is-neutral{background:#f4f4f7;color:#636366}.chester-home .ch-shortcut.is-neutral .ch-icon{color:inherit}
+.chester-home .ch-controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.chester-home .ch-control{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:100px;padding:12px 3px;margin:0;border:1px solid #dceaff!important;border-radius:14px;background:#f0f6ff!important;color:var(--ch-blue)!important;box-shadow:none!important}
+.chester-home .ch-control strong{font-size:12px;font-weight:650}.chester-home .ch-control-state{font-size:11px}
+.chester-home .ch-control.is-off{background:#f6f6f9!important;color:#8e8e93!important;border-color:var(--ch-line)!important}
+.chester-home .ch-control.is-off .ch-icon{color:inherit}
+.chester-home .ch-system-bar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:white;border:1px solid var(--ch-line);border-radius:20px;margin-top:20px;padding:20px 10px}
+.chester-home .ch-system-metric{display:flex;align-items:center;justify-content:center;gap:10px;border-left:1px solid var(--ch-line);padding:0 10px}
+.chester-home .ch-system-metric:first-child{border:0}.chester-home .ch-system-metric .ch-icon{color:#8e8e93;width:21px;height:21px}
+.chester-home .ch-system-metric span:not(.ch-icon){display:block;color:var(--ch-muted);font-size:11px}.chester-home .ch-system-metric strong{display:block;font-size:15px;font-weight:650}.chester-home .ch-system-metric small{display:block;font-size:10px;color:var(--ch-muted)}
+.chester-home .ch-network-details{padding:16px 20px;background:white;border:1px solid var(--ch-line);border-radius:18px}
+.chester-home .ch-detail-columns{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding-top:14px}
+.chester-home .ch-loading{color:var(--ch-muted);padding:12px 0}
+@media(max-width:1100px){.chester-home{padding:22px}.chester-home .ch-layout{grid-template-columns:minmax(0,1fr)}.chester-home .ch-side{grid-template-columns:1fr 1fr}.chester-home .ch-summary-card{gap:8px;padding:15px 10px}.chester-home .ch-summary-card strong{font-size:13px}}
+@media(max-width:650px){.chester-home{padding:18px 12px;border-radius:20px}.chester-home .ch-title{font-size:30px!important}.chester-home .ch-head{margin-bottom:20px}.chester-home .ch-muted{font-size:12px}.chester-home .ch-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.chester-home .ch-summary-card{min-height:78px;padding:14px 10px}.chester-home .ch-summary-card .ch-icon{width:21px;height:21px}.chester-home .ch-summary-card strong{font-size:13px}.chester-home .ch-summary-card span:not(.ch-icon){font-size:10px}.chester-home .ch-layout,.chester-home .ch-side{grid-template-columns:minmax(0,1fr);gap:14px}.chester-home .ch-card{padding:18px 14px;border-radius:18px}.chester-home .ch-carrier>strong{font-size:24px}.chester-home .ch-radio-metric strong{font-size:12px}.chester-home .ch-band-column{padding:0 7px}.chester-home .ch-band-row strong{font-size:12px}.chester-home .ch-band-row span{font-size:10px}.chester-home .ch-system-bar{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 0}.chester-home .ch-system-metric{justify-content:flex-start;padding:0 14px}.chester-home .ch-system-metric:nth-child(odd){border-left:0}.chester-home .ch-detail-columns{grid-template-columns:1fr}.chester-home .ch-control{min-height:90px}.chester-home .ch-description{grid-template-columns:85px minmax(0,1fr)}}
+
+.chester-home .chester-mode__row{display:flex;width:100%;gap:0}.chester-home .chester-mode__head{width:100%}.chester-home .chester-mode__status:empty{display:none}
+
+.chester-home .chester-mode__row{gap:0!important}.chester-home .chester-mode__btn{height:42px!important;min-height:42px!important;border-radius:0!important}.chester-home .chester-mode__btn:first-child{border-radius:10px 0 0 10px!important}.chester-home .chester-mode__btn:last-child{border-radius:0 10px 10px 0!important}
