@@ -185,3 +185,29 @@ overflow. Live wireless/misectel UCI changes remained empty. No power toggle,
 password reveal, Save & Apply, radio reconfiguration or firmware build/flash was
 performed. Saved previews: K45P-WiFi-Simple-Desktop.jpg,
 K45P-WiFi-Simple-Phone.jpg and K45P-Overview-eNB.jpg in task outputs.
+
+
+## Bin 9 release: 1.0.8 / 202611220002
+
+All preceding pending-next-image sections are now included in bin 9. The Wi-Fi
+save path additionally validates every band before staging any changes and
+handles both wifi-device.disabled and wifi-iface.disabled. Initial enabled state
+also respects both flags. A disabled parent radio can therefore be enabled again.
+The source-handler regression test covers distinct/shared credentials, all power
+combinations and an invalid second-band password without partial staging.
+
+Live verification invoked the actual view save handler and vendor apply helper
+with an instrumented UCI adapter, then committed/reloaded the resulting changes
+on the connected K45P over Ethernet. Saved SSIDs/keys and enabled runtime SSIDs/keys
+matched. Shared on/off, separate 2.4-only, separate 5-only and separate both-on
+passed. Disabled radios had their disabled flag set and no running interfaces;
+this vendor's netifd can still report up=true on a disabled radio, so up alone
+was not treated as proof of active Wi-Fi. Original wireless and misectel config
+files were restored byte-for-byte and both radios returned to service. No
+credential is included in the validation report. This checked configuration and
+running access points; it did not include a separate wireless client's join test.
+
+The packed image matches the updated Wi-Fi and Overview source and new settings
+assets/helpers. Executable modes, bundled speed-test engines, SIM boot link,
+release version, kernel/DTB identity, manifest signature, image SHA256 and stock
+sysupgrade compatibility were checked. The connected router was not flashed.

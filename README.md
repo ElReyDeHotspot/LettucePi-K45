@@ -1,5 +1,28 @@
 # LettucePi K45P
 
+## Bin 9 — version 1.0.8, build 202611220002
+
+The approved green-leaf Overview and navigation are included, with visible eNB,
+selected network mode, measured CPU/memory, a unified login card and read-only
+Cellular preview. Remember uses the browser password manager; Logout is beneath
+Developer. Fan Control, Administration, System, Reboot, Software Update,
+AT Commands, Cellular Info, TTL/HL and guided wired VLANs share the Chester theme.
+Fan Control, VLANs and TTL/HL are available under Chester Mods.
+
+Wi-Fi puts power, name and password first, with expandable security/radio tuning.
+Shared and separate names/passwords were saved and applied on a live K45P;
+shared on/off, each band alone and both bands on passed runtime checks. Power
+updates both the radio and AP flags. All bands validate before changes are staged.
+The test restored the original configuration byte-for-byte. TTL/HL supports
+independent values and verifies actual rules; prior IPv4/IPv6 packet captures
+confirmed 128 becomes 64. No CPU/memory tuning was needed or performed.
+
+All prior apps, bundled Ookla/M-Lab engines, Quick Start, manual SIM policy,
+Failover Off defaults, signed OTA, patched uHTTPd and matching NFQUEUE modules
+remain included. Vendor Linux 6.12.94 and the device tree are byte-identical.
+The image passed stock `sysupgrade -T`; it was built and published without
+flashing the connected router. Real-port VLAN datapath validation remains pending.
+
 ## Bin 8 — version 1.0.7, build 202611220001
 
 SIM Selection, Failover, Chester Speeds and Zapret2 share the iOS-inspired design.

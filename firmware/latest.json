@@ -1,12 +1,12 @@
 {
   "product": "K45P",
   "board": "misectel,m02k45",
-  "version": "1.0.7",
-  "build": "202611220001",
-  "bin": "8",
+  "version": "1.0.8",
+  "build": "202611220002",
+  "bin": "9",
   "built": "2026-11-22",
-  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.7-sysupgrade.itb",
-  "sha256": "2975b02e8f4a8ce31411b09f1ea5942796d4b632452b670ab57bfa3ec331e87e",
-  "size": 30818558,
-  "notes": "Bin 8: iOS-inspired SIM Selection and Failover; Manual SIM selection stays on the chosen slot without data; serialized SIM operations and queued cancellation; per-SIM M-Lab tests and IPv4 rows; Chester Speeds combines bundled Ookla and M-Lab plus the official browser-based Netflix FAST.com test. Chester Mods contains Failover, SIM Selection, Chester Speeds and Zapret2; separate M-Lab sidebar entry removed. Chester Speeds is centered to match the other pages. Zapret2 has the matching iOS-style design. All prior apps, Quick Start, signed OTA, patched uHTTPd, matching NFQUEUE modules and US defaults retained. Vendor Linux 6.12.94 kernel and device tree unchanged."
+  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.8-sysupgrade.itb",
+  "sha256": "6023fb011ec59a3f06479dd73544c9cae5f318c9e878f02c5803dcab13a20bcc",
+  "size": 30847230,
+  "notes": "Bin 9: approved green-leaf Overview and navigation; visible eNB; measured CPU/memory; unified login and public radio-only cellular preview; Remember and Logout. Simplified Wi-Fi with verified shared/separate names, passwords and radio power. Matching Fan, Administration, System, Reboot, Update, AT Commands, Cellular Info, TTL/HL and guided VLAN pages. Independent TTL/HL rules verified on wire. Chester Mods adds Fan Control, VLANs and TTL/HL. Bundled Ookla and M-Lab, SIM Selection, Failover, Zapret2, Quick Start, signed OTA, patched uHTTPd, matching NFQUEUE modules and US defaults retained. Vendor Linux 6.12.94 kernel and device tree unchanged."
 }
