@@ -409,12 +409,14 @@ func switchTo(ctx context.Context, slot string, apn string, apnExists bool) erro
 			publish()
 			return nil
 		}
-		if card(slot).Presence == "absent" {
-			return errors.New("no SIM is detected in slot " + slot)
-		}
+		// Slot changes can temporarily report absent while the SIM initializes.
+		// Give both the new slot and rollback the full attachment window.
 		if !wait(ctx, 2*time.Second) {
 			return ctx.Err()
 		}
+	}
+	if card(slot).Presence == "absent" {
+		return errors.New("no SIM is detected in slot " + slot + " after waiting for initialization")
 	}
 	return errors.New("SIM " + slot + " did not attach before the deadline")
 }

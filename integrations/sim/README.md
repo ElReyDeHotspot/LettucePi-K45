@@ -57,3 +57,15 @@ These source/payload changes are pending the next image; published bin7 is intac
 Run `scripts/build-sim.sh` with Go 1.25 or later. The daemon uses only the Go
 standard library and is compiled statically for linux/arm64. Binary provenance
 is in `provenance.json`; the Go license is installed with the payload.
+
+## Dual-card follow-up on 2026-11-22
+
+With T-Mobile in SIM1 and Verizon in SIM2, switching exposed a transient absent
+response during SIM initialization. The daemon now allows the full attachment
+window before treating absence as final, including during rollback. Unit tests
+and the native ARM64 build passed. Live SIM2 readback then confirmed a ready card
+registered on Verizon (311480), LTE, but its data session did not connect with
+vzwinternet. The vendor dialer logged QMI errors 0xe/0xf and verbose reason 2001;
+these alone do not establish the carrier/account cause. Dual-card speed comparison
+was not run because it requires a working data session on each SIM. The test
+returns to SIM1 and Manual mode; per-SIM APNs are retained on the test router.
