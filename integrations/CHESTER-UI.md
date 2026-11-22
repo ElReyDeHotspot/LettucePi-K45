@@ -370,3 +370,61 @@ are unchanged. Live checks visited all four tabs, confirmed no white form panels
 and checked the 390px phone layout without horizontal overflow. No settings were
 saved or time-sync actions triggered. Styles are live and retained for the next
 image; no new firmware was built or flashed for this refinement.
+
+
+## Pending next image: log review and service remedies
+
+Reviewed the live logread and complete dmesg capture after bin 10. Private raw
+logs remain outside Git. No log buffer was cleared, severity lowered, kernel
+message filtered or hardware warning hidden. Wi-Fi calibration is explicitly
+deferred at the owner's request. No new firmware was built or flashed.
+
+Remedies shipped in the source and applied live where relevant:
+
+- Modem boost: boost_cap=0 and no control GPIO on this router. Its vendor loop
+  woke and logged the disabled state every five seconds. A capability guard
+  avoids creating that unused process. Startup is disabled on the live router,
+  and the image customizer removes its boot links, keeping it frozen by default.
+- QModem startup: nested rc_procd calls replaced the outer JSON namespace,
+  producing service set {} / Invalid argument after a successful nested start.
+  Startup now declares enabled instances in one native procd transaction;
+  external dial/reconfigure operations retain their existing entry points.
+  A live start retained dial PID 8824 and its cellular IPv4 connection.
+- ZeroTier: rc.common invokes service_started even when start_service returns
+  early for disabled configuration. Guarding the hook prevents disabled ZT from
+  running zerotier-fw4 / CLI checks for a nonexistent daemon. Enabled behavior
+  is retained; no ZeroTier network was enabled or joined.
+- LED reload: check whether a saved procd instance exists before deleting it,
+  avoiding the initial missing modem_status_any error.
+- LED status: select the first matching JSON value inside jq rather than piping
+  multiple results through head, which could close the pipe under jq.
+- Discovery: exclude wireless netdevs and USB hubs from modem hotplug queues.
+  A Wi-Fi PCI radio and USB root hubs do not expose a modem data interface.
+  Cellular netdev handling and other USB-device discovery remain available.
+- Quectel SCS: missing or unknown SCS now yields an empty value; valid codes use
+  fixed mappings. The vendor fallback previously executed an invalid awk power
+  expression when the response omitted that optional field.
+- Factory fstab: add the standard global defaults without UUIDs or mount entries,
+  matching the auto-generated global policy. The live user's existing fstab is
+  preserved. Early-boot fstab-message improvement awaits a future image/boot test.
+
+Verification used the real OpenWrt procd/jshn serializers with mocked service
+writes: enabled/disabled dial JSON, boost capability guard, ZeroTier disabled
+hook, and absent/present LED instance deletion. Large JSON and absent-value LED
+fixtures passed using the router's actual jq. Native ash syntax checks passed.
+Synthetic Wi-Fi/hub events exited before queueing discovery; no AT operation
+was sent for them. QCAINFO/current-band display regressions and missing-SCS
+fixtures passed. A live re-declaration of QModem left the existing process and
+cellular session intact. After the final SCS fix, a follow-up log window showed
+no further boost notices, awk errors, jq broken pipes or daemon warning/error
+messages. This is a runtime check, not a claim that a fresh boot is error-free.
+
+Remaining observations: captured Wi-Fi interface creation / unsupported-operation
+messages occurred during setup, and both bands subsequently reached AP-ENABLED.
+The current file count was far below the system limit; no limit was increased
+as a speculative fix. IPv6 route/prefix warnings coincided with address setup or
+network reconfiguration. Early PCI clock/deferred initialization, regulator,
+cache-topology and first-boot random-seed messages are retained with the vendor
+kernel/device tree. No panic, OOM or filesystem-corruption event was identified
+in the captured logs. Finite AT discovery timeouts remain honest diagnostics
+when a candidate port does not answer. Historical log entries remain visible.

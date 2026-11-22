@@ -1425,7 +1425,9 @@ get_scs()
         "2") scs="60" ;;
         "3") scs="120" ;;
         "4") scs="240" ;;
-        *) scs=$(awk "BEGIN{ print 2^$1 * 15 }") ;;
+        "5") scs="480" ;;
+        "6") scs="960" ;;
+        *) scs="" ;;
 	esac
     echo "$scs"
 }

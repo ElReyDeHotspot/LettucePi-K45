@@ -12,6 +12,13 @@ shows B66 + B2 + N41 + N41, preserves distinct repeated-band carriers and
 handles both NR response formats. Native QModem, Overview, Cellular Info and
 login consume the corrected data. This parser fix is pending the next image.
 
+System/kernel log review fixes are also pending: modem boost is frozen off at
+boot; disabled ZeroTier no longer calls its firewall/CLI setup; QModem creates
+valid startup service definitions; LED reload handles absent instances; LED
+status parsing avoids broken pipes; Wi-Fi interfaces and USB hubs are skipped
+by modem hotplug discovery; missing SCS is handled without awk errors; and a
+minimal fstab is supplied for fresh images. No calibration data was changed.
+
 ## Bin 10 — version 1.0.9, build 202611220003
 
 Sun/Night appearance now follows the approved Overview mockup. The top-right

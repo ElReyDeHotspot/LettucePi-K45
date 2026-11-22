@@ -22,3 +22,11 @@ exit 0
 out=subprocess.check_output(['bash','-c',script,'test',str(q),'\n'.join(expected)],text=True).splitlines()
 assert out==['66 / 2','41 / 41','530190 / 507870','120 / 120','50 / 50'],out
 print('PASS QCAINFO: mixed NSA, compact/extended NR formats, repeated N41, LTE RB/NR bandwidth units, SA, missing values and serving-cell fallback.')
+
+source=(q/'vendor/quectel.sh').read_text(encoding='utf-8')
+scs=source[source.index('get_scs()'):source.index('get_phych()')]
+script=scs+"\nfor v in 0 1 2 3 4 5 6 '' - invalid; do get_scs \"$v\"; done"
+proc=subprocess.run(['bash','-c',script],text=True,capture_output=True)
+assert proc.returncode==0 and not proc.stderr,proc.stderr
+assert proc.stdout.splitlines()==['15','30','60','120','240','480','960','','','']
+print('PASS missing/unknown SCS returns blank without executing invalid awk expressions.')

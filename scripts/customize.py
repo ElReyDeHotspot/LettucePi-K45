@@ -205,3 +205,7 @@ for name in ['usr/bin/speedtest','usr/libexec/chester-ndt7']:
 for link in ['S99chester_sim','K09chester_sim']:
     target=root/'etc/rc.d'/link
     if not target.exists() and not target.is_symlink():target.symlink_to('../init.d/chester_sim')
+
+# K45P has no configured modem-boost GPIO. Keep the unused polling service frozen.
+for link in (root/'etc/rc.d').glob('*misectel_modem_boost'):
+    if link.is_symlink():link.unlink()

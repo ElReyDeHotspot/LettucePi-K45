@@ -1,0 +1,25 @@
+#!/bin/sh
+# Copyright (C) 2024 Tom <fjrcn@outlook.com>
+manual=$(uci -q get qmodem.main.block_auto_probe)
+[ "${manual}" = 1 ] && exit
+# USB hubs/controllers cannot answer modem AT commands.
+for class_file in bDeviceClass bInterfaceClass; do
+    [ -r "/sys${DEVPATH}/$class_file" ] || continue
+    [ "$(cat "/sys${DEVPATH}/$class_file")" = 09 ] && exit 0
+done
+logger -t modem_hotplug "usb_event slot: ${DEVPATH} action: ${ACTION}"
+hotplug_add_delay=$(uci -q get qmodem.main.hotplug_add_delay || echo 8)
+[ -z "${DEVNUM}" ] && exit
+
+
+slot=$(basename "${DEVPATH}")
+logger -t modem_hotplug "usb_event run slot: ${slot} action: ${ACTION}"
+case "${ACTION}" in
+    bind|\
+    add)
+        (/usr/share/qmodem/modem_scan.sh add "${slot}" usb "${hotplug_add_delay}" >/dev/null 2>&1) &
+        ;;
+    remove)
+        ( /usr/share/qmodem/modem_scan.sh disable "${slot}" >/dev/null 2>&1 ) &
+        ;;
+esac
