@@ -5,7 +5,7 @@ return view.extend({render(){
  s.anonymous=true;s.addremove=true;s.addbtntitle=_('Add instance');s.tab('connection',_('Connection'));s.tab('access',_('Access'));s.tab('advanced',_('Advanced'));
  o=s.taboption('connection',form.Flag,'enable',_('Enable terminal'));o.default=true;
  o=s.taboption('connection',form.Value,'port',_('Console port'),_('Port to listen on. The standard port is 7681.'));o.depends('unix_sock','0');o.datatype='port';o.placeholder=7681;
- o=s.taboption('connection',widgets.DeviceSelect,'interface',_('Listen on interface'),_('Network interface used by the console service.'));o.depends('unix_sock','0');o.nocreate=true;o.includeips=true;
+ o=s.taboption('connection',widgets.DeviceSelect,'interface',_('Listen on interface'),_('Leave blank for LAN and VPN access. Firewall rules control which networks can reach the console.'));o.depends('unix_sock','0');o.nocreate=true;o.includeips=true;
  s.taboption('connection',form.Flag,'readonly',_('Read-only session'),_('Allow viewing output without typing commands.'));
  s.taboption('connection',form.Flag,'ipv6',_('IPv6 support'));
  o=s.taboption('access',form.Value,'credential',_('Basic authentication'),_('Optional username:password challenge for the console service.'));o.placeholder='username:password';o.password=true;

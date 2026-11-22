@@ -1,0 +1,16 @@
+{
+  "sch_tbf": {
+    ".text": true,
+    ".rodata": true,
+    ".data": true,
+    ".init.text": true,
+    ".exit.text": true
+  },
+  "sch_ingress": {
+    ".text": true,
+    ".rodata": true,
+    ".data": true,
+    ".init.text": true,
+    ".exit.text": true
+  }
+}

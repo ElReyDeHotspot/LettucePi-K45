@@ -26,6 +26,10 @@ sed -i -e '/\/misectel\//d' -e '/\/qmodem\//d' -e '/\/video\//d' "$R/etc/apk/rep
 (cd "$REPO/integrations/zapret2/packages"; sha256sum -c SHA256SUMS)
 "$APK" --root "$R" --arch aarch64_cortex-a53 --no-scripts --allow-untrusted add \
   "$REPO"/integrations/zapret2/packages/*.apk
+# Add-on CAKE module for the exact vendor ABI; the kernel stays unchanged.
+(cd "$REPO/integrations/sqm/packages"; sha256sum -c SHA256SUMS)
+"$APK" --root "$R" --arch aarch64_cortex-a53 --no-scripts --allow-untrusted add \
+  "$REPO"/integrations/sqm/packages/*.apk
 (cd "$REPO/integrations/secure-web/packages"; sha256sum -c SHA256SUMS)
 "$APK" --root "$R" --arch aarch64_cortex-a53 --no-scripts --allow-untrusted add \
   "$REPO"/integrations/secure-web/packages/*.apk

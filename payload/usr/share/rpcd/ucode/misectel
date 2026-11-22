@@ -848,11 +848,12 @@ const methods = {
 			// Capability probes, the same ones the service gates on.
 			let police = one("tc actions list action police 2>/dev/null | head -1");
 			let tbfline = wan ? one(`tc -s qdisc show dev ${wan} 2>/dev/null | grep -m1 'qdisc tbf'`) : '';
+			let cakeline = wan ? one(`tc -s qdisc show dev ${wan} 2>/dev/null | grep -m1 'qdisc cake'`) : '';
 			let stats = wan ? one(`tc -s qdisc show dev ${wan} 2>/dev/null | grep -m1 'Sent '`) : '';
 			let lanq = one("tc qdisc show dev br-lan 2>/dev/null | grep -m1 'qdisc fq_codel'");
 
 			let m = match(stats, /Sent (\d+) bytes (\d+) pkt \(dropped (\d+), overlimits (\d+)/);
-			let rate = match(tbfline, /rate ([0-9A-Za-z]+)/);
+			let rate = (match(tbfline, /rate ([0-9A-Za-z]+)/) || match(cakeline, /bandwidth ([0-9A-Za-z]+)/));
 
 			// Download does not go through tc at all. act_police and IFB are
 			// both absent here, but nf_tables carries its own byte-oriented
@@ -885,7 +886,9 @@ const methods = {
 				dl_seen_bytes: tm ? tm[2] : '',
 				dl_dropped: dm ? dm[1] : '',
 				dl_dropped_bytes: dm ? dm[2] : '',
-				shaping: tbfline ? true : false,
+				cake_available: one('[ -d /sys/module/sch_cake ] || [ -f /lib/modules/6.12.94/sch_cake.ko ]; echo $?') == '0',
+				upload_method: cakeline ? 'CAKE' : (tbfline ? 'TBF + fq_codel' : ''),
+				shaping: (cakeline || tbfline) ? true : false,
 				tbf_rate: rate ? rate[1] : '',
 				sent_bytes: m ? m[1] : '',
 				dropped: m ? m[3] : '',

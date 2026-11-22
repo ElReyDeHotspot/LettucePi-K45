@@ -1,34 +1,6 @@
 #!/bin/sh /etc/rc.common
-# LettucePi Smart Queue.
-#
-# Built on what this kernel has, rather than on sqm-scripts, which cannot be
-# installed here: kmod-ifb, kmod-sched-cake and iptables-mod-ipopt all live in
-# the target feed, which is deliberately not configured because it is built
-# against 6.12.87 while this image runs 6.12.85.
-#
-# WHAT THIS KERNEL OFFERS (each verified by attaching it live)
-#   fq_codel   built in
-#   tbf        sch_tbf.ko
-#   IFB        absent, no ifb.ko, RTNETLINK answers Not supported
-#   veth       absent, same answer, so no IFB stand-in either
-#   act_police ABSENT, no act_police.ko, tc actions list action police is
-#              empty, and any police filter fails to load the action module
-#   nft limit  PRESENT, and it is a different kernel path entirely: nf_tables
-#              carries its own byte-oriented token bucket that owes nothing to
-#              act_police, IFB or the tc action plugins
-#
-# So download control IS available, as drop-based policing rather than queued
-# shaping. Measured on the bench with a client downloading through the box:
-# uncapped 499 KB/s, capped at 200 KB/s it settled at 201.0 KB/s over 52.2s
-# with 189 packets dropped, while the router's own download stayed at 434 KB/s.
-#
-# Upload keeps the better mechanism, tbf plus fq_codel, because there we own
-# the queue. Downstream we do not: the bottleneck is the carrier's, so the only
-# lever is to drop early enough that the sender backs off. Expect TCP to pace
-# smoothly and UDP or QUIC to simply see loss.
-#
-# The vendor kernel is left alone: replacing it is what left the modem dead on
-# 2 of 2 units last time.
+# CAKE upload shaping, with TBF/fq_codel fallback and nft download policing.
+# Uses add-on modules for the unchanged K45P vendor kernel.
 START=96
 STOP=10
 USE_PROCD=1
@@ -55,13 +27,17 @@ wan_dev() {
 	done
 }
 
+have_cake() {
+ [ -d /sys/module/sch_cake ] || modprobe sch_cake 2>/dev/null
+}
+
 have_fq_codel() {
 	tc qdisc add dev lo root fq_codel 2>/dev/null || return 1
 	tc qdisc del dev lo root 2>/dev/null
 	return 0
 }
 have_tbf() {
-	tc qdisc add dev lo root handle 1: tbf rate 10mbit burst 10kb latency 50ms 2>/dev/null || return 1
+	tc qdisc add dev lo root handle 1: tbf rate 10mbit burst 80kb latency 50ms 2>/dev/null || return 1
 	tc qdisc del dev lo root 2>/dev/null
 	return 0
 }
@@ -108,6 +84,7 @@ offload_off() {
 offload_restore() {
 	so=$(get saved_offload); sh=$(get saved_offload_hw)
 	[ -n "$so" ] || return 0
+	[ "$(uci -q get qmodem_ttl.main.enable)" = "1" ] && { so=0; sh=0; }
 	uci -q set firewall.@defaults[0].flow_offloading="$so"
 	uci -q set firewall.@defaults[0].flow_offloading_hw="$sh"
 	uci -q commit firewall
@@ -180,10 +157,14 @@ apply() {
 	[ -n "$WAN" ] || { log "no WAN device yet, waiting for the modem"; return 0; }
 
 	offload_off
+	printf '%s\n' "$WAN" > /var/run/chester-sqm-wan
 
 	if [ "$(get upload_enabled)" = "1" ]; then
 		UP=$(get upload_kbit)
-		if have_tbf && [ -n "$UP" ] && [ "$UP" -gt 0 ] 2>/dev/null; then
+		if [ -n "$UP" ] && [ "$UP" -gt 0 ] 2>/dev/null && have_cake &&
+            tc qdisc replace dev "$WAN" root handle 1: cake bandwidth "${UP}kbit" besteffort dual-srchost nat 2>/dev/null; then
+            log "upload: ${UP}kbit CAKE on $WAN"
+        elif have_tbf && [ -n "$UP" ] && [ "$UP" -gt 0 ] 2>/dev/null; then
 			clear_dev "$WAN"
 			# burst must cover a timer tick at the shaped rate or tbf cannot
 			# reach it; about 10 ms, floored so slow links still work.
@@ -229,22 +210,23 @@ apply() {
 	# local clients keep full speed.
 	if [ "$(get lan_fq_codel)" = "1" ] && [ -d /sys/class/net/br-lan ]; then
 		ECN=""; [ "$(get ecn)" = "1" ] && ECN="ecn"
-		tc qdisc replace dev br-lan root fq_codel target 5ms interval 100ms $ECN 2>/dev/null &&
+		tc qdisc replace dev br-lan root handle 20: fq_codel target 5ms interval 100ms $ECN 2>/dev/null &&
 			log "lan: fq_codel on br-lan, no rate limit"
 	fi
 }
 
 remove() {
-	WAN=$(wan_dev)
-	if [ -n "$WAN" ]; then
-		tc filter del dev "$WAN" parent ffff: 2>/dev/null
-		tc qdisc del dev "$WAN" ingress 2>/dev/null
-		clear_dev "$WAN"
-	fi
-	nft_dl_remove
-	clear_dev br-lan
-	offload_restore
-	log "removed"
+ WAN=$(cat /var/run/chester-sqm-wan 2>/dev/null)
+ [ -n "$WAN" ] || WAN=$(wan_dev)
+ # Only remove our root queue. Leave other apps' ingress and clsact hooks alone.
+ if [ -n "$WAN" ] && tc qdisc show dev "$WAN" 2>/dev/null | grep -Eq '^qdisc (cake|tbf) 1: root'; then
+  clear_dev "$WAN"
+ fi
+ nft_dl_remove
+ if tc qdisc show dev br-lan 2>/dev/null | grep -q '^qdisc fq_codel 20: root'; then clear_dev br-lan; fi
+ rm -f /var/run/chester-sqm-wan
+ offload_restore
+ log "removed"
 }
 
 # Counters are read back from the live ruleset rather than tracked here, so

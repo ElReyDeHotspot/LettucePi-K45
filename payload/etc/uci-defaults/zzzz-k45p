@@ -54,4 +54,12 @@ esac
 if [ "$(sha256sum /etc/misectel/apn-presets/us.json 2>/dev/null | cut -d' ' -f1)" = '1f417c8debf0978c37604df54cb67ea88dd73e2efc4f064e3ece2b934ac4850f' ]; then
     cp /usr/share/misectel/apn-presets/defaults/us.json /etc/misectel/apn-presets/us.json
 fi
+# Terminal must accept the same LAN and tailnet paths as LuCI. WAN remains
+# blocked by its firewall zone. Keep any explicitly customized binding.
+for section in $(uci -q show ttyd | sed -n 's/^ttyd\.\([^=]*\)=ttyd$/\1/p'); do
+ case "$(uci -q get "ttyd.$section.interface")" in
+  @lan|br-lan) uci -q delete "ttyd.$section.interface" ;;
+ esac
+done
+uci -q commit ttyd
 exit 0
