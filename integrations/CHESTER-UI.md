@@ -211,3 +211,13 @@ The packed image matches the updated Wi-Fi and Overview source and new settings
 assets/helpers. Executable modes, bundled speed-test engines, SIM boot link,
 release version, kernel/DTB identity, manifest signature, image SHA256 and stock
 sysupgrade compatibility were checked. The connected router was not flashed.
+
+
+## Pending next image: LP-OpenWrt25 design name
+
+System > Language and Style > Design now shows the Chester theme once as
+LP-OpenWrt25. Duplicate theme paths are collapsed even on retained configurations.
+Factory defaults remove the OEM/LettucePi aliases and register LP_OpenWrt25 with
+the existing misectel asset path, preserving theme compatibility. The live theme
+registry was migrated; Design options were visually checked without applying a
+different active design. No firmware image was rebuilt for this label change.
