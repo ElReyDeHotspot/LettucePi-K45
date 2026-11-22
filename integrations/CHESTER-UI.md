@@ -353,3 +353,20 @@ band lock, network-mode or SIM write was issued. Shell/awk fixture tests cover
 mixed NSA, SA, repeated bands, LTE/NR bandwidth units, missing values and empty
 CA fallback; display tests cover Overview, login and Cellular Info. Physical
 mode changes to SA or LTE were not required for this live NSA repair.
+
+
+## Pending next image: System Properties in Night appearance
+
+All four native System tabs (General Settings, Logging, Time Synchronization,
+Language and Style) now use the Chester navy card and inset-field surfaces,
+readable labels/help text, blue selected tabs and switches, and a matching
+Save/Apply bar. Removed the vendor white tab bodies, duplicate section title,
+and bright outer map border. NTP server rows have larger spacing and remove
+controls. Phone forms stack labels above inputs and use two rows of tab buttons.
+
+The changes are scoped to Night appearance and System Properties. Native
+form dependencies, time polling, validation, UCI bindings and save/apply handlers
+are unchanged. Live checks visited all four tabs, confirmed no white form panels,
+and checked the 390px phone layout without horizontal overflow. No settings were
+saved or time-sync actions triggered. Styles are live and retained for the next
+image; no new firmware was built or flashed for this refinement.
