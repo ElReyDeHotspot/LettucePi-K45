@@ -36,16 +36,18 @@
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"/>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#b81425">
+<meta name="theme-color" content="#f8faff">
 <meta name="msapplication-tap-highlight" content="no">
-<meta name="msapplication-TileColor" content="#b81425">
+<meta name="msapplication-TileColor" content="#30b60b">
 <meta name="application-name" content="{{ appname }}">
 <meta name="apple-mobile-web-app-title" content="{{ appname }}">
 <script src="{{ resource }}/chester-ui/appearance.js?v=20261122-1"></script>
 <link rel="stylesheet" href="{{ media }}/cascade.css?v=chester-k45p-live-15">
 <link rel="stylesheet" href="{{ resource }}/chester-ui/appearance.css?v=20261122-18">
 <link rel="stylesheet" href="{{ resource }}/chester-ui/navigation.css?v=7f6c3cc79fe5">
-<link rel="icon" href="{{ media }}/favicon.ico" sizes="48x48">
+<link rel="icon" href="{{ media }}/favicon.ico?v=chester-leaf-1" sizes="16x16 32x32 48x48 64x64 128x128 256x256">
+<link rel="icon" href="{{ media }}/green-leaf.svg?v=chester-leaf-1" type="image/svg+xml" sizes="any">
+<link rel="apple-touch-icon" href="{{ media }}/apple-touch-icon.png?v=chester-leaf-1" sizes="180x180">
 {% if (node?.css): %}
 <link rel="stylesheet" href="{{ resource }}/{{ node.css }}">
 {% endif %}
