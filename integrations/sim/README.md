@@ -69,3 +69,27 @@ vzwinternet. The vendor dialer logged QMI errors 0xe/0xf and verbose reason 2001
 these alone do not establish the carrier/account cause. Dual-card speed comparison
 was not run because it requires a working data session on each SIM. The test
 returns to SIM1 and Manual mode; per-SIM APNs are retained on the test router.
+
+## Independent per-SIM tests
+
+Each SIM card has an M-Lab NDT Test speed button, using the same bundled,
+interface-bound engine and locks as Failover. Manual mode and saved settings are
+required. The confirmation explains mobile data/public IP publication and the
+cellular interruption. The daemon tests only the requested slot and restores the
+original slot/APN on success, failure or cancellation. It does not change the
+preferred SIM or choose a winner. Progress and cancellation share the page status;
+download/upload results appear on the tested card. Results are runtime-only and
+invalidated when a different card is observed. Temporary initialization absence
+no longer discards a previous measurement.
+
+The owner's MBN AutoSel=0 and deactivate commands both returned OK on November 22;
+readback confirmed AutoSel=0. Verizon data still failed on retry. These modem
+settings were applied to the live device only, not silently added as factory defaults.
+SIM1's independent NDT test completed at 365.8/5.5 Mbps. SIM2's button was verified
+to select the physical slot; a successful Verizon NDT result remains blocked by
+its data-session failure. No firmware image was built or flashed.
+
+Final-build live checks: SIM1 measured 360.8/5.3 Mbps; the SIM2 test button
+selected slot2, cancellation restored SIM1/APN and retained its previous result.
+Invalid slot, missing notice and automatic-mode requests were rejected.
+No operation or link-test lock remained; Failover configuration was unchanged.

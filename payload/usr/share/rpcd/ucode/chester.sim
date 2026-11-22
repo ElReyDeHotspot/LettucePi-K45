@@ -23,6 +23,14 @@ return {'chester.sim':{
   if(!state().supported)return invalid('This modem does not report two switchable slots.');
   return queue('switch',slot);
  }},
+ test:{args:{slot:'String',notice:'String'},call:function(request){
+  let slot=request.args.slot;
+  if(slot!='1'&&slot!='2')return invalid('Choose SIM 1 or SIM 2.');
+  if(request.args.notice!='1')return invalid('Review the M-Lab test notice first.');
+  if(config().mode!='manual')return invalid('Save Manual mode before testing a SIM.');
+  if(!state().supported)return invalid('This modem does not report two switchable slots.');
+  return queue('test',slot);
+ }},
  run_selection:{args:{notice:'String'},call:function(request){
   if(request.args.notice!='1')return invalid('Review the M-Lab test notice first.');
   if(config().mode=='auto_switch')return invalid('Use Manual or Auto-Select before running a comparison.');

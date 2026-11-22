@@ -3,9 +3,9 @@
   "go": "go1.27.4 linux/amd64",
   "target": "linux/arm64, CGO_ENABLED=0",
   "dependencies": "Go standard library only",
-  "binary_sha256": "d57179d38af46fe9cfb729cadd6626aae5206057d9769fb1a58e364aa4d2b7ac",
+  "binary_sha256": "e79412c86ac27006c993fda2c4a75bf3e1fc9e555121766ceedc004f75728285",
   "sources_sha256": {
-    "main.go": "a3a394c1a4faff4be7823db8055dd15e7d8d740d648fd0895f061e0656f3aaef",
+    "main.go": "8a0f8c8c9bc661f92083932930698f74c235eec68d5c0bd9f4c65db3058c49ee",
     "main_test.go": "6a0272ad02b0ac0255cfdc4346d370f55c9248e0e538c327666b246c62bcd025",
     "go.mod": "55ac0dc4724db0940ef06bc93e5dc45acb9c362d1b08269a0d272b097b5d2d36"
   }

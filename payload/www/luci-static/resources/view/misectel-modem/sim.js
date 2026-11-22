@@ -7,6 +7,7 @@
 var status=rpc.declare({object:'chester.sim',method:'status',expect:{}});
 var save=rpc.declare({object:'chester.sim',method:'save',params:['settings'],expect:{}});
 var switchSIM=rpc.declare({object:'chester.sim',method:'switch',params:['slot'],expect:{}});
+var testSIM=rpc.declare({object:'chester.sim',method:'test',params:['slot','notice'],expect:{}});
 var compare=rpc.declare({object:'chester.sim',method:'run_selection',params:['notice'],expect:{}});
 var cancel=rpc.declare({object:'chester.sim',method:'cancel',expect:{}});
 var refresh=rpc.declare({object:'chester.sim',method:'refresh',expect:{}});
@@ -29,8 +30,9 @@ return view.extend({
   this.cardRefs=['1','2'].map(function(slot){
    var badge=E('span',{'class':'cs-pill'}),name=E('h3'),body=E('div'),result=E('div',{'class':'cs-result'}),live=E('div',{'class':'cs-live-note'});
    var button=E('button',{type:'button','class':'cs-use',click:ui.createHandlerFn(self,function(){return this.action(function(){return switchSIM(slot);});})},['Use SIM '+slot]);
-   var node=E('div',{'class':'cs-card'},[E('div',{'class':'cs-card-top'},[E('span',{'class':'cs-small'},['SIM '+slot]),badge]),name,body,live,result,button]);
-   return {slot:slot,node:node,badge:badge,name:name,body:body,result:result,live:live,button:button};
+   var test=E('button',{type:'button','class':'cs-run',click:ui.createHandlerFn(self,function(){this.testSlot(slot);})},['Test speed']);
+   var node=E('div',{'class':'cs-card'},[E('div',{'class':'cs-card-top'},[E('span',{'class':'cs-small'},['SIM '+slot]),badge]),name,body,live,result,button,test]);
+   return {slot:slot,node:node,badge:badge,name:name,body:body,result:result,live:live,button:button,test:test};
   });
   this.modeButtons=[['manual','Manual'],['auto_select','Auto-Select'],['auto_switch','Auto-Switch']].map(function(m){return E('button',{type:'button','class':'cs-mode','aria-pressed':String(self.mode===m[0]),click:function(){self.mode=m[0];self.dirty();self.updateMode();}},[m[1]]);});
   this.modeNote=E('div',{'class':'cs-muted'});
@@ -58,7 +60,7 @@ return view.extend({
  updateMode:function(){var self=this;['manual','auto_select','auto_switch'].forEach(function(m,i){self.modeButtons[i].setAttribute('aria-pressed',String(self.mode===m));});if(this.selectDetails)this.selectDetails.open=this.mode==='auto_select';if(this.switchDetails)this.switchDetails.open=this.mode==='auto_switch';this.modeNote.textContent=this.mode==='manual'?'Choose a SIM yourself. Automatic selection and automatic switching are off.':this.mode==='auto_select'?'Choose by speed at the next startup. Runtime Auto-Switch is off.':'Monitor and switch while running. Startup Auto-Select is off.';this.updateButtons();},
  updateButtons:function(){
   if(!this.last)return;var s=this.last,c=s.config||{},busy=!!s.busy||!!this.requestBusy;
-  this.cardRefs.forEach(function(r){var active=s.active===r.slot,v=(s.cards||{})[r.slot]||{},online=active&&v.ready&&v.connected;r.button.disabled=busy||!s.supported||online||c.mode!=='manual'||this.mode!=='manual'||this.isDirty;r.button.textContent=online?'Active SIM':c.mode!=='manual'?'Use Manual to select':active?'Reconnect SIM '+r.slot:'Use SIM '+r.slot;},this);
+  this.cardRefs.forEach(function(r){var active=s.active===r.slot,v=(s.cards||{})[r.slot]||{},online=active&&v.ready&&v.connected;r.test.disabled=busy||!s.supported||c.mode!=='manual'||this.mode!=='manual'||this.isDirty;r.test.setAttribute('aria-label','Test SIM '+r.slot+' speed with M-Lab NDT');r.button.disabled=busy||!s.supported||online||c.mode!=='manual'||this.mode!=='manual'||this.isDirty;r.button.textContent=online?'Active SIM':c.mode!=='manual'?'Use Manual to select':active?'Reconnect SIM '+r.slot:'Use SIM '+r.slot;},this);
   this.compareButton.disabled=busy||!s.supported||this.isDirty||c.mode==='auto_switch';this.cancelButton.style.display=s.busy?'':'none';this.saveButton.disabled=busy;this.modeButtons.forEach(function(b){b.disabled=busy;});
  },
  update:function(s){
@@ -77,6 +79,11 @@ return view.extend({
   });
   this.log.textContent=(s.events||[]).slice().reverse().join('\n')||'No SIM operations yet.';this.updateButtons();
  },
+ testSlot:function(slot){var self=this;ui.showModal('Test SIM '+slot+' speed',[
+  E('p',{},['This M-Lab NDT test uses mobile data and publishes the result and tested link’s public IP address. Testing another SIM interrupts cellular data while it switches. Your original SIM and APN will be restored afterward.']),
+  E('p',{},[E('a',{href:'https://www.measurementlab.net/privacy/',target:'_blank',rel:'noopener noreferrer'},['M-Lab privacy policy'])]),
+  E('div',{'class':'right'},[E('button',{'class':'btn',click:ui.hideModal},['Cancel']), ' ', E('button',{'class':'btn cbi-button-action',click:function(){ui.hideModal();self.action(function(){return testSIM(slot,'1');});}},['Start test'])])
+ ]);},
  action:async function(fn){if(this.requestBusy)return;this.requestBusy=true;this.updateButtons();try{var r=await fn();if(!r.success)throw new Error(r.error||'Could not queue the SIM operation.');this.update(await status());}catch(e){ui.addNotification(null,E('p',{},[e.message]));}finally{this.requestBusy=false;this.updateButtons();}},
  saveSettings:async function(){
   var a={mode:this.mode,notice:this.notice.checked};Object.keys(this.inputs).forEach(function(k){var f=this.inputs[k],n=f.node;a[k]=n.type==='checkbox'?n.checked:n.type==='number'?Number(n.value)*f.scale:n.value.trim();},this);

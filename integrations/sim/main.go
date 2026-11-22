@@ -259,9 +259,8 @@ func snapshot() {
 	if c.Presence == "absent" {
 		c.Carrier = ""
 		c.ICCIDEnd = ""
-		c.Download = nil
-		c.Upload = nil
-		c.Tested = 0
+		// Retain the previous test through temporary absence during switching.
+		// A different observed ICCID invalidates it above.
 	}
 	c.RSRP = nil
 	if fields := strings.Fields(cell["rsrp"]); len(fields) > 0 {
@@ -449,6 +448,9 @@ func score(c *Card) float64 {
 	return *c.Download + *c.Upload
 }
 func measure(ctx context.Context, slot string) error {
+	card(slot).Download = nil
+	card(slot).Upload = nil
+	card(slot).Tested = 0
 	a, _ := uciGet("failover.main.primary")
 	b, _ := uciGet("failover.main.backup")
 	role := ""
@@ -597,6 +599,16 @@ func runJob(request Request) {
 				command(root, 5, "uci", "commit", "chester_sim")
 			}
 		}
+	} else if request.Action == "test" {
+		if cfg.Mode != "manual" || (request.Slot != "1" && request.Slot != "2") {
+			lastErr = errors.New("choose Manual and a valid SIM before testing")
+		} else {
+			a, p := apnFor(request.Slot, originalAPN, apnExists)
+			lastErr = switchTo(ctx, request.Slot, a, p)
+			if lastErr == nil {
+				lastErr = measure(ctx, request.Slot)
+			}
+		}
 	} else if request.Action == "select" {
 		best := -1.0
 		for _, slot := range []string{original, other(original)} {
@@ -661,15 +673,21 @@ func runJob(request Request) {
 		if e != nil {
 			lastErr = fmt.Errorf("%v; original SIM needs attention: %v", lastErr, e)
 		}
-		if lastErr == nil {
+		if lastErr == nil && request.Action != "test" {
 			lastErr = errors.New("SIM selection did not complete")
 		}
-		if ctx.Err() != nil && restored {
+		if request.Action == "test" && lastErr == nil && restored {
+			phase("completed", "SIM "+request.Slot+" speed test completed. Original SIM restored.")
+		} else if ctx.Err() != nil && restored {
 			phase("cancelled", "Selection cancelled. Original SIM restored.")
 		} else {
 			phase("failed", lastErr.Error())
 		}
-		event(lastErr.Error())
+		if lastErr != nil {
+			event(lastErr.Error())
+		} else {
+			event("SIM " + request.Slot + " speed test completed; original SIM restored")
+		}
 	} else {
 		state.Winner = winner
 		phase("completed", "SIM "+winner+" is connected")
@@ -859,7 +877,7 @@ func main() {
 				if r.Action == "refresh" {
 					snapshot()
 					publish()
-				} else if r.Action == "switch" || r.Action == "select" {
+				} else if r.Action == "switch" || r.Action == "select" || r.Action == "test" {
 					runJob(r)
 				}
 			}
