@@ -9,7 +9,3 @@ Compiler: ImmortalWrt 25.12.1 SDK, AArch64 cortex-a53, GCC 14.3.0, musl. TLS and
 Link headers/libraries use libubox commit `7dd127841e82eb1cfb61185da37dde7b9bd9ba6d` (ABI 20260213), ubus commit `24864e7840b3a02a9ef76284a373f6b2f00b8a9b` (ABI 20251202), and json-c 0.18 (SONAME 5). Vendor stripped libraries could not be linked directly, so the matching libubox/ubus sources were rebuilt for linking only. The firmware retains its vendor runtime libraries. The existing configuration/init/upgrade keep files are packaged with the new server; the unused vendor websocket plugin is removed.
 
 `packages/SHA256SUMS` pins the local APKs. The image builder verifies these before installation. APKs are local unsigned build inputs; release authenticity is provided by the independently signed OTA manifest and its image SHA256.
-
-Live validation: authenticated malformed REST params of string, integer, array and boolean types all return Invalid params while the daemon remains alive. Valid legacy and REST ubus requests, LuCI login, Overview and Terminal were checked. The crashing request was never sent to the original vendor server.
-
-HTTP management remains the shipping configuration at the owner's request. No device TLS certificate, private CA, certificate-renewal service or shared TLS private key is included.
