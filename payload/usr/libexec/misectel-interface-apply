@@ -1,0 +1,612 @@
+#!/bin/sh
+
+. "${MISECTEL_INTERFACE_FUNCTIONS:-/lib/functions.sh}"
+
+CONFIG="${MISECTEL_INTERFACE_CONFIG:-misectel_interface}"
+ORIGINS="${MISECTEL_INTERFACE_ORIGINS:-misectel_interface_origins}"
+CONFIG_DIR="${MISECTEL_INTERFACE_CONFIG_DIR:-/etc/config}"
+NETWORK="${MISECTEL_INTERFACE_NETWORK:-network}"
+LOCK="${MISECTEL_INTERFACE_LOCK:-/var/lock/misectel-interface.lock}"
+LOCK_HELD=0
+UCI="${MISECTEL_INTERFACE_UCI:-uci}"
+WIFI="${MISECTEL_INTERFACE_WIFI:-/usr/libexec/misectel-interface-wifi}"
+QMODEM_NETDEV="${MISECTEL_INTERFACE_QMODEM_NETDEV:-/usr/share/qmodem/modem_netdev.sh}"
+QMODEM_PORT_POLICY="${MISECTEL_INTERFACE_QMODEM_PORT_POLICY:-/usr/share/qmodem/bridge_port_policy.sh}"
+SYSFS="${MISECTEL_INTERFACE_SYSFS:-/sys/class/net}"
+MODE="${1:-apply}"
+ERRORS=''
+QMODEM_MGMT=''
+QMODEM_LEGACY=''
+ACTIVE_FILE="${TMPDIR:-/tmp}/misectel-interface-active.$$"
+CLAIM_FILE="${TMPDIR:-/tmp}/misectel-interface-claims.$$"
+RUNTIME_FILE="${TMPDIR:-/tmp}/misectel-interface-runtime.$$"
+VXLAN_FILE="${TMPDIR:-/tmp}/misectel-interface-vxlan.$$"
+cleanup() {
+	[ "$LOCK_HELD" != 1 ] || rmdir "$LOCK" 2>/dev/null || true
+	rm -f "$ACTIVE_FILE" "$CLAIM_FILE" "$RUNTIME_FILE" "$VXLAN_FILE"
+}
+trap cleanup EXIT INT TERM
+: > "$ACTIVE_FILE"
+: > "$CLAIM_FILE"
+: > "$RUNTIME_FILE"
+: > "$VXLAN_FILE"
+
+error() {
+	ERRORS="${ERRORS}${ERRORS:+
+}$*"
+}
+
+valid_name() {
+	case "$1" in ''|*[!A-Za-z0-9_.:-]*) return 1;; esac
+}
+
+valid_instance() {
+	case "$1" in ''|*[!A-Za-z0-9_]*|????????????????????????????????*) return 1;; esac
+}
+
+valid_ipv4() {
+	local old_ifs octet
+	old_ifs="$IFS"; IFS=.; set -- $1; IFS="$old_ifs"
+	[ "$#" -eq 4 ] || return 1
+	for octet in "$@"; do
+		case "$octet" in ''|*[!0-9]*) return 1;; esac
+		[ "$octet" -le 255 ] || return 1
+	done
+}
+
+valid_uint() {
+	case "$1" in ''|*[!0-9]*) return 1;; esac
+	[ "$1" -ge "$2" ] && [ "$1" -le "$3" ]
+}
+
+valid_cidr() {
+	local address prefix
+	address="${1%/*}"
+	prefix="${1#*/}"
+	[ "$address" != "$prefix" ] && valid_ipv4 "$address" && valid_uint "$prefix" 1 31
+}
+
+zone_for_network_cb() {
+	local section="$1" wanted="$2" networks item name
+	config_get networks "$section" network
+	for item in $networks; do
+		[ "$item" != "$wanted" ] || {
+			config_get name "$section" name
+			printf '%s\n' "$name"
+			return 1
+		}
+	done
+}
+
+zone_for_network() {
+	config_load firewall
+	config_foreach zone_for_network_cb zone "$1"
+}
+
+port_allowed() {
+	local port allowed optional_wan wan_role
+	port="$1"
+	[ ! -d "$SYSFS/$port/wireless" ] && [ ! -e "$SYSFS/$port/phy80211" ] || return 1
+	optional_wan="$($UCI -q get misectel.network_defaults.optional_wan || $UCI -q get misectel.network_defaults.wan_device)"
+	if [ -n "$optional_wan" ] && [ "$port" = "$optional_wan" ]; then
+		wan_role="$($UCI -q get misectel.network_defaults.wan_role)"
+		wan_role="${wan_role:-wan}"
+		[ "$($UCI -q get misectel.network_defaults.optional_wan_mode)" = lan ] &&
+			[ "$($UCI -q get "network.$wan_role.disabled")" = 1 ] &&
+			[ "$(cat "$SYSFS/$port/type" 2>/dev/null)" = 1 ]
+		return $?
+	fi
+	if [ -n "$MISECTEL_INTERFACE_PORTS" ]; then
+		for allowed in $MISECTEL_INTERFACE_PORTS; do [ "$port" = "$allowed" ] && return 0; done
+		return 1
+	fi
+	if [ -s /etc/board.json ]; then
+		for allowed in $(jsonfilter -i /etc/board.json -e '@.network.lan.ports[*]' -e '@.network.lan.device' 2>/dev/null); do
+			[ "$port" = "$allowed" ] && return 0
+		done
+		return 1
+	fi
+	[ -e "$SYSFS/$port" ] || return 1
+	case "$port" in lo|wan|wwan*|usb*|rmnet*|eth0) return 1;; esac
+	return 0
+}
+
+has_vlan_membership() {
+	local port="$1" section
+	for section in $($UCI -q show "$NETWORK" | sed -n "/\.ports=.*'${port}\(:[^']*\)\?'\([[:space:]]\|$\)/s/\.ports=.*//p"); do
+		[ "$($UCI -q get "$section")" != bridge-vlan ] || return 0
+	done
+	return 1
+}
+
+validate_assignment() {
+	local handoff_ports handoff_wifi handoff_count section provider instance enabled port peer vni udp mtu underlay local_ip management endpoint bridge key previous address_mode bridge_ipv4 firewall_policy prepared mac
+	section="$1"
+	config_get provider "$section" provider
+	config_get instance "$section" instance
+	config_get enabled "$section" enabled 0
+	valid_instance "$instance" || error "$section.instance is invalid"
+	[ "$provider" != vxlan ] || [ "${#instance}" -le 7 ] || error "$section.instance exceeds 7 characters"
+	case "$provider" in qmodem_passthrough|vxlan) :;; *) error "$section.provider is unsupported: $provider";; esac
+	case "$enabled" in 0|1) :;; *) error "$section.enabled must be 0 or 1";; esac
+	if [ "$provider" = qmodem_passthrough ]; then
+		config_get handoff_ports "$section" desired_port
+		config_get handoff_wifi "$section" desired_wifi
+		handoff_count=0
+		for port in $handoff_ports $handoff_wifi; do handoff_count=$((handoff_count + 1)); done
+		[ "$handoff_count" -le 1 ] || error "$section: select only one passthrough port or access point"
+	fi
+	if [ "$enabled" != 1 ]; then
+		# An explicit LAN-first disable also retires pre-manager QModem
+		# devices. Untouched legacy assignments remain unchanged at boot.
+		if [ "$provider" = qmodem_passthrough ]; then
+			config_get prepared "$section" lan_prepared
+			if [ "$prepared" = 1 ]; then
+				QMODEM_LEGACY="$QMODEM_LEGACY $instance"
+				printf 'qmodem|%s|0|||\n' "$instance" >> "$RUNTIME_FILE"
+			fi
+		fi
+		return 0
+	fi
+	printf '%s:%s\n' "$provider" "$instance" >> "$ACTIVE_FILE"
+	config_list_foreach "$section" desired_port validate_port "$provider:$instance"
+	if [ "$provider" = qmodem_passthrough ]; then
+		config_get management "$section" management_cidr
+		config_get endpoint "$section" runtime_endpoint
+		config_get bridge "$section" runtime_bridge
+		config_get prepared "$section" lan_prepared
+		if [ "$prepared" = 1 ]; then
+			config_get bridge "$section" bridge_name
+			config_get mac "$section" bridge_mac
+			config_get mtu "$section" bridge_mtu 1500
+			valid_uint "$mtu" 576 9000 || error "$section.bridge_mtu is invalid"
+			valid_name "$bridge" && [ "${#bridge}" -le 15 ] || error "$section.bridge_name is invalid"
+			printf '%s\n' "$mac" | grep -Eq '^([0-9a-f]{2}:){5}[0-9a-f]{2}$' || error "$section.bridge_mac is invalid"
+		fi
+		[ -z "$management" ] || valid_cidr "$management" || error "$section.management_cidr is invalid"
+		[ -z "$management" ] || QMODEM_MGMT="$QMODEM_MGMT $instance"
+		QMODEM_LEGACY="$QMODEM_LEGACY $instance"
+		printf 'qmodem|%s|%s|%s|%s|%s\n' "$instance" "$enabled" "$endpoint" "$bridge" "$management" >> "$RUNTIME_FILE"
+		return 0
+	fi
+	config_get peer "$section" remote_vtep
+	config_get local_ip "$section" local_vtep
+	config_get vni "$section" vni
+	config_get udp "$section" udp_port 4789
+	config_get mtu "$section" mtu 1450
+	config_get underlay "$section" underlay
+	config_get address_mode "$section" address_mode none
+	config_get bridge_ipv4 "$section" bridge_ipv4
+	config_get firewall_policy "$section" firewall_policy 13
+	valid_ipv4 "$peer" || error "$section.remote_vtep is invalid"
+	[ -z "$local_ip" ] || valid_ipv4 "$local_ip" || error "$section.local_vtep is invalid"
+	valid_uint "$vni" 1 16777215 || error "$section.vni must be between 1 and 16777215"
+	valid_uint "$udp" 1 65535 || error "$section.udp_port must be between 1 and 65535"
+	valid_uint "$mtu" 576 9000 || error "$section.mtu must be between 576 and 9000"
+	valid_name "$underlay" || error "$section.underlay is invalid"
+	case "$address_mode" in none|static|dhcp) :;; *) error "$section.address_mode is invalid";; esac
+	[ "$address_mode" != static ] || valid_cidr "$bridge_ipv4" || error "$section.bridge_ipv4 is invalid"
+	valid_uint "$firewall_policy" 0 255 || error "$section.firewall_policy must be between 0 and 255"
+	key="$underlay|$udp|$vni"
+	previous="$(sed -n "s/^$key|//p" "$VXLAN_FILE" | head -n1)"
+	[ -z "$previous" ] || error "$section duplicates the VXLAN binding of $previous"
+	[ -n "$previous" ] || printf '%s|%s\n' "$key" "$section" >> "$VXLAN_FILE"
+	[ "$($UCI -q get "$NETWORK.$underlay")" = interface ] || error "$section.underlay does not exist: $underlay"
+	[ -n "$(zone_for_network "$underlay" | head -n1)" ] || error "$section.underlay is not assigned to a firewall zone"
+	printf 'vxlan|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n' "$instance" "$enabled" "$peer" "$local_ip" "$vni" "$udp" "$mtu" "$underlay" "$address_mode" "$bridge_ipv4" "$firewall_policy" >> "$RUNTIME_FILE"
+}
+
+validate_port() {
+	local port="$1" owner="$2" previous
+	valid_name "$port" && port_allowed "$port" || { error "$owner requests unavailable port $port"; return; }
+	has_vlan_membership "$port" && { error "$port is part of a bridge-vlan and cannot be managed"; return; }
+	previous="$(sed -n "s/^$port|//p" "$CLAIM_FILE")"
+	[ "$previous" = "$owner" ] && return 0
+	[ -z "$previous" ] || { error "$port is already claimed by $previous"; return; }
+	printf '%s|%s\n' "$port" "$owner" >> "$CLAIM_FILE"
+}
+
+validate() {
+	local api global_count=0 revision timeout
+	config_load "$CONFIG" || { error 'configuration cannot be loaded'; return 1; }
+	validate_global() {
+		global_count=$((global_count + 1))
+		config_get api "$1" api_version
+		config_get revision "$1" revision
+		config_get timeout "$1" apply_timeout 90
+		[ "$api" = 1 ] || error 'global.api_version must be 1'
+		valid_uint "$revision" 0 2147483647 || error 'global.revision is invalid'
+		valid_uint "$timeout" 30 600 || error 'global.apply_timeout must be between 30 and 600 seconds'
+	}
+	config_foreach validate_global global
+	config_foreach validate_assignment assignment
+	[ "$global_count" -eq 1 ] || error 'exactly one global section is required'
+	[ -z "$ERRORS" ]
+}
+
+bridge_for_port_cb() {
+	local section="$1" port="$2" name type ports item
+	config_get type "$section" type
+	[ "$type" = bridge ] || return 0
+	config_get name "$section" name
+	config_get ports "$section" ports
+	for item in $ports; do [ "$item" != "$port" ] || { printf '%s\n' "$name"; return 1; }; done
+}
+
+bridge_for_port() {
+	config_load "$NETWORK"
+	config_foreach bridge_for_port_cb device "$1"
+}
+
+remove_port_cb() {
+	local section="$1" port="$2" type ports item changed=0
+	config_get type "$section" type
+	[ "$type" = bridge ] || return 0
+	config_get ports "$section" ports
+	for item in $ports; do [ "$item" = "$port" ] && changed=1; done
+	[ "$changed" = 1 ] || return 0
+	$UCI -q delete "$NETWORK.$section.ports"
+	for item in $ports; do [ "$item" = "$port" ] || $UCI add_list "$NETWORK.$section.ports=$item"; done
+}
+
+remove_port_everywhere() {
+	config_load "$NETWORK"
+	config_foreach remove_port_cb device "$1"
+}
+
+device_section_by_name_cb() {
+	local section="$1" wanted="$2" name
+	config_get name "$section" name
+	[ "$name" != "$wanted" ] || { printf '%s\n' "$section"; return 1; }
+}
+
+add_port_to_bridge() {
+	local port="$1" bridge="$2" section ports item
+	[ -n "$bridge" ] || return 0
+	config_load "$NETWORK"
+	section="$(config_foreach device_section_by_name_cb device "$bridge")"
+	[ -n "$section" ] || return 1
+	config_get ports "$section" ports
+	for item in $ports; do [ "$item" != "$port" ] || return 0; done
+	$UCI add_list "$NETWORK.$section.ports=$port"
+}
+
+origin_for_port() {
+	local wanted="$1"
+	find_origin() { local port; config_get port "$1" port; [ "$port" != "$wanted" ] || { printf '%s\n' "$1"; return 1; }; }
+	config_load "$ORIGINS" 2>/dev/null || return 0
+	config_foreach find_origin origin
+}
+
+record_origin() {
+	local port="$1" owner="$2" bridge section
+	[ -z "$(origin_for_port "$port")" ] || return 0
+	bridge="$(bridge_for_port "$port" | head -n1)"
+	if ! $UCI -q show "$ORIGINS" >/dev/null 2>&1; then
+		mkdir -p "$CONFIG_DIR" && touch "$CONFIG_DIR/$ORIGINS" || return 1
+	fi
+	section="$($UCI add "$ORIGINS" origin)" || return 1
+	$UCI set "$ORIGINS.$section.port=$port"
+	$UCI set "$ORIGINS.$section.owner=$owner"
+	$UCI set "$ORIGINS.$section.bridge=$bridge"
+}
+
+restore_origin_cb() {
+	local section="$1" port owner bridge current
+	config_get port "$section" port
+	config_get owner "$section" owner
+	config_get bridge "$section" bridge
+	current="$(sed -n "s/^$port|//p" "$CLAIM_FILE" | tail -n1)"
+	[ "$current" = "$owner" ] && return 0
+	remove_port_everywhere "$port"
+	[ -z "$bridge" ] || add_port_to_bridge "$port" "$bridge" || error "cannot restore $port to $bridge"
+	$UCI -q delete "$ORIGINS.$section"
+}
+
+create_vxlan() {
+	local instance="$1" enabled="$2" peer="$3" local_ip="$4" vni="$5" udp="$6" mtu="$7" underlay="$8" address_mode="$9" bridge_ipv4="${10}" firewall_policy="${11}" port owner iface bridge device l2
+	[ "$enabled" = 1 ] || return 0
+	iface="iomvx_$instance"
+	device="iomvxb_$instance"
+	l2="iomvxl_$instance"
+	bridge="br-iom-$instance"
+	owner="vxlan:$instance"
+	$UCI set "$NETWORK.$iface=interface"
+	$UCI set "$NETWORK.$iface.proto=vxlan"
+	$UCI set "$NETWORK.$iface.peeraddr=$peer"
+	$UCI set "$NETWORK.$iface.vid=$vni"
+	$UCI set "$NETWORK.$iface.port=$udp"
+	$UCI set "$NETWORK.$iface.mtu=$mtu"
+	$UCI set "$NETWORK.$iface.tunlink=$underlay"
+	[ -z "$local_ip" ] || $UCI set "$NETWORK.$iface.ipaddr=$local_ip"
+	$UCI set "$NETWORK.$device=device"
+	$UCI set "$NETWORK.$device.name=$bridge"
+	$UCI set "$NETWORK.$device.type=bridge"
+	$UCI add_list "$NETWORK.$device.ports=$iface"
+	$UCI set "$NETWORK.$l2=interface"
+	$UCI set "$NETWORK.$l2.device=$bridge"
+	$UCI set "$NETWORK.$l2.defaultroute=0"
+	$UCI set "$NETWORK.$l2.mvpn=1"
+	$UCI set "$NETWORK.$l2.mvpn_proto=vxlan"
+	$UCI set "$NETWORK.$l2.vp=$firewall_policy"
+	case "$address_mode" in
+		static)
+			$UCI set "$NETWORK.$l2.proto=static"
+			$UCI set "$NETWORK.$l2.ipaddr=$bridge_ipv4"
+			;;
+		dhcp) $UCI set "$NETWORK.$l2.proto=dhcp";;
+		*) $UCI set "$NETWORK.$l2.proto=none";;
+	esac
+	while IFS='|' read -r port owner; do
+		[ "$owner" = "vxlan:$instance" ] || continue
+		record_origin "$port" "$owner" || return 1
+		remove_port_everywhere "$port"
+		$UCI add_list "$NETWORK.$device.ports=$port"
+	done < "$CLAIM_FILE"
+}
+
+remove_firewall_network_cb() {
+	local section="$1" networks item instance remove changed=0
+	config_get networks "$section" network
+	for item in $networks; do
+		case "$item" in
+			iom_qmi_*) changed=1;;
+			iomvxl_*) changed=1;;
+			qmodem_mgmt_*)
+				for instance in $QMODEM_LEGACY; do [ "$item" != "qmodem_mgmt_$instance" ] || changed=1; done
+				;;
+		esac
+	done
+	[ "$changed" = 1 ] || return 0
+	$UCI -q delete "firewall.$section.network"
+	for item in $networks; do
+		case "$item" in iom_qmi_*|iomvxl_*) continue;; esac
+		remove=0
+		for instance in $QMODEM_LEGACY; do [ "$item" != "qmodem_mgmt_$instance" ] || remove=1; done
+		[ "$remove" = 1 ] || $UCI add_list "firewall.$section.network=$item"
+	done
+}
+
+add_firewall_network_cb() {
+	local section="$1" zone="$2" target="$3" name networks item
+	config_get name "$section" name
+	[ "$name" = "$zone" ] || return 0
+	config_get networks "$section" network
+	for item in $networks; do [ "$item" != "$target" ] || return 0; done
+	$UCI add_list "firewall.$section.network=$target"
+}
+
+configure_firewall() {
+	local instance kind enabled peer local_ip vni udp mtu underlay address_mode bridge_ipv4 firewall_policy zone section
+	for section in $($UCI -q show firewall | sed -n 's/^firewall\.\(iom_vxlan_[A-Za-z0-9_]*\)=rule$/\1/p'); do
+		$UCI -q delete "firewall.$section"
+	done
+	$UCI -q delete firewall.iom_vxlan
+	config_load firewall
+	config_foreach remove_firewall_network_cb zone
+	for instance in $QMODEM_MGMT; do
+		config_load firewall
+		config_foreach add_firewall_network_cb zone lan "iom_qmi_$instance"
+	done
+	while IFS='|' read -r kind instance enabled peer local_ip vni udp mtu underlay address_mode bridge_ipv4 firewall_policy; do
+		[ "$kind" = vxlan ] && [ "$enabled" = 1 ] || continue
+		zone="$(zone_for_network "$underlay" | head -n1)"
+		section="iom_vxlan_$instance"
+		$UCI set "firewall.$section=rule"
+		$UCI set "firewall.$section.name=Allow managed VXLAN $instance peer"
+		$UCI set "firewall.$section.src=$zone"
+		$UCI set "firewall.$section.src_ip=$peer"
+		$UCI set "firewall.$section.proto=udp"
+		$UCI set "firewall.$section.dest_port=$udp"
+		$UCI set "firewall.$section.target=ACCEPT"
+	done < "$RUNTIME_FILE"
+	$UCI commit firewall
+}
+
+# A disabled bridge can remain alive through the modem interface's device
+# reference. Release only this modem's references before testing LAN readiness;
+# confirmation will restart its dialer in router mode afterwards.
+retire_qmodem_interface_cb() {
+ local cfg="$1" owner device ifname current option
+ config_get owner "$cfg" modem_config
+ [ -z "$owner" ] || [ "$owner" = "$retiring_instance" ] || return 0
+ case "$cfg" in
+  "$retiring_instance"|"${retiring_instance}v6"|"$retiring_alias"|"${retiring_alias}v6") :;;
+  *) [ "$owner" = "$retiring_instance" ] || return 0;;
+ esac
+ config_get device "$cfg" device
+ config_get ifname "$cfg" ifname
+ for option in device ifname; do
+  case "$option" in device) current="$device";; ifname) current="$ifname";; esac
+  [ "$current" = "$retiring_bridge" ] || continue
+  if [ -n "$retiring_endpoint" ]; then
+   $UCI set "$NETWORK.$cfg.$option=$retiring_endpoint" || retiring_error=1
+  else
+   $UCI -q delete "$NETWORK.$cfg.$option" || retiring_error=1
+  fi
+ done
+}
+retire_qmodem_network() {
+ local retiring_instance="$1" retiring_bridge="$2" retiring_alias retiring_endpoint retiring_error=0
+ [ -n "$retiring_bridge" ] || retiring_bridge="$($UCI -q get "$CONFIG.qmodem_$retiring_instance.bridge_name")"
+ [ -n "$retiring_bridge" ] || return 0
+ retiring_alias="$($UCI -q get "qmodem.$retiring_instance.alias")"
+ [ -n "$retiring_alias" ] || retiring_alias="$retiring_instance"
+ retiring_endpoint="$("$QMODEM_NETDEV" "$retiring_instance" 2>/dev/null)" || retiring_endpoint=''
+ if [ -n "$retiring_endpoint" ]; then
+  valid_name "$retiring_endpoint" || return 1
+  [ "$retiring_endpoint" != "$retiring_bridge" ] || retiring_endpoint=''
+ fi
+ config_load "$NETWORK"
+ config_foreach retire_qmodem_interface_cb interface
+ [ "$retiring_error" = 0 ]
+}
+
+create_qmodem() {
+	local instance="$1" enabled="$2" endpoint="$3" bridge="$4" management="$5" port owner claimed_by device_section if_section prepared mac mtu
+	[ -r "$QMODEM_PORT_POLICY" ] || { error 'QModem bridge port policy is unavailable'; return 1; }
+	. "$QMODEM_PORT_POLICY"
+	QMODEM_BRIDGE_PORT_UCI="$UCI"
+	QMODEM_BRIDGE_PORT_NETWORK="$NETWORK"
+	QMODEM_BRIDGE_PORT_SYSFS="$SYSFS"
+	if [ "$enabled" != 1 ]; then
+		retire_qmodem_network "$instance" "$bridge" || return 1
+		qmodem_bridge_port_restore "$instance" || return 1
+		$UCI -q delete "$NETWORK.qmodem_bridge_$instance"
+		$UCI -q delete "$NETWORK.qmodem_mgmt_$instance"
+		return 0
+	fi
+	prepared="$($UCI -q get "$CONFIG.qmodem_$instance.lan_prepared")"
+	if [ "$prepared" = 1 ]; then
+		bridge="$($UCI -q get "$CONFIG.qmodem_$instance.bridge_name")"
+		mac="$($UCI -q get "$CONFIG.qmodem_$instance.bridge_mac")"
+		mtu="$($UCI -q get "$CONFIG.qmodem_$instance.bridge_mtu")"
+		# Persist the enumerated Ethernet endpoint before dialing. netifd owns
+		# its membership, including unplug/replug; SIM/PDP state is irrelevant.
+		endpoint="$("$QMODEM_NETDEV" "$instance" 2>/dev/null)" || endpoint=''
+		if [ -n "$endpoint" ]; then
+			valid_name "$endpoint" || return 1
+			if [ "$(cat "$SYSFS/$endpoint/type" 2>/dev/null)" != 1 ]; then
+				endpoint=''
+			elif [ "$(cat "$SYSFS/$endpoint/mtu" 2>/dev/null)" -lt "${mtu:-1500}" ]; then
+				error "$instance data endpoint MTU is smaller than bridge MTU"
+				return 1
+			fi
+		fi
+	else
+		# Legacy offline selections must not unexpectedly move LAN ports at boot.
+		[ -n "$endpoint" ] && [ -n "$bridge" ] || return 0
+		valid_name "$endpoint" || return 1
+	fi
+	valid_name "$bridge" || { error "$instance has invalid bridge data"; return 1; }
+	if [ -n "$endpoint" ]; then
+		qmodem_bridge_port_apply "$instance" "$endpoint" "$($UCI -q get "qmodem.$instance.path")" || {
+			error "$instance cannot configure modem bridge port policy"
+			return 1
+		}
+	fi
+	$UCI -q delete "$NETWORK.qmodem_bridge_$instance"
+	$UCI -q delete "$NETWORK.qmodem_mgmt_$instance"
+	device_section="iom_qm_${instance}"
+	if_section="iom_qmi_${instance}"
+	$UCI set "$NETWORK.$device_section=device"
+	$UCI set "$NETWORK.$device_section.name=$bridge"
+	$UCI set "$NETWORK.$device_section.type=bridge"
+	$UCI set "$NETWORK.$device_section.bridge_empty=1"
+	$UCI set "$NETWORK.$device_section.mtu=${mtu:-1500}"
+	[ -z "$mac" ] || $UCI set "$NETWORK.$device_section.macaddr=$mac"
+	$UCI -q delete "$NETWORK.$device_section.ports"
+	[ -z "$endpoint" ] || $UCI add_list "$NETWORK.$device_section.ports=$endpoint"
+	owner="qmodem_passthrough:$instance"
+	while IFS='|' read -r port claimed_by; do
+		[ "$claimed_by" = "$owner" ] || continue
+		record_origin "$port" "$owner" || return 1
+		remove_port_everywhere "$port"
+		$UCI add_list "$NETWORK.$device_section.ports=$port"
+	done < "$CLAIM_FILE"
+	$UCI set "$NETWORK.$if_section=interface"
+	$UCI set "$NETWORK.$if_section.device=$bridge"
+	$UCI set "$NETWORK.$if_section.force_link=1"
+	$UCI set "$NETWORK.$if_section.defaultroute=0"
+	if [ -n "$management" ]; then
+		$UCI set "$NETWORK.$if_section.proto=static"
+		$UCI set "$NETWORK.$if_section.ipaddr=$management"
+	else
+		$UCI set "$NETWORK.$if_section.proto=none"
+	fi
+}
+
+remove_managed_qmodem_cb() {
+	case "$1" in
+		iom_qm_*)
+			$UCI -q delete "$NETWORK.$1"
+			$UCI -q delete "$NETWORK.iom_qmi_${1#iom_qm_}"
+			;;
+	esac
+}
+
+cleanup_qmodem_port_policies() {
+	local state instance
+	[ -r "$QMODEM_PORT_POLICY" ] || return 0
+	. "$QMODEM_PORT_POLICY"
+	QMODEM_BRIDGE_PORT_UCI="$UCI"
+	QMODEM_BRIDGE_PORT_NETWORK="$NETWORK"
+	for state in $(qmodem_bridge_port_sections qmodem-bridge-port-policy); do
+		case "$state" in qmodem_port_*) instance="${state#qmodem_port_}";; *) return 1;; esac
+		grep -qxF "qmodem_passthrough:$instance" "$ACTIVE_FILE" && continue
+		qmodem_bridge_port_restore "$instance" || return 1
+	done
+}
+
+remove_managed_vxlan_cb() {
+	case "$1" in iomvxb_*) $UCI -q delete "$NETWORK.$1";; esac
+}
+
+remove_managed_vxlan_interface_cb() {
+	case "$1" in iomvx_*|iomvxl_*) $UCI -q delete "$NETWORK.$1";; esac
+}
+
+reload_changed_wifi() {
+	local radios radio state attempt
+	radios="$("$WIFI" changed-radios)" || { error 'cannot determine changed Wi-Fi radios'; return 1; }
+	for radio in $radios; do
+		case "$radio" in ''|*[!A-Za-z0-9_]*) error 'invalid Wi-Fi radio name'; return 1;; esac
+		# network reload returns before netifd finishes its wireless reconfiguration.
+		sleep 2
+		for attempt in 1 2 3 4 5 6 7 8 9 10; do
+			state="$(ubus call network.wireless status "{\"device\":\"$radio\"}" | jsonfilter -e "@.$radio.up" -e "@.$radio.pending")" || return 1
+			[ "$state" != "$(printf 'true\nfalse')" ] || break
+			sleep 1
+		done
+		[ "$state" = "$(printf 'true\nfalse')" ] || { error "$radio is not ready for bridge reassignment"; return 1; }
+		wifi down "$radio" >/dev/null || { error "cannot stop $radio for bridge reassignment"; return 1; }
+		for attempt in 1 2 3 4 5 6 7 8 9 10; do
+			state="$(ubus call network.wireless status "{\"device\":\"$radio\"}" | jsonfilter -e "@.$radio.up" -e "@.$radio.pending")" || return 1
+			[ "$state" != "$(printf 'false\nfalse')" ] || break
+			sleep 1
+		done
+		[ "$state" = "$(printf 'false\nfalse')" ] || { error "$radio did not stop before bridge reassignment"; return 1; }
+		wifi up "$radio" >/dev/null || { error "cannot start $radio after bridge reassignment"; return 1; }
+	done
+}
+
+apply() {
+	local kind a b c d e f g h i j k
+	mkdir "$LOCK" 2>/dev/null || { error 'another interface transaction is running'; return 1; }
+	LOCK_HELD=1
+	validate || return 1
+	"$WIFI" validate || return 1
+	cleanup_qmodem_port_policies || { error 'cannot restore retired modem bridge port policy'; return 1; }
+	$UCI -q delete "$NETWORK.iomvx0"
+	$UCI -q delete "$NETWORK.iom_vx_bridge"
+	$UCI -q delete "$NETWORK.iom_vx_l2"
+	config_load "$NETWORK"
+	config_foreach remove_managed_qmodem_cb device
+	config_foreach remove_managed_vxlan_cb device
+	config_foreach remove_managed_vxlan_interface_cb interface
+	config_load "$ORIGINS" 2>/dev/null && config_foreach restore_origin_cb origin
+	while IFS='|' read -r kind a b c d e f g h i j k; do
+		case "$kind" in
+			vxlan) create_vxlan "$a" "$b" "$c" "$d" "$e" "$f" "$g" "$h" "$i" "$j" "$k" || return 1;;
+			qmodem) create_qmodem "$a" "$b" "$c" "$d" "$e" || return 1;;
+		esac
+	done < "$RUNTIME_FILE"
+	$UCI commit "$ORIGINS" 2>/dev/null || true
+	$UCI commit "$NETWORK" || return 1
+	"$WIFI" apply || return 1
+	configure_firewall || return 1
+	[ ! -x /usr/libexec/misectel-vpn-firewall ] || /usr/libexec/misectel-vpn-firewall || return 1
+	if [ "$MODE" != no-reload ]; then
+		/etc/init.d/network reload || return 1
+		reload_changed_wifi || return 1
+		/etc/init.d/firewall reload || return 1
+	fi
+}
+
+[ "$MISECTEL_INTERFACE_LIBRARY" = 1 ] && return 0
+
+case "$MODE" in
+	validate) validate && "$WIFI" validate || { printf '%s\n' "$ERRORS" >&2; exit 1; };;
+	apply|no-reload) apply || { printf '%s\n' "$ERRORS" >&2; exit 1; };;
+	*) echo "usage: $0 {validate|apply|no-reload}" >&2; exit 2;;
+esac

@@ -493,6 +493,17 @@ const methods = {
 			if (!ctx)
 				return { success: false, message: 'failed to open uci cursor' };
 
+			if (!on) {
+				let port = ctx.get('misectel', 'network_defaults', 'optional_wan') || ctx.get('misectel', 'network_defaults', 'wan_device') || 'wan';
+				let claimed = false;
+				ctx.foreach('misectel_interface', 'assignment', (item) => {
+					let ports = item.desired_port || [];
+					if (type(ports) != 'array') ports = [ ports ];
+					if (item.enabled == '1' && index(ports, port) >= 0) claimed = true;
+				});
+				if (claimed) return { success: false, message: 'Remove this port from IP Passthrough or its assigned network before switching it to WAN.' };
+			}
+
 			ctx.set('misectel', 'network_defaults', null, 'network');
 			ctx.set('misectel', 'network_defaults', 'optional_wan_mode', on ? 'lan' : 'wan');
 			ctx.commit('misectel');

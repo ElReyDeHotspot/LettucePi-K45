@@ -1,0 +1,882 @@
+#!/usr/bin/ucode
+'use strict';
+
+import { open, popen, stat, rename } from 'fs';
+import { cursor } from 'uci';
+import * as wifi from 'misectel.interface_wifi';
+
+const CONFIG = '/etc/config/misectel_interface';
+const CONFIRMED = '/etc/config/misectel_interface.confirmed';
+const PENDING = '/etc/config/misectel_interface.pending';
+const PREVIOUS = '/tmp/misectel_interface.previous';
+const QMODEM_CONFIRMED = '/etc/misectel-interface/qmodem.confirmed';
+const QMODEM_PREVIOUS = '/tmp/qmodem.interface-manager.previous';
+const QMODEM_PENDING = '/etc/misectel-interface/qmodem.pending';
+const QMODEM_PENDING_INSTANCE = '/etc/misectel-interface/qmodem.pending-instance';
+const TRANSACTION_LOCK = '/var/lock/misectel-interface-rpc.lock';
+const RUNTIME_PREVIOUS = '/tmp/misectel-interface.runtime.previous';
+const QMODEM_TRANSACTION = '/etc/misectel-interface/qmodem.transaction';
+const QMODEM_FORCE_RESULT = '/etc/misectel-interface/qmodem.force-result';
+const PROVIDERS = [ 'qmodem_passthrough', 'vxlan' ];
+let confirmConfigLocked, rollbackConfigLocked;
+
+function quoteArg(value) {
+	return `'${replace(`${value ?? ''}`, "'", "'\\''")}'`;
+}
+
+function command(cmd) {
+	let fd = popen(`sh -c ${quoteArg(cmd)}; printf '\\n%s' $?`, 'r');
+	if (!fd)
+		return { code: -1, output: '' };
+	let output = fd.read('all') || '';
+	fd.close();
+	let lines = split(output, /\n/);
+	let code = +pop(lines);
+	return { code: type(code) == 'int' ? code : -1, output: trim(join('\n', lines)) };
+}
+
+function exists(path) {
+	try { return stat(path) != null; } catch (err) { return false; }
+}
+
+function readText(path) {
+	let fd = open(path, 'r');
+	if (!fd)
+		return null;
+	let value = fd.read('all') || '';
+	fd.close();
+	return trim(value);
+}
+
+function writeText(path, value) {
+	let fd = open(`${path}.new`, 'w');
+	if (!fd)
+		return false;
+	let written = fd.write(value);
+	let closed = fd.close();
+	return written != null && closed && rename(`${path}.new`, path);
+}
+
+function list(value) {
+	return type(value) == 'array' ? value : (value ? [ value ] : []);
+}
+
+function clean(section) {
+	let result = {};
+	for (let key in section)
+		if (substr(key, 0, 1) != '.')
+			result[key] = section[key];
+	return result;
+}
+
+function getConfig() {
+	let ctx = cursor();
+	let result = { global: { api_version: '1', revision: '0', apply_timeout: '90' }, assignments: [] };
+	ctx.foreach('misectel_interface', 'global', (s) => result.global = clean(s));
+	ctx.foreach('misectel_interface', 'assignment', (s) => {
+		let item = clean(s);
+		item.id = s['.name'];
+		item.desired_port = list(item.desired_port);
+		item.desired_wifi = list(item.desired_wifi);
+		push(result.assignments, item);
+	});
+	return result;
+}
+
+function validIpv4(value) {
+	let parts = split(`${value ?? ''}`, '.');
+	if (length(parts) != 4)
+		return false;
+	for (let part in parts)
+		if (!match(part, /^\d+$/) || +part < 0 || +part > 255)
+			return false;
+	return true;
+}
+
+function validUint(value, min, max) {
+	return match(`${value ?? ''}`, /^\d+$/) && +value >= min && +value <= max;
+}
+
+function valueOr(value, fallback) {
+	return value == null || `${value}` == '' ? `${fallback}` : `${value}`;
+}
+
+function validCidr(value) {
+	let parts = split(`${value ?? ''}`, '/');
+	return length(parts) == 2 && validIpv4(parts[0]) && validUint(parts[1], 1, 31);
+}
+
+function validName(value) {
+	return match(`${value ?? ''}`, /^[A-Za-z0-9_]{1,31}$/);
+}
+
+function inventory() {
+ let ports = [], seen = {}, ctx = cursor();
+ let raw = readText('/etc/board.json'), board = null;
+ if (raw) try { board = json(raw); } catch (err) {}
+ let wanRole = ctx.get('misectel', 'network_defaults', 'wan_role') || 'wan';
+ let wanLan = ctx.get('misectel', 'network_defaults', 'optional_wan_mode') == 'lan' && ctx.get('network', wanRole, 'disabled') == '1';
+ // The WAN/LAN socket is a physical port too. Offer it first, while retaining
+ // its live uplink role until the operator explicitly switches it to LAN.
+ for (let name in list(board?.network?.wan?.ports || board?.network?.wan?.device)) {
+  if (!name || seen[name]) continue;
+  seen[name] = true;
+  push(ports, { device: `${name}`, role: wanLan ? 'lan' : 'wan', assignable: wanLan });
+ }
+ for (let name in list(board?.network?.lan?.ports || board?.network?.lan?.device)) {
+  if (!name || seen[name]) continue;
+  seen[name] = true;
+  push(ports, { device: `${name}`, role: 'lan', assignable: true });
+ }
+ if (!length(ports)) {
+  let found = split(command("find /sys/class/net -maxdepth 1 -type l -printf '%f\\n' 2>/dev/null | sort").output, /\n/);
+  for (let name in found)
+   if (match(name, /^(lan[0-9]+|eth[1-9][0-9]*)$/)) push(ports, { device: name, role: 'lan', assignable: true });
+ }
+ for (let port in ports) { port.id = port.device; port.type = 'port'; }
+ return ports;
+}
+
+function validateConfig(config) {
+	let errors = [];
+	let claims = {};
+	let uplinks = {};
+	for (let port in inventory()) if (port.role == 'wan') uplinks[port.device] = true;
+	let vxlanKeys = {};
+	if (type(config) != 'object')
+		return [ 'config must be an object' ];
+	if (`${config.global?.api_version ?? ''}` != '1')
+		push(errors, 'global.api_version must be 1');
+	if (!validUint(config.global?.revision, 0, 2147483647))
+		push(errors, 'global.revision is invalid');
+	if (!validUint(config.global?.apply_timeout, 30, 600))
+		push(errors, 'global.apply_timeout must be between 30 and 600 seconds');
+	let ids = {};
+	for (let item in (config.assignments || [])) {
+		if (!validName(item.id) || ids[item.id])
+			push(errors, `assignment id is invalid or duplicated: ${item.id ?? ''}`);
+		ids[item.id] = true;
+		if (index(PROVIDERS, item.provider) < 0)
+			push(errors, `${item.id}.provider is unsupported`);
+		if (!validName(item.instance))
+			push(errors, `${item.id}.instance is invalid`);
+		if (item.provider == 'vxlan' && length(item.instance) > 7)
+			push(errors, `${item.id}.instance exceeds 7 characters`);
+		if (item.enabled != '0' && item.enabled != '1')
+			push(errors, `${item.id}.enabled must be 0 or 1`);
+		if (item.provider == 'qmodem_passthrough' && length(list(item.desired_port)) + length(list(item.desired_wifi)) > 1)
+			push(errors, `${item.id}: select only one Ethernet port or Wi-Fi access point for passthrough`);
+		if (item.provider == 'qmodem_passthrough' && item.lan_prepared == '1') {
+			if (!match(`${item.bridge_name ?? ''}`, /^[A-Za-z0-9_.:-]{1,15}$/) ||
+			    !match(`${item.bridge_mac ?? ''}`, /^[0-9a-f]{2}(:[0-9a-f]{2}){5}$/))
+				push(errors, `${item.id} has an invalid stable bridge identity`);
+			if (item.management_cidr && !validCidr(item.management_cidr))
+				push(errors, `${item.id}.management_cidr is invalid`);
+			if (!validUint(item.bridge_mtu || '1500', 576, 9000))
+				push(errors, `${item.id}.bridge_mtu is invalid`);
+			for (let other in config.assignments || [])
+				if (other.id != item.id && other.bridge_name == item.bridge_name)
+					push(errors, `${item.id} duplicates another bridge identity`);
+			let netctx = cursor();
+			netctx.foreach('network', 'device', (s) => {
+				if (s.name == item.bridge_name && s['.name'] != `iom_qm_${item.instance}` && s['.name'] != `qmodem_bridge_${item.instance}`)
+					push(errors, `${item.id} conflicts with an existing network device`);
+			});
+		}
+		if (item.enabled == '1') {
+			for (let port in list(item.desired_port)) {
+				if (!match(`${port}`, /^[A-Za-z0-9_.:-]+$/))
+					push(errors, `${item.id} has an invalid port`);
+				else if (uplinks[port])
+					push(errors, `${port} is an Internet uplink; switch it to LAN mode before assigning it`);
+				else if (claims[port] && claims[port] != `${item.provider}:${item.instance}`)
+					push(errors, `${port} is already claimed by ${claims[port]}`);
+				else
+					claims[port] = `${item.provider}:${item.instance}`;
+			}
+		}
+		if (item.provider == 'vxlan' && item.enabled == '1') {
+			let addressMode = valueOr(item.address_mode, 'none');
+			if (!validIpv4(item.remote_vtep)) push(errors, `${item.id}.remote_vtep is invalid`);
+			if (item.local_vtep && !validIpv4(item.local_vtep)) push(errors, `${item.id}.local_vtep is invalid`);
+			if (!validUint(item.vni, 1, 16777215)) push(errors, `${item.id}.vni is invalid`);
+			if (!validUint(item.udp_port || '4789', 1, 65535)) push(errors, `${item.id}.udp_port is invalid`);
+			if (!validUint(item.mtu || '1450', 576, 9000)) push(errors, `${item.id}.mtu is invalid`);
+			if (!match(`${item.underlay ?? ''}`, /^[A-Za-z0-9_]{1,15}$/)) push(errors, `${item.id}.underlay is invalid`);
+			if (index([ 'none', 'static', 'dhcp' ], addressMode) < 0) push(errors, `${item.id}.address_mode is invalid`);
+			if (addressMode == 'static' && !validCidr(item.bridge_ipv4)) push(errors, `${item.id}.bridge_ipv4 is invalid`);
+			if (!validUint(valueOr(item.firewall_policy, '13'), 0, 255)) push(errors, `${item.id}.firewall_policy is invalid`);
+			let key = `${item.underlay ?? ''}|${item.udp_port || '4789'}|${item.vni ?? ''}`;
+			if (vxlanKeys[key])
+				push(errors, `${item.id} duplicates the VXLAN binding of ${vxlanKeys[key]}`);
+			else
+				vxlanKeys[key] = item.id;
+		}
+	}
+	return [ ...errors, ...wifi.validate(config) ];
+}
+
+function uciQuote(value) {
+	return `'${replace(`${value ?? ''}`, "'", "'\\''")}'`;
+}
+
+function serialize(config) {
+	let global = config.global || {};
+	let output = "config global 'global'\n";
+	for (let key in [ 'api_version', 'revision', 'apply_timeout' ])
+		output += `\toption ${key} ${uciQuote(global[key])}\n`;
+	for (let item in (config.assignments || [])) {
+		output += `\nconfig assignment ${uciQuote(item.id)}\n`;
+		for (let key in [ 'provider', 'instance', 'enabled', 'management_cidr', 'bridge_name', 'bridge_mac', 'bridge_mtu', 'lan_prepared', 'generation', 'remote_vtep', 'local_vtep', 'vni', 'udp_port', 'mtu', 'underlay', 'address_mode', 'bridge_ipv4', 'firewall_policy', 'runtime_endpoint', 'runtime_bridge' ])
+			if (item[key] != null && `${item[key]}` != '')
+				output += `\toption ${key} ${uciQuote(item[key])}\n`;
+		for (let port in list(item.desired_port))
+			output += `\tlist desired_port ${uciQuote(port)}\n`;
+		for (let section in list(item.desired_wifi))
+			output += `\tlist desired_wifi ${uciQuote(section)}\n`;
+	}
+	return output;
+}
+
+function pendingToken() {
+	return exists(PENDING) ? readText(PENDING) : null;
+}
+
+function modemTransaction() {
+	try {
+		let state = json(readText(QMODEM_TRANSACTION) || '{}');
+		return state.token && state.token == pendingToken() ? state : null;
+	} catch (err) { return null; }
+}
+
+function now() { return +trim(command('cut -d. -f1 /proc/uptime').output); }
+
+function scheduleExpiry(token, timeout) {
+	command(`( sleep ${timeout}; ubus call misectel.interface expire_qmodem ${quoteArg(sprintf('%J', { token }))} >/dev/null 2>&1 ) >/dev/null 2>&1 & true`);
+}
+
+function modemReady(instance) {
+	return command(`/usr/libexec/misectel-interface-modem ready ${quoteArg(instance)}`).code == 0;
+}
+
+function forceResult() {
+	try { return json(readText(QMODEM_FORCE_RESULT) || 'null'); }
+	catch (err) { return null; }
+}
+
+function applyCandidateLocked(candidate, expectedRevision, applyMode, modemInstance) {
+	let current = getConfig();
+	if (pendingToken())
+		return { result: false, code: 409, errors: [ 'pending transaction must be confirmed or rolled back' ] };
+	if (+expectedRevision != +(current.global.revision || 0))
+		return { result: false, code: 409, errors: [ 'configuration revision is stale' ] };
+	candidate.global = candidate.global || {};
+	candidate.global.api_version = '1';
+	candidate.global.revision = `${+(current.global.revision || 0) + 1}`;
+	candidate.global.apply_timeout = `${candidate.global.apply_timeout || current.global.apply_timeout || 90}`;
+	let errors = validateConfig(candidate);
+	if (length(errors))
+		return { result: false, code: 400, errors };
+	if (command(`cp ${quoteArg(CONFIG)} ${quoteArg(PREVIOUS)}`).code != 0)
+		return { result: false, code: 500, errors: [ 'failed to create rollback snapshot' ] };
+	if (!pendingToken() && command(`cp ${quoteArg(PREVIOUS)} ${quoteArg(CONFIRMED)}`).code != 0)
+		return { result: false, code: 500, errors: [ 'failed to persist confirmed snapshot' ] };
+	let token = readText('/proc/sys/kernel/random/uuid');
+	if (!match(token || '', /^[a-f0-9-]{36}$/))
+		return { result: false, code: 500, errors: [ 'cannot allocate transaction token' ] };
+	if (!wifi.snapshot(token, current, candidate))
+		return { result: false, code: 500, errors: [ 'failed to persist pending transaction' ] };
+	// Persist recovery metadata before publishing the pending commit marker.
+	if (applyMode == 'prepare' && (!writeText(QMODEM_PENDING, `${token}\n`) ||
+	    !writeText(QMODEM_PENDING_INSTANCE, `${modemInstance}\n`) ||
+	    !writeText(QMODEM_TRANSACTION, sprintf('%J', { token, instance: modemInstance, phase: 'prepared', deadline: now() + +candidate.global.apply_timeout }))))
+		return { result: false, code: 500, errors: [ 'failed to persist modem recovery state' ] };
+	if (!writeText(PENDING, `${token}\n`))
+		return { result: false, code: 500, errors: [ 'failed to publish pending transaction' ] };
+	if (!writeText(CONFIG, serialize(candidate))) {
+		rollbackConfigLocked(token);
+		return { result: false, code: 500, errors: [ 'failed to write configuration' ] };
+	}
+	let applied = command(`/usr/libexec/misectel-interface-apply ${applyMode == 'prepare' ? 'validate' : (applyMode == 'no-reload' ? 'no-reload' : 'apply')} 2>&1`);
+	if (applied.code != 0) {
+		let restored = rollbackConfigLocked(token);
+		return { result: false, code: 500, errors: [ applied.output || 'apply failed', ...(restored.result ? [] : [ 'rollback failed; pending transaction retained', restored.output || '' ]) ] };
+	}
+	let timeout = +candidate.global.apply_timeout;
+	if (applyMode != 'prepare')
+		command(`( sleep ${timeout}; current=$(cat ${quoteArg(PENDING)} 2>/dev/null); [ "$current" != ${quoteArg(token)} ] || ubus call misectel.interface rollback_config ${quoteArg(sprintf('%J', { token }))} >/dev/null 2>&1 ) >/dev/null 2>&1 & true`);
+	return { result: true, revision: +candidate.global.revision, pending_token: token, confirm_timeout: timeout };
+}
+
+function withTransaction(callback) {
+	// Recover a lock left by a terminated rpcd worker. PID plus start time avoids
+	// confusing a recycled PID with the original owner. Live owners are retained.
+	let owner = split(readText(`${TRANSACTION_LOCK}/owner`) || '', ' ');
+	if (match(owner[0] || '', /^\d+$/)) {
+		let process = readText(`/proc/${owner[0]}/stat`);
+		if (!process || split(process, ' ')[21] != owner[1])
+			command(`rm -f ${quoteArg(`${TRANSACTION_LOCK}/owner`)}; rmdir ${quoteArg(TRANSACTION_LOCK)} 2>/dev/null`);
+	}
+	if (command(`mkdir ${quoteArg(TRANSACTION_LOCK)}`).code != 0)
+		return { result: false, code: 409, errors: [ 'another interface transaction is running' ] };
+	let self = split(readText('/proc/self/stat') || '', ' ');
+	if (!writeText(`${TRANSACTION_LOCK}/owner`, `${self[0]} ${self[21]}`)) {
+		command(`rmdir ${quoteArg(TRANSACTION_LOCK)}`);
+		return { result: false, code: 500 };
+	}
+	let result;
+	try { result = callback(); }
+	catch (err) { result = { result: false, code: 500, errors: [ 'interface transaction failed; inspect pending state before retrying' ] }; }
+	command(`rm -f ${quoteArg(`${TRANSACTION_LOCK}/owner`)} && rmdir ${quoteArg(TRANSACTION_LOCK)}`);
+	return result;
+}
+
+function applyCandidate(candidate, expectedRevision) {
+	return withTransaction(() => applyCandidateLocked(candidate, expectedRevision));
+}
+
+function replaceProvider(config, provider, instance, values) {
+	let found = false;
+	for (let i = 0; i < length(config.assignments); i++) {
+		let old = config.assignments[i];
+		if (old.provider != provider || old.instance != instance)
+			continue;
+		config.assignments[i] = { ...old, ...values, provider, instance, id: old.id };
+		found = true;
+	}
+	if (!found)
+		push(config.assignments, { ...values, provider, instance, id: provider == 'vxlan' ? `vxlan_${instance}` : `qmodem_${instance}` });
+	return config;
+}
+
+function removeProvider(config, provider, instance) {
+	let assignments = [];
+	for (let item in config.assignments)
+		if (item.provider != provider || item.instance != instance)
+			push(assignments, item);
+	config.assignments = assignments;
+	return config;
+}
+
+function setProviderLocked(req, provider, instance, applyMode) {
+	let config = getConfig();
+	if (req.args?.remove == true)
+		return applyCandidateLocked(removeProvider(config, provider, instance), req.args?.revision, applyMode);
+	let values = req.args?.config || {};
+	values.enabled = values.enabled == true || values.enabled == '1' ? '1' : '0';
+	values.desired_port = list(values.desired_port);
+	if (values.desired_wifi != null) values.desired_wifi = list(values.desired_wifi);
+	return applyCandidateLocked(replaceProvider(config, provider, instance, values), req.args?.revision, applyMode, instance);
+}
+
+function setProvider(req, provider, instance) {
+	return withTransaction(() => setProviderLocked(req, provider, instance));
+}
+
+function findAssignment(config, provider, instance) {
+	for (let item in config.assignments)
+		if (item.provider == provider && item.instance == instance)
+			return item;
+	return null;
+}
+
+function commitModemOptions(instance) {
+	let values = findAssignment(getConfig(), 'qmodem_passthrough', instance);
+	if (!values) return false;
+	let qctx = cursor();
+	qctx.set('qmodem', instance, 'en_bridge', values.enabled);
+	qctx.set('qmodem', instance, 'bridge_management_ip', values.management_cidr || '');
+	qctx.set('qmodem', instance, 'bridge_manager', 'misectel-interface-v2');
+	if (values.enabled == '1') qctx.set('qmodem', instance, 'donot_nat', '1');
+	if (length(list(values.desired_port)))
+		qctx.set('qmodem', instance, 'bridge_port', list(values.desired_port));
+	else qctx.delete('qmodem', instance, 'bridge_port');
+	return qctx.commit('qmodem') === true;
+}
+
+function setQmodemLocked(req) {
+	let instance = `${req.args?.instance ?? ''}`;
+	if (readText('/usr/share/qmodem/bridge-manager.version') != '2')
+		return { result: false, code: 409, errors: [ 'QModem must be upgraded with the LAN-first bridge manager' ] };
+	if (!validName(instance))
+		return { result: false, code: 400, errors: [ 'invalid QModem instance' ] };
+	if (cursor().get('qmodem', instance) != 'modem-device')
+		return { result: false, code: 400, errors: [ 'QModem instance does not exist' ] };
+	if (pendingToken())
+		return { result: false, code: 409, errors: [ 'pending transaction must be confirmed or rolled back' ] };
+	if (command(`mkdir -p /etc/misectel-interface/snapshot && cp /etc/config/qmodem /etc/misectel-interface/snapshot/qmodem && cp /etc/config/qmodem ${quoteArg(QMODEM_CONFIRMED)}`).code != 0)
+		return { result: false, code: 500, errors: [ 'failed to create QModem rollback snapshot' ] };
+	let current = getConfig(), previous = findAssignment(current, 'qmodem_passthrough', instance);
+	let values = req.args?.config || {};
+	let digest = trim(command(`printf '%s' ${quoteArg(instance)} | sha256sum`).output);
+	if (!match(digest, /^[a-f0-9]{64}/))
+		return { result: false, code: 500, errors: [ 'cannot allocate stable bridge identity' ] };
+	let netctx = cursor();
+	let legacyBridge = netctx.get('network', `iom_qm_${instance}`, 'name') || netctx.get('network', `qmodem_bridge_${instance}`, 'name');
+	let existingBridge = previous?.bridge_name || previous?.runtime_bridge || legacyBridge;
+	values.bridge_name = existingBridge || `bqm${substr(digest, 0, 12)}`;
+	if (!match(values.bridge_name, /^[A-Za-z0-9_.:-]{1,15}$/))
+		return { result: false, code: 400, errors: [ 'invalid bridge identity' ] };
+	let existingMac = readText(`/sys/class/net/${values.bridge_name}/address`);
+	let seed = readText('/sys/class/net/br-lan/address') || readText('/etc/machine-id') || instance;
+	let macDigest = trim(command(`printf '%s' ${quoteArg(`${seed}:${instance}`)} | sha256sum`).output);
+	values.bridge_mac = previous?.bridge_mac || existingMac || `02:${substr(macDigest, 0, 2)}:${substr(macDigest, 2, 2)}:${substr(macDigest, 4, 2)}:${substr(macDigest, 6, 2)}:${substr(macDigest, 8, 2)}`;
+	values.bridge_mtu = previous?.bridge_mtu || readText(`/sys/class/net/${values.bridge_name}/mtu`) || '1500';
+	values.lan_prepared = '1';
+	values.generation = readText('/proc/sys/kernel/random/uuid');
+	values.runtime_endpoint = '';
+	values.runtime_bridge = '';
+	// Preparing only validates and persists the candidate. The browser obtains
+	// its token before asking a separate worker to change the LAN topology.
+	req.args.config = values;
+	let result = setProviderLocked(req, 'qmodem_passthrough', instance, 'prepare');
+	if (!result.result)
+		return result;
+	if (req.args?.force === true) {
+		let state = modemTransaction();
+		state.force = true;
+		state.phase = 'queued';
+		// Validation has completed. This durable marker disables rollback,
+		// including boot recovery, before any LAN topology change starts.
+		if (!writeText(QMODEM_TRANSACTION, sprintf('%J', state))) {
+			rollbackConfigLocked(result.pending_token);
+			return { result: false, code: 500 };
+		}
+		command(`( ubus -t 120 call misectel.interface apply_qmodem ${quoteArg(sprintf('%J', { token: state.token }))} >/dev/null 2>&1 ) >/dev/null 2>&1 & true`);
+		return { ...result, force: true, phase: 'queued' };
+	}
+	scheduleExpiry(result.pending_token, result.confirm_timeout);
+	result.phase = 'prepared';
+	return result;
+}
+
+function activateQmodemLocked(token) {
+	let state = modemTransaction();
+	if (!state || state.token != token || state.deadline <= now()) return { result: false, code: 409 };
+	if (state.phase != 'prepared') return { result: true, phase: state.phase };
+	state.phase = 'queued';
+	state.deadline = now() + +getConfig().global.apply_timeout;
+	if (!writeText(QMODEM_TRANSACTION, sprintf('%J', state))) return { result: false, code: 500 };
+	scheduleExpiry(token, +getConfig().global.apply_timeout);
+	let queued = command(`( ubus -t 120 call misectel.interface apply_qmodem ${quoteArg(sprintf('%J', { token }))} >/dev/null 2>&1 ) >/dev/null 2>&1 & true`);
+	return { result: queued.code == 0, phase: state.phase };
+}
+
+function applyQmodemLocked(token) {
+	let state = modemTransaction();
+	if (state?.force && state.token == token) {
+		if (!commitModemOptions(state.instance))
+			return { result: false, code: 500, errors: [ 'failed to commit modem options; force save will retry' ] };
+		let applied = command(`/usr/libexec/misectel-interface-modem quiesce ${quoteArg(state.instance)}`);
+		if (applied.code == 0) applied = command('/usr/libexec/misectel-interface-apply apply 2>&1');
+		// Persist the outcome before clearing pending; interrupted workers can
+		// safely retry. An apply failure must never restore the old settings.
+		if (!writeText(QMODEM_FORCE_RESULT, sprintf('%J', { instance: state.instance, revision: +getConfig().global.revision, result: applied.code == 0, error: applied.code == 0 ? '' : (applied.output || 'LAN apply failed') })))
+			return { result: false, code: 500 };
+		let done = command(`rm -f ${quoteArg(PENDING)}`);
+		if (done.code != 0) return { result: false, code: 500 };
+		command(`rm -f ${quoteArg(QMODEM_PENDING)} ${quoteArg(QMODEM_PENDING_INSTANCE)} ${quoteArg(QMODEM_TRANSACTION)} ${quoteArg(QMODEM_PREVIOUS)}`);
+		wifi.finish(token);
+		if (applied.code == 0) command(`(/etc/init.d/qmodem_network reconfigure ${quoteArg(state.instance)} >/dev/null 2>&1 </dev/null &)`);
+		return { result: applied.code == 0, saved: true, force: true };
+	}
+	if (!state || state.token != token || state.phase != 'queued' || state.deadline <= now()) return { result: false, code: 409 };
+	state.phase = 'applying';
+	if (!writeText(QMODEM_TRANSACTION, sprintf('%J', state))) return { result: false, code: 500 };
+	if (command(`/usr/libexec/misectel-interface-modem quiesce ${quoteArg(state.instance)}`).code != 0) {
+		rollbackConfigLocked(token);
+		return { result: false, code: 500, errors: [ 'cannot detach previous data endpoint' ] };
+	}
+	let applied = command('/usr/libexec/misectel-interface-apply apply 2>&1');
+	if (applied.code != 0 || state.deadline <= now()) {
+		let restored = rollbackConfigLocked(token);
+		return { result: false, code: 500, errors: [ applied.output || 'LAN apply expired', restored.result ? 'configuration restored' : 'rollback requires recovery' ] };
+	}
+	state.phase = 'ready';
+	return { result: writeText(QMODEM_TRANSACTION, sprintf('%J', state)), phase: state.phase };
+}
+
+function setQmodem(req) {
+	return withTransaction(() => setQmodemLocked(req));
+}
+
+function ownership(config) {
+	let result = {};
+	for (let item in config.assignments) {
+		if (item.enabled == '1') {
+			for (let port in list(item.desired_port))
+				result[port] = { type: 'port', provider: item.provider, instance: item.instance, bridge: item.provider == 'vxlan' ? `br-iom-${item.instance}` : (item.bridge_name || item.runtime_bridge || null) };
+			if (item.provider == 'vxlan' || item.provider == 'qmodem_passthrough')
+				for (let section in list(item.desired_wifi))
+					result[`wifi:${section}`] = { type: 'wifi', provider: item.provider, instance: item.instance,
+						bridge: item.provider == 'vxlan' ? `br-iom-${item.instance}` : (item.bridge_name || item.runtime_bridge || null),
+						network: item.provider == 'vxlan' ? `iomvxl_${item.instance}` : `iom_qmi_${item.instance}` };
+		}
+	}
+	return result;
+}
+
+function runtimeMaster(port) {
+	let result = command(`readlink ${quoteArg(`/sys/class/net/${port}/master`)} 2>/dev/null`);
+	if (result.code != 0 || !result.output)
+		return null;
+	let parts = split(result.output, '/');
+	return length(parts) ? parts[length(parts) - 1] : null;
+}
+
+function portStatus(config) {
+	let claims = ownership(config), result = [], seen = {};
+	for (let item in inventory()) {
+		let port = item.device, claim = claims[port] || null, master = runtimeMaster(port);
+		let drift = claim != null && claim.bridge != null && master != claim.bridge;
+		push(result, {
+			id: port, type: 'port',
+			device: port,
+			role: item.role,
+			available: claim == null,
+			configured: claim != null,
+			applied: claim != null && claim.bridge != null && master == claim.bridge,
+			owner: claim,
+			expected_bridge: claim?.bridge || null,
+			runtime_bridge: master,
+			conflict: drift,
+			conflict_reason: drift ? `expected ${claim.bridge}, attached to ${master || 'no bridge'}` : null,
+			drift
+		});
+		seen[port] = true;
+	}
+	for (let port in claims) {
+		if (seen[port] || claims[port].type != 'port') continue;
+		let claim = claims[port], master = runtimeMaster(port);
+		push(result, {
+			id: port, type: 'port',
+			device: port,
+			role: 'unknown',
+			available: false,
+			configured: true,
+			applied: false,
+			owner: claim,
+			expected_bridge: claim.bridge || null,
+			runtime_bridge: master,
+			conflict: true,
+			conflict_reason: 'configured port is absent from physical inventory',
+			drift: master != claim.bridge
+		});
+	}
+	return result;
+}
+
+function wifiStatus(config) {
+	let claims = ownership(config), result = [], devices = {}, seen = {};
+	let status = command('ubus call network.wireless status 2>/dev/null');
+	try {
+		let radios = json(status.output);
+		for (let radio in radios)
+			for (let iface in radios[radio].interfaces || [])
+				if (iface.section && iface.ifname) devices[iface.section] = iface.ifname;
+	} catch (err) {}
+	for (let item in wifi.inventory()) {
+		let claim = claims[item.id], device = devices[item.section], master = device ? runtimeMaster(device) : null;
+		let configured = claim != null && length(item.network) == 1 && item.network[0] == claim.network;
+		let drift = claim != null && (!configured || (item.enabled && device != null && master != claim.bridge));
+		push(result, {
+			...item, runtime_ifname: device || null, owner: claim || null, available: claim == null,
+			configured, applied: configured && item.enabled && master == claim.bridge,
+			dormant: configured && !item.enabled, expected_bridge: claim?.bridge || null, runtime_bridge: master,
+			drift, conflict: drift, conflict_reason: drift ? 'Wi-Fi network or runtime bridge differs from its assignment' : null
+		});
+		seen[item.id] = true;
+	}
+	for (let id in claims)
+		if (claims[id].type == 'wifi' && !seen[id])
+			push(result, { id, type: 'wifi', section: substr(id, 5), owner: claims[id], available: false,
+				configured: false, applied: false, dormant: false, drift: true, conflict: true,
+				conflict_reason: 'configured Wi-Fi AP is absent from inventory' });
+	return result;
+}
+
+function qmodemReady(instance, config) {
+	if (!modemReady(instance)) return false;
+	config = config || getConfig();
+	let item = findAssignment(config, 'qmodem_passthrough', instance);
+	if (!item || item.enabled != '1' || !length(list(item.desired_wifi))) return true;
+	let interfaces = wifiStatus(config);
+	for (let section in list(item.desired_wifi)) {
+		let member = null;
+		for (let entry in interfaces)
+			if (entry.id == `wifi:${section}`) member = entry;
+		if (!member || member.drift || !(member.applied || member.dormant)) return false;
+	}
+	return true;
+}
+
+function modemTransactionStatus() {
+	let state = modemTransaction();
+	return state ? { ...state, remaining: max(0, state.deadline - now()),
+		ready: state.phase == 'ready' && qmodemReady(state.instance) } : null;
+}
+
+function vxlanStatus(config) {
+	let result = [];
+	for (let item in config.assignments) {
+		if (item.provider != 'vxlan') continue;
+		let underlay = command(`ubus call ${quoteArg(`network.interface.${item.underlay}`)} status 2>/dev/null`);
+		let underlayUp = false;
+		if (underlay.code == 0) {
+			try { underlayUp = json(underlay.output)?.up == true; } catch (err) {}
+		}
+		let route = command(`ip -4 route get ${quoteArg(item.remote_vtep)} 2>/dev/null`);
+		push(result, {
+			instance: item.instance,
+			enabled: item.enabled == '1',
+			applied: item.enabled == '1' && command(`ip link show ${quoteArg(`br-iom-${item.instance}`)} >/dev/null 2>&1`).code == 0,
+			underlay_up: underlayUp,
+			route_available: route.code == 0,
+			remote_vtep: item.remote_vtep,
+			underlay: item.underlay
+		});
+	}
+	return result;
+}
+
+function restorePendingQmodem(token) {
+	if (!exists(QMODEM_PENDING) || readText(QMODEM_PENDING) != token)
+		return true;
+	let instance = readText(QMODEM_PENDING_INSTANCE);
+	if (!validName(instance)) return false;
+	let done = command(`/usr/libexec/misectel-interface-restore-modem ${quoteArg(instance)}`);
+	return done.code == 0;
+}
+
+function importLegacyOrigins(qctx) {
+	let origins = cursor(), network = cursor(), known = {}, changed = false;
+	origins.foreach('misectel_interface_origins', 'origin', (s) => {
+		if (s.port) known[s.port] = true;
+	});
+	qctx.foreach('qmodem', 'bridge-port-backup', (s) => {
+		let port = `${s.bridge_port ?? ''}`, instance = `${s.modem_config ?? ''}`;
+		if (!validName(instance) || !match(port, /^[A-Za-z0-9_.:-]+$/) || known[port])
+			return;
+		let bridge = network.get('network', s.device_section, 'name') || '';
+		if (!match(`${bridge}`, /^[A-Za-z0-9_.:-]*$/))
+			return;
+		let section = origins.add('misectel_interface_origins', 'origin');
+		origins.set('misectel_interface_origins', section, 'port', port);
+		origins.set('misectel_interface_origins', section, 'owner', `qmodem_passthrough:${instance}`);
+		origins.set('misectel_interface_origins', section, 'bridge', bridge);
+		known[port] = true;
+		changed = true;
+	});
+	return !changed || origins.commit('misectel_interface_origins') === true;
+}
+
+function migrateQmodemLocked() {
+	let config = getConfig(), qctx = cursor(), changed = false, slots = {};
+	if (pendingToken()) return { result: false, code: 409 };
+	qctx.foreach('qmodem', 'modem-slot', (s) => {
+		if (s.slot)
+			slots[s.slot] = list(s.bridge_port);
+	});
+	qctx.foreach('qmodem', 'modem-device', (s) => {
+		let instance = s['.name'];
+		if (!validName(instance) || findAssignment(config, 'qmodem_passthrough', instance))
+			return;
+		let path = split(`${s.modem_path ?? ''}`, '/');
+		let slot = length(path) ? path[length(path) - 1] : '';
+		let ports = list(s.bridge_port);
+		if (!length(ports))
+			ports = slots[slot] || [];
+		config = replaceProvider(config, 'qmodem_passthrough', instance, {
+			enabled: s.en_bridge == '1' ? '1' : '0',
+			desired_port: ports,
+			management_cidr: s.bridge_management_ip || ''
+		});
+		changed = true;
+	});
+	if (!changed)
+		return { result: true, changed: false, revision: +(config.global.revision || 0) };
+	if (!importLegacyOrigins(qctx))
+		return { result: false, code: 500, errors: [ 'failed to import legacy bridge origins' ] };
+	// Import desired settings only. An upgrade must not move previously offline
+	// LAN ports or silently accept a topology the user has never confirmed.
+	// Existing live bridges remain untouched until the explicit LAN transaction.
+	config.global.revision = `${+(config.global.revision || 0) + 1}`;
+	let errors = validateConfig(config);
+	if (length(errors)) return { result: false, code: 400, errors };
+	return { result: writeText(CONFIG, serialize(config)), changed: true,
+		requires_apply: true, revision: +config.global.revision };
+}
+
+function migrateQmodem() {
+	return withTransaction(() => migrateQmodemLocked());
+}
+
+confirmConfigLocked = function(token) {
+	if (!token || token != pendingToken())
+		return { result: false, code: 409 };
+	let state = modemTransaction();
+	if (state?.force) return { result: false, code: 409 };
+	if (readText(QMODEM_PENDING) == token && !state)
+		return { result: false, code: 409, errors: [ 'missing modem transaction state; rollback required' ] };
+	if (state && (state.phase != 'ready' || state.deadline <= now() || !qmodemReady(state.instance)))
+		return { result: false, code: 409, errors: [ 'LAN topology is not ready or confirmation has expired' ] };
+	// Do not expose candidate modem options to an already running dial monitor
+	// during preparation or the confirmation window.
+	if (state && !commitModemOptions(state.instance))
+		return { result: false, code: 500, errors: [ 'failed to commit modem options; transaction remains pending' ] };
+	// The pending marker is the commit point. Preserve rollback snapshots until
+	// it is gone; a power loss before this unlink must still restore the old LAN.
+	let done = command(`rm -f ${quoteArg(PENDING)}`);
+	if (done.code == 0)
+		command(`rm -f ${quoteArg(QMODEM_PENDING)} ${quoteArg(QMODEM_PENDING_INSTANCE)} ${quoteArg(QMODEM_TRANSACTION)} ${quoteArg(QMODEM_PREVIOUS)}`);
+	if (done.code == 0) wifi.finish(token);
+	let restarted = !state || command(`(/etc/init.d/qmodem_network reconfigure ${quoteArg(state.instance)} >/dev/null 2>&1 </dev/null &)`).code == 0;
+	return { result: done.code == 0, code: done.code, service_restart_queued: restarted };
+};
+
+rollbackConfigLocked = function(token) {
+	if (modemTransaction()?.force)
+		return { result: false, code: 409, errors: [ 'force-saved configuration cannot be rolled back' ] };
+	let pending = pendingToken();
+	if (!pending)
+		return { result: false, code: 404 };
+	if (token && token != pending)
+		return { result: false, code: 409 };
+	let wirelessErrors = wifi.restore(pending);
+	if (length(wirelessErrors))
+		return { result: false, code: 500, output: join('; ', wirelessErrors) };
+	let qmodemRestored = restorePendingQmodem(pending);
+	let instance = readText(QMODEM_PENDING_INSTANCE);
+	let done = command(`cp ${quoteArg(CONFIRMED)} ${quoteArg(CONFIG)} && /usr/libexec/misectel-interface-apply apply 2>&1`);
+	if (done.code == 0 && qmodemRestored) {
+		command(`rm -f ${quoteArg(PENDING)} ${quoteArg(QMODEM_TRANSACTION)} ${quoteArg(QMODEM_PENDING)} ${quoteArg(QMODEM_PENDING_INSTANCE)}`);
+		wifi.finish(pending);
+		if (validName(instance)) command(`(/etc/init.d/qmodem_network reconfigure ${quoteArg(instance)} >/dev/null 2>&1 </dev/null &)`);
+	}
+	return { result: done.code == 0 && qmodemRestored, code: done.code, output: done.output };
+};
+
+function qmodemRuntimeLocked(req) {
+	let action = `${req.args?.action ?? ''}`, instance = `${req.args?.instance ?? ''}`;
+	let config = getConfig(), item = findAssignment(config, 'qmodem_passthrough', instance);
+	if (item?.lan_prepared != '1' && cursor().get('qmodem', instance, 'bridge_manager') == 'misectel-interface-v2')
+		return { result: false, code: 409, errors: [ 'LAN configuration needs manual apply and confirmation' ] };
+	if (item?.lan_prepared == '1') {
+		if (pendingToken()) return { result: false, code: 409, deferred: true, bridge: item.bridge_name };
+		if (index([ 'apply', 'release' ], action) < 0 || !validName(instance)) return { result: false, code: 400 };
+		let endpoint = `${req.args?.endpoint ?? ''}`, lease = `${req.args?.lease ?? ''}`;
+		if (!match(endpoint, /^[A-Za-z0-9_.:-]*$/) || !match(lease, /^[A-Za-z0-9_.:-]*$/)) return { result: false, code: 400 };
+		let result = command(`/usr/libexec/misectel-interface-modem ${action} ${quoteArg(instance)} ${quoteArg(endpoint)} ${quoteArg(lease)}`);
+		try { return json(result.output); } catch (err) { return { result: false, code: result.code, errors: [ 'data endpoint operation failed' ] }; }
+	}
+	// The dial service must register its bridge before the UI can confirm it.
+	// Only the modem belonging to this pending QModem transaction may do so.
+	let pending = pendingToken();
+	if (pending && (readText(QMODEM_PENDING) != pending || readText(QMODEM_PENDING_INSTANCE) != instance))
+		return { result: false, code: 409, errors: [ 'pending transaction must be confirmed or rolled back' ] };
+	if (!item || (action == 'apply' && item.enabled != '1'))
+		return { result: false, code: 409, errors: [ 'no enabled managed QModem assignment' ] };
+	if (action == 'apply') {
+		if (!match(`${req.args?.endpoint ?? ''}`, /^[A-Za-z0-9_.:-]+$/) || !match(`${req.args?.bridge ?? ''}`, /^[A-Za-z0-9_.:-]{1,15}$/))
+			return { result: false, code: 400, errors: [ 'invalid runtime interface' ] };
+		if (req.args?.management_cidr && !validCidr(req.args.management_cidr))
+			return { result: false, code: 400, errors: [ 'invalid management CIDR' ] };
+		let management = req.args.management_cidr || item.management_cidr || '';
+		if (item.runtime_endpoint == req.args.endpoint && item.runtime_bridge == req.args.bridge && item.management_cidr == management)
+			return { result: true, unchanged: true, bridge: item.runtime_bridge || '' };
+		item.runtime_endpoint = req.args.endpoint;
+		item.runtime_bridge = req.args.bridge;
+		item.management_cidr = management;
+	}
+	else if (action == 'release') {
+		if (!item.runtime_endpoint && !item.runtime_bridge)
+			return { result: true, unchanged: true, bridge: '' };
+		item.runtime_endpoint = '';
+		item.runtime_bridge = '';
+	}
+	else return { result: false, code: 400 };
+	if (command(`cp ${quoteArg(CONFIG)} ${quoteArg(RUNTIME_PREVIOUS)}`).code != 0)
+		return { result: false, code: 500, errors: [ 'failed to create runtime rollback snapshot' ] };
+	if (!writeText(CONFIG, serialize(config)))
+		return { result: false, code: 500 };
+	let done = command('/usr/libexec/misectel-interface-apply apply 2>&1');
+	if (done.code != 0) {
+		command(`cp ${quoteArg(RUNTIME_PREVIOUS)} ${quoteArg(CONFIG)} && /usr/libexec/misectel-interface-apply apply >/dev/null 2>&1`);
+		return { result: false, code: done.code, bridge: '', output: done.output };
+	}
+	command(`rm -f ${quoteArg(RUNTIME_PREVIOUS)}`);
+	return { result: true, code: 0, bridge: item.runtime_bridge || '', output: done.output };
+}
+
+const methods = {
+	capabilities: { call: () => ({ api_version: 1, providers: PROVIDERS, ports: inventory(), interfaces: [ ...inventory(), ...wifi.inventory() ], provider_interface_types: { vxlan: [ 'port', 'wifi' ], qmodem_passthrough: [ 'port', 'wifi' ] }, transactional_apply: true, qmodem_passthrough: { lan_first: true, manual_confirmation: true, max_wifi_aps: 1 }, vxlan: { max_vni: 16777215, default_port: 4789, default_mtu: 1450, address_modes: [ 'none', 'static', 'dhcp' ] } }) },
+	get_config: { call: () => ({ api_version: 1, config: getConfig(), pending_token: pendingToken(), transaction: modemTransactionStatus(), force_result: forceResult(), force_save_supported: true }) },
+	validate_config: { args: { config: {} }, call: (req) => { let errors = validateConfig(req.args?.config); return { valid: length(errors) == 0, errors }; } },
+	apply_config: { args: { config: {}, revision: 0 }, call: (req) => applyCandidate(req.args?.config, req.args?.revision) },
+	set_vxlan: {
+		args: { instance: 'instance', config: {}, revision: 0, remove: false },
+		call: (req) => {
+			let instance = `${req.args?.instance ?? ''}`;
+			if (!validName(instance) || length(instance) > 7)
+				return { result: false, code: 400, errors: [ 'invalid VXLAN instance' ] };
+			return setProvider(req, 'vxlan', instance);
+		}
+	},
+	set_qmodem: { args: { instance: 'instance', config: {}, revision: 0, force: false }, call: (req) => setQmodem(req) },
+	activate_qmodem: { args: { token: 'token' }, call: (req) => withTransaction(() => activateQmodemLocked(`${req.args?.token ?? ''}`)) },
+	// Worker and expiry methods are root-only; browser ACLs only expose activation.
+	apply_qmodem: { args: { token: 'token' }, call: (req) => withTransaction(() => applyQmodemLocked(`${req.args?.token ?? ''}`)) },
+	expire_qmodem: { args: { token: 'token' }, call: (req) => withTransaction(() => {
+		let state = modemTransaction();
+		if (state?.force && state.token == req.args?.token) return applyQmodemLocked(state.token);
+		return state && state.token == req.args?.token && state.deadline <= now()
+			? rollbackConfigLocked(state.token) : { result: true, unchanged: true };
+	}) },
+	reconcile_qmodem: { call: () => withTransaction(() => ({ result: command('/usr/libexec/misectel-interface-modem reconcile').code == 0 })) },
+	confirm_config: {
+		args: { token: 'token' },
+		call: (req) => withTransaction(() => confirmConfigLocked(`${req.args?.token ?? ''}`))
+	},
+	rollback_config: {
+		args: { token: 'token' },
+		call: (req) => withTransaction(() => rollbackConfigLocked(`${req.args?.token ?? ''}`))
+	},
+	get_status: {
+		call: () => {
+			let config = getConfig();
+			let ports = portStatus(config), drift = [];
+			let interfaces = [ ...ports, ...wifiStatus(config) ];
+			for (let port in interfaces)
+				if (port.drift) push(drift, port);
+			let vxlan = vxlanStatus(config), errors = [], bridges = {};
+			for (let item in vxlan) {
+				bridges[item.instance] = item.applied;
+				if (item.enabled && !item.underlay_up) push(errors, `VXLAN ${item.instance} underlay interface is down`);
+				if (item.enabled && !item.route_available) push(errors, `VXLAN ${item.instance} remote VTEP has no IPv4 route`);
+			}
+			let modems = [];
+			for (let item in config.assignments) {
+				if (item.provider != 'qmodem_passthrough') continue;
+				let member = split(readText(`/var/run/misectel-interface/${item.instance}`) || '', /\s+/);
+				let endpoint = member[0] || command(`/usr/share/qmodem/modem_netdev.sh ${quoteArg(item.instance)}`).output;
+				if (!match(`${endpoint}`, /^[A-Za-z0-9_.:-]{1,15}$/)) endpoint = null;
+				let address = endpoint ? readText(`/sys/class/net/${endpoint}/bridge_ipv4`) : null;
+				if (!validIpv4(address || '') && endpoint)
+					address = command(`ip -4 -o addr show dev ${quoteArg(endpoint)} | awk '{split($4,a,"/"); print a[1]; exit}'`).output;
+				if (!validIpv4(address || '') || match(`${address}`, /^(0|127|22[4-9]|23[0-9])\./)) address = null;
+				let bridgeMode = endpoint && readText(`/sys/class/net/${endpoint}/bridge_mode`) == '1';
+				push(modems, { cellular_ipv4: address, passthrough_active: !!bridgeMode, instance: item.instance, enabled: item.enabled == '1', bridge: item.bridge_name || null,
+					lan_ready: item.enabled == '1' && item.lan_prepared == '1' && qmodemReady(item.instance, config), requires_apply: item.enabled == '1' && item.lan_prepared != '1',
+					endpoint: member[0] || null, endpoint_attached: !!member[0] && runtimeMaster(member[0]) == item.bridge_name });
+			}
+			return { api_version: 1, revision: +(config.global.revision || 0), pending_token: pendingToken(), transaction: modemTransactionStatus(), ownership: ownership(config), ports, interfaces, drift, vxlan, qmodem: modems, bridges: { vxlan: bridges }, errors };
+		}
+	},
+	migrate_qmodem: { call: () => migrateQmodem() },
+	qmodem_runtime: {
+		args: { action: 'action', instance: 'instance', endpoint: 'endpoint', bridge: 'bridge', management_cidr: 'management_cidr', lease: '' },
+		call: (req) => withTransaction(() => qmodemRuntimeLocked(req))
+	}
+};
+
+return { 'misectel.interface': methods };
