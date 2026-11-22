@@ -8,3 +8,9 @@ state.ttl='256';assert.throws(()=>api.payload.call(ctx),/1 to 255/);state.ttl='6
 state.wifiOn=true;assert.throws(()=>api.payload.call(ctx),/Wi-Fi name/);state.sharedWifi={ssid:'Chester Test',key:'test-passphrase',encryption:'sae-mixed'};p=api.payload.call(ctx);assert(p.wifi.radios.every(r=>r.ssid==='Chester Test'&&r.key==='test-passphrase'));
 state.shared=false;state.radios.forEach((r,i)=>{r.ssid='Band '+i;r.key='passphrase-'+i;r.encryption='psk2';});p=api.payload.call(ctx);assert.equal(p.wifi.radios[0].ssid,'Band 0');assert.equal(p.wifi.radios[1].ssid,'Band 1');
 console.log('Quick Start draft: SIM/APN, WAN, independent TTL/HL, password confirmation, timezone, Wi-Fi disabled/shared/separate passed. No settings applied.');
+
+state.shared=true;
+for(const encryption of ['psk2','sae','sae-mixed']){state.sharedWifi.encryption=encryption;state.sharedWifi.key='test-passphrase';p=api.payload.call(ctx);assert(p.wifi.radios.every(r=>r.encryption===encryption));}
+state.sharedWifi.encryption='none';state.sharedWifi.key='';p=api.payload.call(ctx);assert(p.wifi.radios.every(r=>r.encryption==='none'&&r.key===''));
+state.shared=false;state.radios[0].encryption='none';state.radios[0].key='';state.radios[1].encryption='sae';p=api.payload.call(ctx);assert.equal(p.wifi.radios[0].encryption,'none');assert.equal(p.wifi.radios[0].key,'');assert.equal(p.wifi.radios[1].encryption,'sae');
+console.log('Wi-Fi encryption: WPA2, WPA3, mixed and Open retained correctly for shared/separate bands. No settings applied.');
