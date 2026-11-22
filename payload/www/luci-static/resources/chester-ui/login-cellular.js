@@ -99,7 +99,16 @@ const password=content.querySelector('input[type=password]'),username=content.qu
 if(password&&form){
  const row=make('div','login-remember'),checkbox=document.createElement('input'),label=make('label','','Remember');checkbox.type='checkbox';checkbox.id='chester-remember-password';label.htmlFor=checkbox.id;checkbox.title='Use this browser’s saved-password manager';try{checkbox.checked=window.localStorage.getItem('chester-remember-password')==='1';}catch(e){}
  const sync=()=>{form.autocomplete=checkbox.checked?'on':'off';password.autocomplete=checkbox.checked?'current-password':'off';if(username)username.autocomplete='username';try{window.localStorage.setItem('chester-remember-password',checkbox.checked?'1':'0');}catch(e){}};
- checkbox.addEventListener('change',sync);sync();row.append(checkbox,label);password.closest('.cbi-value')?.after(row);
+ checkbox.addEventListener('change',sync);sync();row.append(checkbox,label);
+ const forgot=make('button','login-forgot','Forgot password?');forgot.type='button';forgot.setAttribute('aria-haspopup','dialog');
+ const dialog=make('dialog','login-reset-help');dialog.setAttribute('aria-labelledby','chester-reset-help-title');
+ const title=make('h2','','Reset with the physical button');title.id='chester-reset-help-title';
+ const notice=make('p','login-reset-warning','A factory reset erases all saved settings, including your password, Wi-Fi and cellular configuration.');
+ const steps=make('ol','');for(const text of ['Keep the router powered on and wait until it has finished starting.','Press and hold the physical Reset button for at least 5 seconds, then release it.','Leave the power connected while the router resets and reboots.','Reconnect, open 192.168.100.1, and complete Quick Start. The default login is root with password admin.'])steps.append(make('li','',text));
+ const close=make('button','login-reset-close','Got it');close.type='button';close.addEventListener('click',()=>dialog.close());
+ dialog.append(title,notice,steps,make('p','login-reset-note','This button only shows instructions. The reset must be performed on the router itself.'),close);document.body.append(dialog);
+ dialog.addEventListener('close',()=>forgot.focus());forgot.addEventListener('click',()=>{dialog.showModal();close.focus();});
+ row.append(forgot);password.closest('.cbi-value')?.after(row);
  const help=make('p','login-remember-help','Your browser may ask to save the password after you sign in.');label.title=help.textContent;
 }
 const panel=make('section','chester-home login-cellular');panel.setAttribute('aria-label','Cellular status');

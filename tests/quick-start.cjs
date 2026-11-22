@@ -14,3 +14,21 @@ for(const encryption of ['psk2','sae','sae-mixed']){state.sharedWifi.encryption=
 state.sharedWifi.encryption='none';state.sharedWifi.key='';p=api.payload.call(ctx);assert(p.wifi.radios.every(r=>r.encryption==='none'&&r.key===''));
 state.shared=false;state.radios[0].encryption='none';state.radios[0].key='';state.radios[1].encryption='sae';p=api.payload.call(ctx);assert.equal(p.wifi.radios[0].encryption,'none');assert.equal(p.wifi.radios[0].key,'');assert.equal(p.wifi.radios[1].encryption,'sae');
 console.log('Wi-Fi encryption: WPA2, WPA3, mixed and Open retained correctly for shared/separate bands. No settings applied.');
+// Applying settings may close the first-run endpoint before its reply arrives.
+async function completionCase(reply,statuses){
+ let done=false,reads=0;
+ const calls={apply_setup_wizard_config:async()=>{if(reply instanceof Error)throw reply;return reply;},get_setup_wizard_context:async()=>{const s=statuses[Math.min(reads++,statuses.length-1)];if(s instanceof Error)throw s;return s;}};
+ const a=new Function('view','rpc','window',code)({extend:x=>x},{declare:o=>calls[o.method]},{setTimeout:fn=>fn()});
+ const buttons=[{disabled:false}];
+ const c={payload:()=>({}),panel:{querySelectorAll:()=>buttons},error:{textContent:''},completeSetup:()=>done=true};
+ await a.finish.call(c);return {done,buttons,error:c.error.textContent,reads};
+}
+(async()=>{
+ // RPC declaration names are resolved from the source, without making calls.
+ let r=await completionCase({result:true},[]);assert(r.done);
+ r=await completionCase(new Error('connection lost'),[{code:403}]);assert(r.done);
+ r=await completionCase({code:403,message:'closed'},[{code:403}]);assert(r.done);
+ r=await completionCase({result:false,message:'Invalid Wi-Fi'},[{result:true}]);assert(!r.done);assert.equal(r.error,'Invalid Wi-Fi');assert(!r.buttons[0].disabled);
+ r=await completionCase(new Error('offline'),[new Error('offline')]);assert(!r.done);assert.equal(r.reads,10);assert(!r.buttons[0].disabled);
+ console.log('Quick Start completion: success, completed retry, interrupted reply, validation error and offline recovery passed.');
+})().catch(e=>{console.error(e);process.exitCode=1;});

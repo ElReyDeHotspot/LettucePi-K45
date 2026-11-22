@@ -307,7 +307,7 @@ return view.extend({
 			'class': 'cq-btn',
 			'click': ui.createHandlerFn(self, function () {
 				status.className = 'cq-status';
-				status.textContent = _('Applyingâ€¦');
+				status.textContent = _('Applying...');
 				return callSet(
 					master.input.checked ? '1' : '0',
 					upSwitch.input.checked ? '1' : '0',
@@ -385,7 +385,7 @@ return view.extend({
 					row(_('LAN queue'), s.lan_fq_codel ? _('fq_codel, no rate limit') : _('off'),
 						s.lan_fq_codel ? 'is-good' : 'is-off'),
 					row(_('Flow offload'), offloadOn
-						? _('ON â€” bypasses shaping entirely')
+						? _('ON ; bypasses shaping entirely')
 						: _('off, required for shaping'),
 						offloadOn ? 'is-warn' : 'is-good')
 				], true)
@@ -400,7 +400,7 @@ return view.extend({
 
 		body.push(E('div', { 'class': 'cq-note' }, dlAvail ? [
 			E('strong', {}, [ _('Upload is queued, download is policed.') ]), ' ',
-			_('Uploads leave through this router, so the queue is ours to manage and packets wait their turn. Downloads arrive having already passed the carrier bottleneck, so the only lever left is to drop what exceeds the limit until the sender slows down. Set the download limit a little below your real line speed â€” a limit above it does nothing at all.')
+			_('Uploads leave through this router, so the queue is ours to manage and packets wait their turn. Downloads arrive having already passed the carrier bottleneck, so the only lever left is to drop what exceeds the limit until the sender slows down. Set the download limit a little below your real line speed ; a limit above it does nothing at all.')
 		] : [
 			E('strong', {}, [ _('Download limiting is not available on this firmware.') ]), ' ',
 			_('It needs either the nftables rate limiter or the tc police action, and neither is present. Upload shaping is unaffected, and on a cellular uplink it is the direction that matters most.')

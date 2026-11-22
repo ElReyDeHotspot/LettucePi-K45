@@ -75,6 +75,26 @@ return view.extend({
  },
  payload(){const s=this.state;for(let i=0;i<7;i++){const error=validateDraft(s,i);if(error)throw new Error(error);}return {wizard:{skipped_network:!s.wan.exists,skipped_wifi:!s.radios.length,skipped_admin:!s.password},network:{wan_role:s.wan.role,wan_device:s.wan.device,optional_wan_mode:s.wan.mode,proto:s.wan.proto,username:s.wan.username,password:s.wan.password,ipaddr:s.wan.ipaddr,netmask:s.wan.netmask,gateway:s.wan.gateway,dns:s.wan.dns},wifi:{enabled:s.wifiOn,linked_bands:s.shared,radios:s.radios.map(r=>{const w=s.shared?s.sharedWifi:r;return {name:r.name,section:r.section,ssid:w.ssid,encryption:openWifi(w.encryption)?'none':w.encryption,key:openWifi(w.encryption)?'':w.key};})},admin:{skipped:!s.password,password:s.password},chester:{sim_slot:s.sim,apn:s.apn,auth:'none',username:'',password:'',zonename:s.zone,timezone:s.zone?(this.data.chester?.timezones?.[s.zone]||''):'',ttl_enabled:s.ttlOn,ttl:Number(s.ttl),hl:Number(s.hl)}};},
  show(){const s=this.state;dom.content(this.progress,[E('span',{},['Step '+(s.step+1)+' of '+STEPS.length]),E('strong',{},[STEPS[s.step]]),E('div',{'class':'cw-progress-track'},[E('i',{'style':'width:'+((s.step+1)/STEPS.length*100)+'%'})])]);this.error.textContent='';const go=()=>{const error=validateDraft(s,s.step);if(error){this.error.textContent=error;return;}s.step++;this.show();};const form=E('form',{submit:ev=>{ev.preventDefault();if(s.step<7)go();}},[E('h1',{},[STEPS[s.step]]),...this.body(),this.error,E('footer',{'class':'cw-actions'},[s.step?E('button',{type:'button','class':'cw-back',click:()=>{s.step--;this.show();}},['Back']):E('span'),E('button',{type:s.step<7?'submit':'button','class':'cw-next',click:s.step===7?()=>this.finish():null},[s.step===7?'Apply settings':'Continue'])])]);dom.content(this.panel,[form]);},
- async finish(){let payload;try{payload=this.payload();}catch(e){this.error.textContent=e.message;return;}const buttons=this.panel.querySelectorAll('button');buttons.forEach(b=>b.disabled=true);try{const result=await apply(JSON.stringify(payload));if(result.result!==true)throw new Error(result.message||'Settings could not be saved.');dom.content(this.panel,[E('h1',{},['You’re ready']),E('p',{'class':'cw-lead'},['Your settings were saved. The connection may reconnect as they take effect.']),E('a',{'class':'cw-next',href:L.url('admin','dashboard','overview')},['Open Overview'])]);this.state.password='';this.state.confirm='';}catch(e){this.error.textContent=e.message||'The connection changed. Reconnect and check whether setup completed.';buttons.forEach(b=>b.disabled=false);}},
+ completeSetup(message){
+  dom.content(this.panel,[E('h1',{},['You’re ready']),E('p',{'class':'cw-lead'},[message||'Your settings were saved. The connection may reconnect as they take effect.']),E('a',{'class':'cw-next',href:L.url('admin','dashboard','overview')},['Open Overview'])]);this.state.password='';this.state.confirm='';
+ },
+ async finish(){
+  let payload;try{payload=this.payload();}catch(e){this.error.textContent=e.message;return;}
+  const buttons=this.panel.querySelectorAll('button');buttons.forEach(b=>b.disabled=true);
+  try{
+   const result=await apply(JSON.stringify(payload));
+   if(result.result===true){this.completeSetup();return;}
+   if(result.code===403){const status=await context();if(status.code===403){this.completeSetup('Setup is complete. Open Overview to check your settings.');return;}}
+   throw new Error(result.message||'Settings could not be saved.');
+  }catch(e){
+   // A network reload can interrupt the reply or cause an RPC retry after the
+   // backend has completed setup. Confirm the closed first-run state first.
+   for(let i=0;i<10;i++){
+    try{const status=await context();if(status.code===403){this.completeSetup('Setup is complete. Open Overview to check your settings.');return;}if(status.result===true)break;}catch(ignore){}
+    await new Promise(resolve=>window.setTimeout(resolve,1000));
+   }
+   this.error.textContent=e.message||'The connection changed. Reconnect and check whether setup completed.';buttons.forEach(b=>b.disabled=false);
+  }
+ },
  handleSave:null,handleSaveApply:null,handleReset:null
 });
