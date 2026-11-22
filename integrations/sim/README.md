@@ -74,8 +74,8 @@ returns to SIM1 and Manual mode; per-SIM APNs are retained on the test router.
 
 Each SIM card has an M-Lab NDT Test speed button, using the same bundled,
 interface-bound engine and locks as Failover. Manual mode and saved settings are
-required. The confirmation explains mobile data/public IP publication and the
-cellular interruption. The daemon tests only the requested slot and restores the
+required. An inline notice explains mobile data/public IP publication and the
+cellular interruption; tests start directly without a popup. The daemon tests only the requested slot and restores the
 original slot/APN on success, failure or cancellation. It does not change the
 preferred SIM or choose a winner. Progress and cancellation share the page status;
 download/upload results appear on the tested card. Results are runtime-only and
@@ -93,3 +93,7 @@ Final-build live checks: SIM1 measured 360.8/5.3 Mbps; the SIM2 test button
 selected slot2, cancellation restored SIM1/APN and retained its previous result.
 Invalid slot, missing notice and automatic-mode requests were rejected.
 No operation or link-test lock remained; Failover configuration was unchanged.
+
+The per-SIM controls now match Failover: blue Test SIM buttons become Cancel test
+while running, with inline progress and Download/Upload/Latency rows plus the
+M-Lab timestamp. Live verification recorded 281.4/6.2 Mbps and 22.0 ms on SIM1.

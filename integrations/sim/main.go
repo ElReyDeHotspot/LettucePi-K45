@@ -56,9 +56,13 @@ type Card struct {
 	Seen      int64    `json:"seen"`
 	Download  *float64 `json:"download,omitempty"`
 	Upload    *float64 `json:"upload,omitempty"`
+	Latency   *float64 `json:"latency,omitempty"`
+	Server    string   `json:"server,omitempty"`
 	Tested    int64    `json:"tested,omitempty"`
 }
 type State struct {
+	Operation         string           `json:"operation,omitempty"`
+	TestSlot          string           `json:"test_slot,omitempty"`
 	Hotplug           string           `json:"hotplug"`
 	Running           bool             `json:"running"`
 	Busy              bool             `json:"busy"`
@@ -503,6 +507,15 @@ func measure(ctx context.Context, slot string) error {
 			item := card(slot)
 			item.Download = &dl
 			item.Upload = &ul
+			item.Latency = nil
+			if d, ok := summary["Download"].(map[string]any); ok {
+				if l, ok := d["Latency"].(map[string]any); ok {
+					if n, ok := l["Value"].(float64); ok {
+						item.Latency = &n
+					}
+				}
+			}
+			item.Server = str(summary["ServerFQDN"])
 			item.Tested = time.Now().Unix()
 			publish()
 			return nil
@@ -559,6 +572,8 @@ func runJob(request Request) {
 	j, _ := json.Marshal(journal)
 	os.WriteFile("/tmp/chester-sim/journal.json", j, 0600)
 	state.Busy = true
+	state.Operation = request.Action
+	state.TestSlot = request.Slot
 	publish()
 	os.Remove("/tmp/chester-sim/cancel")
 	ctx, cancel := context.WithCancel(root)
