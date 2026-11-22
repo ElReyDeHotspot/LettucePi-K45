@@ -447,10 +447,10 @@ function validateWifiEntries(radios) {
 		let encryption = trimSafe(radio.encryption || 'psk2');
 		let key = radio.key || '';
 
-		if (!section || !ssid || !validEncryption(encryption))
+		if (!section || !ssid || length(ssid)>32 || !validEncryption(encryption))
 			return 'invalid wireless setup payload';
 
-		if (encryption != 'none' && encryption != 'open' && length(key) < 8)
+		if (encryption != 'none' && encryption != 'open' && (length(key) < 8 || length(key)>63))
 			return 'wireless password must be at least 8 characters long';
 	}
 
@@ -588,7 +588,7 @@ function applyNetworkConfig(network) {
 
 function applyWifiConfig(wifi, radios) {
 	let linked = wifi.linked_bands === true;
-	let validation = validateWifiEntries(radios);
+	let validation = wifi.enabled === false ? null : validateWifiEntries(radios);
 
 	if (validation)
 		return { result: false, code: -1, message: validation };
@@ -605,7 +605,10 @@ function applyWifiConfig(wifi, radios) {
 		let encryption = trimSafe(radio.encryption || 'psk2');
 		let key = radio.key || '';
 
-		push(commands, `uci -q set wireless.${section}.disabled=${quoteArg('0')}`);
+		let disabled=wifi.enabled===false?'1':'0';
+        push(commands, `uci -q set wireless.${radio.name}.disabled=${quoteArg(disabled)}`);
+        push(commands, `uci -q set wireless.${section}.disabled=${quoteArg(disabled)}`);
+        if(wifi.enabled===false)continue;
 		push(commands, `uci -q set wireless.${section}.ssid=${quoteArg(ssid)}`);
 		push(commands, `uci -q set wireless.${section}.encryption=${quoteArg(encryption)}`);
 
@@ -626,7 +629,7 @@ function applyAdminConfig(admin) {
 	if (admin?.skipped === true)
 		return { result: true, skipped: true };
 
-	let password = trimSafe(admin?.password);
+	let password = admin?.password || '';
 
 	if (!password)
 		return { result: true, skipped: true };
@@ -639,7 +642,7 @@ function applyAdminConfig(admin) {
 		};
 	}
 
-	let result = runCommand(`(echo ${quoteArg(password)}; sleep 1; echo ${quoteArg(password)}) | passwd root >/dev/null 2>&1`);
+	let result = runCommand(`printf '%s\\n%s\\n' ${quoteArg(password)} ${quoteArg(password)} | passwd root >/dev/null 2>&1`);
 	return {
 		result: result.result,
 		code: result.code,
@@ -711,7 +714,11 @@ function buildChesterContext() {
 	return {
 		timezones: zones,
 		zonename: trimSafe(readCommandOutput('uci -q get system.@system[0].zonename 2>/dev/null')),
-		apn_presets: presets
+		apn_presets: presets,
+        sim_slot: parseJsonSafe(readfile('/tmp/chester-sim/state.json'), {}).active || '1',
+        ttl_enabled: trimSafe(readCommandOutput('uci -q get qmodem_ttl.main.enable 2>/dev/null')) == '1',
+        ttl: trimSafe(readCommandOutput('uci -q get qmodem_ttl.main.ttl 2>/dev/null')) || '64',
+        hl: trimSafe(readCommandOutput('uci -q get qmodem_ttl.main.hl 2>/dev/null')) || '64'
 	};
 }
 
@@ -844,74 +851,60 @@ function buildModemContext() {
 // No redial here. The apply already reloads the network, which re-dials, and
 // redialling from inside the wizard would drop the very connection its
 // apply-and-redirect loop is polling over.
+// Validate the complete first-run draft before any persistent write.
+function validWizardIpv4(value){
+ let parts=split(value||'', '.');if(length(parts)!=4)return false;
+ for(let part in parts)if(!match(part,/^[0-9]{1,3}$/)||+part>255)return false;return true;
+}
+function validateWizardDraft(parsed) {
+ let c=parsed.chester||{},w=parsed.wifi||{},admin=parsed.admin||{},n=parsed.network||{},wizard=parsed.wizard||{};
+ if(c.sim_slot!='1'&&c.sim_slot!='2')return 'Choose SIM 1 or SIM 2.';
+ if(type(c.apn)!='string'||length(c.apn)>100||(length(c.apn)&&!match(c.apn,/^[A-Za-z0-9][A-Za-z0-9.-]*$/)))return 'Enter a valid APN.';
+ if(type(c.ttl_enabled)!='bool'||type(c.ttl)!='int'||type(c.hl)!='int'||c.ttl<1||c.ttl>255||c.hl<1||c.hl>255)return 'TTL and HL must be whole numbers from 1 to 255.';
+ if(c.zonename&&(type(c.zonename)!='string'||!timezones[c.zonename]))return 'Choose a valid timezone.';
+ if(!wizard.skipped_admin&&(type(admin.password)!='string'||length(admin.password)<5||match(admin.password,/[\r\n]/)))return 'Use a valid root password of at least 5 characters.';
+ if(!wizard.skipped_network){
+  let wan=readManagedWanConfig();
+  if(n.wan_role!=wan.role||n.wan_device!=wan.device)return 'The WAN socket changed. Reload Quick Start.';
+  if(index(['wan','lan'],n.optional_wan_mode)<0||!validProtocol(n.proto))return 'Choose a valid WAN configuration.';
+  if(n.optional_wan_mode=='wan'&&n.proto=='static'&&(!validWizardIpv4(n.ipaddr)||!validWizardIpv4(n.netmask)||(n.gateway&&!validWizardIpv4(n.gateway))))return 'Enter a valid static IPv4 address and netmask.';
+ }
+ if(!wizard.skipped_wifi){
+  if(type(w.enabled)!='bool'||type(w.radios)!='array'||!length(w.radios))return 'Choose a valid Wi-Fi configuration.';
+  let actual=readWirelessRadios(),seen={};
+  if(length(w.radios)!=length(actual))return 'Include all available Wi-Fi bands.';
+  for(let radio in w.radios){
+   let found=false;for(let r in actual)if(r.name==radio.name&&r.section==radio.section)found=true;
+   if(!found||seen[radio.section])return 'The wireless interfaces changed. Reload Quick Start.';
+   seen[radio.section]=true;
+  }
+  if(w.enabled){let error=validateWifiEntries(w.radios);if(error)return error;}
+ }
+ let sim=parseJsonSafe(readfile('/tmp/chester-sim/state.json'),{});
+ if(sim.busy||readfile('/tmp/chester-sim/request.json'))return 'A SIM operation is finishing. Try Apply again shortly.';
+ if(sim.supported!==true)return 'The modem is still starting. Try Apply again when both SIM slots are available.';
+ if(!length(findModemSections()))return 'The modem is still starting. Try Apply again shortly.';
+ return null;
+}
 function applyChesterExtras(extras) {
-	if (type(extras) != 'object')
-		return { result: true, skipped: true };
-
-	// zonename is the readable name the UI shows; the POSIX string is what
-	// busybox actually reads out of /etc/TZ, and the daylight-saving rules live
-	// inside THAT string. Storing only the name gives a router whose clock never
-	// changes for DST, so it is both or neither.
-	let zonename = trimSafe(extras.zonename);
-	let tzstring = trimSafe(extras.timezone);
-
-	if (zonename && tzstring) {
-		let tzResult = runCommand(
-			`uci -q set system.@system[0].zonename=${quoteArg(zonename)} && ` +
-			`uci -q set system.@system[0].timezone=${quoteArg(tzstring)} && ` +
-			`uci -q commit system`
-		);
-
-		if (!tzResult.result) {
-			return {
-				result: false,
-				code: tzResult.code,
-				message: 'failed to set the timezone'
-			};
-		}
-
-		// Storing it is not applying it: /etc/TZ is what busybox reads, and only
-		// this regenerates it. Detached so the wizard's reply is not held up.
-		runCommand('(sleep 1; /etc/init.d/system reload >/dev/null 2>&1 || true) >/dev/null 2>&1 & true');
-	}
-
-	// An empty APN means leave the modem picking one automatically, which is
-	// what ships and what works for most carriers. That is a deliberate choice
-	// in the dropdown, not a missing value, so it must not be written as "".
-	let apn = trimSafe(extras.apn);
-
-	if (!apn)
-		return { result: true };
-
-	let sections = findModemSections();
-
-	if (!length(sections))
-		return { result: true, skipped: true };
-
-	for (let name in sections) {
-		let apnResult = runCommand(
-			`uci -q set qmodem.${name}.apn=${quoteArg(apn)} && ` +
-			`uci -q set qmodem.${name}.auth=${quoteArg(trimSafe(extras.auth) || 'none')} && ` +
-			`uci -q set qmodem.${name}.username=${quoteArg(trimSafe(extras.username))} && ` +
-			`uci -q set qmodem.${name}.password=${quoteArg(trimSafe(extras.password))}`
-		);
-
-		if (!apnResult.result) {
-			return {
-				result: false,
-				code: apnResult.code,
-				message: 'failed to set the APN'
-			};
-		}
-	}
-
-	let commitResult = runCommand(`uci -q commit qmodem`);
-
-	return {
-		result: commitResult.result,
-		code: commitResult.code,
-		message: commitResult.result ? null : 'failed to save the APN'
-	};
+ let slot=extras.sim_slot,apn=extras.apn,sections=findModemSections(),modem=sections[0];
+ let commands=['set -e'];
+ if(extras.zonename){
+  push(commands,`uci -q set system.@system[0].zonename=${quoteArg(extras.zonename)}`);
+  push(commands,`uci -q set system.@system[0].timezone=${quoteArg(timezones[extras.zonename])}`);
+  push(commands,'uci -q commit system');
+ }
+ push(commands,'uci -q set chester_sim.main=selection',"uci -q set chester_sim.main.mode='manual'",`uci -q set chester_sim.main.preferred=${quoteArg(slot)}`,`uci -q set chester_sim.main.modem=${quoteArg(modem)}`,`uci -q set chester_sim.main.apn${slot}=${quoteArg(apn)}`,'uci -q commit chester_sim');
+ let suffix=slot=='2'?'2':'';
+ push(commands,`uci -q set qmodem.${modem}.apn${suffix}=${quoteArg(apn)}`,`uci -q set qmodem.${modem}.auth${suffix}='none'`,`uci -q delete qmodem.${modem}.username${suffix} >/dev/null 2>&1 || true`,`uci -q delete qmodem.${modem}.password${suffix} >/dev/null 2>&1 || true`,'uci -q commit qmodem');
+ let saved=runCommand(join('; ',commands));if(!saved.result)return {result:false,message:'Could not save the SIM, APN or timezone.'};
+ let ttl=runCommand(`/usr/sbin/chester-ttl apply ${extras.ttl_enabled?'1':'0'} ${extras.ttl} ${extras.hl} >/dev/null 2>&1`);
+ if(!ttl.result)return {result:false,message:'The live firewall did not accept TTL/HL. Review the settings and retry.'};
+ let queued=runCommand(`mkdir -p /tmp/chester-sim; rm -f /tmp/chester-sim/cancel; printf '%s' ${quoteArg(sprintf('%J',{action:'switch',slot:slot,queued:true}))} > /tmp/chester-sim/request.json.tmp && mv /tmp/chester-sim/request.json.tmp /tmp/chester-sim/request.json`);
+ if(!queued.result)return {result:false,message:'Could not queue the selected SIM.'};
+ runCommand('/etc/init.d/chester_sim enabled || /etc/init.d/chester_sim enable; /etc/init.d/chester_sim running || /etc/init.d/chester_sim start');
+ runCommand('(sleep 1; /etc/init.d/system reload >/dev/null 2>&1) >/dev/null 2>&1 & true');
+ return {result:true};
 }
 
 function applySetupWizardConfig(configJson) {
@@ -939,7 +932,10 @@ function applySetupWizardConfig(configJson) {
 		};
 	}
 
-	let wizard = parsed.wizard || {};
+	let validation = validateWizardDraft(parsed);
+ if (validation) return {result:false, code:-1, message:validation};
+
+ let wizard = parsed.wizard || {};
 	let network = parsed.network || {};
 	let wifi = parsed.wifi || {};
 	let admin = parsed.admin || {};
@@ -961,17 +957,18 @@ function applySetupWizardConfig(configJson) {
 			return wifiResult;
 	}
 
-	if (!skippedAdmin) {
-		let adminResult = applyAdminConfig(admin);
-		if (!adminResult.result)
-			return adminResult;
-	}
 
 	// After the vendor sections, so a failure here cannot leave the wizard
 	// marked complete with half its own settings applied.
 	let chesterResult = applyChesterExtras(chester);
 	if (!chesterResult.result)
 		return chesterResult;
+
+	if (!skippedAdmin) {
+		let adminResult = applyAdminConfig(admin);
+		if (!adminResult.result)
+			return adminResult;
+	}
 
 	let wizardResult = persistWizardState(true, skippedNetwork, skippedWifi, skippedAdmin);
 	if (!wizardResult.result)

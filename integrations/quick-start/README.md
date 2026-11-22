@@ -1,9 +1,36 @@
-# K43P Quick Start port
+# Chester K45P Quick Start
 
-The K45P payload includes the patched wizard view and `misectel_setup_wizard` backend. The patch recipes originate from the K43P wrapper, adapted to the K45P vendor wizard and US preset defaults.
+The pending flow starts directly at SIM Selection, then APN Selection, WAN Port,
+TTL/HL, Root Password, Timezone and Wi-Fi, followed by a review before Apply.
+It uses the Chester Sun/Night appearance and supports phones without horizontal
+scrolling. Choices remain in the draft when moving Back; no setting is written
+while navigating. The review never prints root or Wi-Fi passwords.
 
-Internet Setup includes APN and Time Zone selectors. The backend serves sanitized APN presets and the LuCI timezone table through the existing first-run context, so the controls work before login without synchronous rpcd calls back into itself. Applying the wizard writes both the readable zone name and POSIX timezone, reloads the system clock configuration, and saves the selected APN to detected modem sections. Existing network reload handles redial.
+SIM selection saves Manual mode and the selected slot. The APN is saved to that
+slot's Chester policy and QModem profile; the existing serialized SIM daemon
+performs selection after Apply. Manual selection retains the chosen SIM even
+without data. Quick Start does not run speed tests or enable automatic selection.
 
-The view also carries K43P branding, removes the literal null subtitle, and retains a changed WAN/LAN selection through step rerenders. The original Wi-Fi and password steps remain. K45P intentionally preserves the current/default password when that step is skipped, following the owner's requested root/admin behavior; it does not import K43P's password-clearing skip behavior.
+TTL/HL uses the existing chester-ttl helper, which verifies both live firewall
+values. Timezone is resolved from the server's own LuCI zone table. A blank root
+password keeps the existing password; root/admin continue sharing root's password.
+Wi-Fi supports shared or separate names/passwords and an explicit Disable choice.
+Disable writes both radio and AP flags, retaining saved credentials for later use.
 
-These files are copied into every image by `scripts/customize.py`, including fresh installations and factory resets. No client configuration or private device data is bundled.
+The existing first-run RPC object and ACL are retained. Completed setup refuses
+context and Apply requests. All new fields and known network/radio identities
+are validated before writes. The backend is still a sequence of persistent
+operations: an operating-system failure during Apply may require retrying;
+validation is not a claim of transactional rollback across every subsystem.
+
+Validation: frontend draft tests cover SIM/APN, WAN, TTL/HL bounds, password
+confirmation, timezone and disabled/shared/separate Wi-Fi. The backend harness
+extracts the real helpers and runs under ucode with all system operations mocked.
+It checks validation before writes, SIM/APN policy, verified TTL helper use,
+both radio/AP disable flags, server timezone mapping and password whitespace.
+Live browser checks traversed all steps, exercised invalid TTL, Back navigation,
+Wi-Fi Off and Review, and checked Sun/Night plus a 390px phone viewport. Apply
+was not submitted during the UI review, and no new root password was entered.
+
+The new flow is deployed live and committed for the next image. Bin 10 was built
+and flashed before this redesign; its original Quick Start remains in /rom.

@@ -1,0 +1,10 @@
+const fs=require('fs'),path=require('path'),assert=require('assert/strict');
+const code=fs.readFileSync(path.join(__dirname,'../payload/www/luci-static/resources/view/misectel-dashboard/setup-wizard.js'),'utf8');
+const api=new Function('view','rpc',code)({extend:x=>x},{declare:()=>{}});
+const state={sim:'2',apn:'vzwinternet',wan:{exists:true,role:'wan',device:'wan',mode:'lan',proto:'dhcp'},ttlOn:true,ttl:'65',hl:'66',password:'',confirm:'',zone:'America/New_York',wifiOn:false,shared:true,radios:[{name:'radio0',section:'ap0',ssid:'',key:''},{name:'radio1',section:'ap1',ssid:'',key:''}],sharedWifi:{ssid:'',key:'',encryption:'sae-mixed'}};
+const ctx={state,data:{chester:{timezones:{'America/New_York':'EST5EDT,M3.2.0,M11.1.0'}}}};
+let p=api.payload.call(ctx);assert.equal(p.chester.sim_slot,'2');assert.equal(p.chester.apn,'vzwinternet');assert.equal(p.network.optional_wan_mode,'lan');assert.equal(p.chester.ttl,65);assert.equal(p.chester.hl,66);assert.equal(p.wifi.enabled,false);assert.equal(p.wifi.radios.length,2);assert.equal(p.wizard.skipped_wifi,false);assert.equal(p.wizard.skipped_admin,true);
+state.ttl='256';assert.throws(()=>api.payload.call(ctx),/1 to 255/);state.ttl='65';state.password='new password';state.confirm='different';assert.throws(()=>api.payload.call(ctx),/do not match/);state.password=' keep spaces ';state.confirm=state.password;assert.equal(api.payload.call(ctx).admin.password,' keep spaces ');
+state.wifiOn=true;assert.throws(()=>api.payload.call(ctx),/Wi-Fi name/);state.sharedWifi={ssid:'Chester Test',key:'test-passphrase',encryption:'sae-mixed'};p=api.payload.call(ctx);assert(p.wifi.radios.every(r=>r.ssid==='Chester Test'&&r.key==='test-passphrase'));
+state.shared=false;state.radios.forEach((r,i)=>{r.ssid='Band '+i;r.key='passphrase-'+i;r.encryption='psk2';});p=api.payload.call(ctx);assert.equal(p.wifi.radios[0].ssid,'Band 0');assert.equal(p.wifi.radios[1].ssid,'Band 1');
+console.log('Quick Start draft: SIM/APN, WAN, independent TTL/HL, password confirmation, timezone, Wi-Fi disabled/shared/separate passed. No settings applied.');

@@ -1,5 +1,12 @@
 # LettucePi K45P
 
+## Pending next image: Quick Start
+
+The live Quick Start now follows SIM Selection → APN Selection → WAN Port →
+TTL/HL → Root Password → Timezone → Wi-Fi, then Review. Wi-Fi can be disabled
+or use shared/separate band names. These new wizard files are pending the next
+image; bin 10 below contains the earlier Quick Start.
+
 ## Bin 10 — version 1.0.9, build 202611220003
 
 Sun/Night appearance now follows the approved Overview mockup. The top-right
