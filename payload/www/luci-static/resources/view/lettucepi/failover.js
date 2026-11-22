@@ -87,12 +87,13 @@ return view.extend({
         this.saveButton = E('button', {'class':'fo-save',type:'button',click:ui.createHandlerFn(this,this.saveSettings)}, ['Save changes']);
         this.primary.addEventListener('change', function() { if(self.primary.value===self.backup.value) self.backup.value=self.draftOrder[0]; self.drawOrder(); self.markDirty(); });
         this.backup.addEventListener('change', function() { if(self.backup.value===self.primary.value) self.primary.value=self.draftOrder[1]; self.drawOrder(); self.markDirty(); });
-        var root = E('div', {'class':'fo-page'}, [
-            E('div', {'class':'fo-heading'}, [E('div', {}, [E('h2', {}, ['Failover']),E('div', {'class':'fo-muted'}, ['Choose a backup connection or use both together.'])]),this.badge]),
+        var root = E('div', {'class':'fo-page chester-ios'}, [
+            E('link',{rel:'stylesheet',href:L.resource('chester-ui/ios.css')+'?v=4ca34f0484d4'}),
+            E('div', {'class':'fo-heading'}, [E('div', {}, [E('div',{'class':'ios-title',role:'heading','aria-level':'2'},['Failover']),E('div', {'class':'fo-muted'}, ['Choose a backup connection or use both together.'])]),this.badge]),
             E('div', {'class':'fo-card'}, [this.portBox,E('div', {'class':'fo-muted',style:'margin-top:14px'}, ['Tap WAN to switch this socket between internet and LAN.'])]),
             this.wanNotice,
-            E('section', {'class':'fo-card','aria-label':'Set connection priority'}, [
-                E('div', {'class':'fo-order-heading'}, [E('h3', {}, ['Your connection order']),E('p', {'class':'fo-muted'}, ['Drag the handle to switch sides, or use the button on either card.'])]),
+            E('section', {'class':'fo-card fo-order-card','aria-label':'Set connection priority'}, [
+                E('div', {'class':'fo-order-heading'}, [E('h3', {}, ['Your connection order']),E('p', {'class':'fo-muted'}, ['Drag a handle to change priority, or use the button on either card.'])]),
                 E('div',{'class':'fo-muted fo-test-notice'},['Test each link with M-Lab NDT. Tests use data and may slow other traffic. M-Lab publishes results and your public IP address. ',E('a',{href:'https://www.measurementlab.net/privacy/',target:'_blank',rel:'noopener noreferrer'},['Privacy policy'])]),this.orderBox,this.orderNote
             ]),
             E('div', {'class':'fo-card'}, [
@@ -138,7 +139,7 @@ return view.extend({
             var lanAction=E('button', {type:'button','class':'fo-pill fo-uplink-status fo-lan-action','aria-label':'Switch Ethernet socket from LAN to WAN',title:'Tap to use this socket for internet',click:ui.createHandlerFn(self,function() { return self.toggleWanPort(); })}, ['LAN mode',E('span',{'aria-hidden':'true'},['↗'])]);
             card.append(E('div', {'class':'fo-uplink-top'}, [icon(self.connectionKind(name)),grip]),E('h4', {}, [title]),health,lanAction,active,detail,testButton,testResult,
                 E('button', {type:'button','class':'fo-uplink-action','aria-label':'Make '+title+' '+(index?'primary':'secondary'),click:function() { self.swapOrder(); }}, [index?'Make primary':'Make secondary']));
-            slot.append(E('div', {'class':'fo-role'}, [E('span', {'class':'fo-role-number'}, [String(index+1)]),E('span', {}, [index?'Secondary · right':'Primary · left'])]),card);
+            slot.append(E('div', {'class':'fo-role'}, [E('span', {'class':'fo-role-number'}, [String(index+1)]),E('span', {}, [index?'Secondary':'Primary'])]),card);
             self.priorityRefs.push({name:name,card:card,health:health,lanAction:lanAction,detail:detail,active:active,slot:slot,testButton:testButton,testResult:testResult,index:index});
             self.bindDrag(card,grip,index);
             slot.addEventListener('dragover',function(e) { if(self.nativeDragFrom==null)return; e.preventDefault(); e.dataTransfer.dropEffect='move'; self.showDrop(index); });
@@ -240,9 +241,9 @@ return view.extend({
             r.testResult.className='fo-test-result'+(result && result.phase==='failed'?' error':'');
             r.testResult.replaceChildren();
             if(result) {
-                if(result.phase==='completed') {
+                if(result.phase==='completed') {r.testResult.classList.add('has-metrics');
                     [['Download',result.download_mbps,'Mbps'],['Upload',result.upload_mbps,'Mbps'],['Latency',result.latency_ms,'ms']].forEach(function(m){
-                        r.testResult.append(E('div',{'class':'fo-test-row'},[E('span',{},[m[0]]),E('strong',{},[Number.isFinite(m[1])?m[1].toFixed(1)+' '+m[2]:'—'])]));
+                        r.testResult.append(E('div',{'class':'fo-test-row'},[E('span',{},[m[0]]),E('strong',{},Number.isFinite(m[1])?[m[1].toFixed(1),E('small',{'class':'ios-unit'},[' '+m[2]])]:['—'])]));
                     });
                     r.testResult.title='M-Lab NDT · '+(result.server||'')+' · '+new Date(result.timestamp*1000).toLocaleString();
                     r.testResult.append(E('div',{'class':'fo-muted',style:'font-size:10px;margin-top:5px'},['M-Lab · '+new Date(result.timestamp*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})]));

@@ -1,15 +1,29 @@
 {
-	"luci-app-lettucepi-speedtest": {
-		"description": "Access the LettucePi Speedtest interface",
-		"read": {
-			"ubus": {
-				"luci.lettucepi.speedtest": [ "status", "history" ]
-			}
-		},
-		"write": {
-			"ubus": {
-				"luci.lettucepi.speedtest": [ "install", "start", "cancel" ]
-			}
-		}
-	}
+  "luci-app-lettucepi-speedtest": {
+    "description": "Access the LettucePi Speedtest interface",
+    "read": {
+      "ubus": {
+        "luci.lettucepi.speedtest": [
+          "status",
+          "history"
+        ],
+        "failover": [
+          "status"
+        ]
+      }
+    },
+    "write": {
+      "ubus": {
+        "luci.lettucepi.speedtest": [
+          "install",
+          "start",
+          "cancel"
+        ],
+        "failover": [
+          "test_start",
+          "test_cancel"
+        ]
+      }
+    }
+  }
 }

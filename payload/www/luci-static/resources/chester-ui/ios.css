@@ -1,0 +1,179 @@
+/* Chester connection pages only. Sidebar and system theme are intentionally out of scope. */
+.chester-ios.cs-page,.chester-ios.fo-page,.chester-ios.lp-speedtest {
+ --ios-blue:#007aff;--ios-ink:#1c1c1e;--ios-muted:#6e6e73;--ios-line:#e5e5ea;--ios-group:#f2f2f7;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+ color:var(--ios-ink);background:var(--ios-group);max-width:1120px;padding:28px;border-radius:26px;
+ font-size:14px;line-height:1.45;letter-spacing:-.015em;
+}
+.chester-ios :is(button,input,select){font-family:inherit;letter-spacing:inherit}
+.chester-ios :is(.cs-head,.fo-heading){margin-bottom:26px;align-items:flex-start}
+.chester-ios :is(.cs-head .ios-title,.fo-heading .ios-title){font-size:34px;font-weight:750;letter-spacing:-.045em;margin-bottom:5px;line-height:1.15}
+.chester-ios :is(.cs-head .ios-title,.fo-heading .ios-title){font-size:34px!important;font-weight:750!important;line-height:1.15!important;color:var(--ios-ink)!important}
+.chester-ios :is(.cs-muted,.fo-muted,.cs-note,.cs-live-note,.fo-order-note,.lp-st-caption,.lp-st-msg,.lp-st-foot){color:var(--ios-muted);font-weight:400}
+.chester-ios :is(.cs-card,.cs-panel,.fo-card,.lp-st-card,.lp-st-history){background:#fff;border:1px solid var(--ios-line);border-radius:20px;box-shadow:0 2px 8px #00000003}
+.chester-ios .cs-card:before{display:none}
+.chester-ios .cs-card.current{border-color:#b8d4ff;box-shadow:0 0 0 1px #007aff08}
+.chester-ios .cs-grid{gap:18px}
+.chester-ios .cs-card{padding:22px;margin-bottom:18px}
+.chester-ios :is(.cs-small,.cs-kv span,.cs-field,.fo-field){color:var(--ios-muted)}
+.chester-ios .cs-card h3{font-size:25px;font-weight:700;min-height:0;margin:0 0 18px;letter-spacing:-.035em}
+.chester-ios .cs-card-top{margin-bottom:6px}
+.chester-ios :is(.cs-pill,.fo-pill){font-weight:600;background:#ededf0;color:#6e6e73;padding:5px 10px;font-size:12px}
+.chester-ios :is(.cs-pill.active,.fo-pill.online){background:#e2f8e9;color:#248a3d}
+.chester-ios .fo-pill.offline{background:#fff0ef;color:#c9342b}
+.chester-ios .cs-kv{margin:0;padding:9px 0;border-bottom:1px solid #ededf0;color:var(--ios-ink);font-size:13px}
+.chester-ios .cs-kv:last-child{border-bottom:0}
+.chester-ios .cs-kv strong{font-weight:500;line-height:1.4}
+.chester-ios .cs-live-note{font-size:11px;margin:12px 0 18px}
+.chester-ios .cs-card-actions{display:flex;align-items:stretch;gap:10px;margin-top:auto;padding-top:8px}
+.chester-ios .cs-card-actions button{flex:1;min-width:0;width:auto;margin:0}
+.chester-ios .cs-card-actions{margin-top:18px}
+.chester-ios .cs-extra{margin-top:16px;border-top:1px solid var(--ios-line);font-size:12px}
+.chester-ios .cs-extra summary{padding:12px 0 0;min-height:36px;cursor:pointer;color:var(--ios-muted);font-size:12px}
+.chester-ios .cs-extra[open] summary{padding-bottom:10px}
+.chester-ios .cs-extra .cs-live-note{margin-bottom:0}
+.chester-ios :is(.fo-test-button,.cs-save,.fo-save,.cs-run){background:var(--ios-blue);border:1px solid var(--ios-blue);color:#fff;min-height:44px;padding:11px 16px;border-radius:11px;box-shadow:none;font-weight:600;font-size:14px;cursor:pointer}
+.chester-ios :is(.cs-use,.fo-uplink-action,.cs-cancel){background:#fff;border:1px solid var(--ios-blue);color:var(--ios-blue);min-height:44px;padding:10px 14px;border-radius:11px;font-weight:600;box-shadow:none;font-size:13px}
+.chester-ios :is(.cs-use,.fo-uplink-action):hover{background:#f0f6ff}
+.chester-ios .fo-test-button:hover,.chester-ios .cs-save:hover,.chester-ios .fo-save:hover{background:#0067df;border-color:#0067df}
+.chester-ios button:disabled{opacity:.45;cursor:default}
+.chester-ios :is(button,input,select,summary):focus-visible{outline:3px solid #007aff55;outline-offset:3px}
+.chester-ios a{color:var(--ios-blue)}
+.chester-ios .cs-refresh{color:var(--ios-blue);padding:6px 0;min-height:44px}
+.chester-ios .cs-mode-panel{background:transparent;border:0;box-shadow:none;padding:0;margin-bottom:22px}
+.chester-ios .cs-mode-panel h3{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%)}
+.chester-ios :is(.cs-modes,.fo-modes){background:#e6e6eb;border:1px solid #dedee5;border-radius:12px;padding:4px;gap:3px;margin:0 0 10px}
+.chester-ios .fo-modes{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:16px}
+.chester-ios :is(.cs-mode,.fo-mode){background:transparent;border:0;box-shadow:none;color:#363639;border-radius:8px;min-height:42px;padding:9px 6px;font-size:13px;font-weight:500}
+.chester-ios :is(.cs-mode,.fo-mode)[aria-pressed=true]{background:var(--ios-blue);border:0;box-shadow:0 1px 4px #00000012;color:#fff}
+.chester-ios :is(.fo-test-button,.cs-save,.fo-save,.cs-run),.chester-ios :is(.cs-mode,.fo-mode)[aria-pressed=true]{color:#fff!important}
+.chester-ios .cs-mode-panel .cs-muted{font-size:12px}
+.chester-ios :is(.cs-status,.fo-help){background:#e9f2ff;border:0;border-radius:12px;color:#235e9c;min-height:0;padding:12px 15px}
+.chester-ios .cs-status.error{background:#fff0ef;color:#b42318}
+.chester-ios :is(.fo-test-notice,.cs-note){font-size:11px;line-height:1.55;margin:4px 0 18px}
+.chester-ios :is(.fo-test-result){font-size:12px;line-height:1.5;margin:14px 0 0;color:var(--ios-muted)}
+.chester-ios .fo-test-result.has-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 8px;padding:14px 0 0;border-top:1px solid var(--ios-line)}
+.chester-ios .fo-test-result .fo-test-row{display:flex;flex-direction:column;gap:4px;min-width:0;margin:0;padding:0 8px 0 0;border-right:1px solid var(--ios-line)}
+.chester-ios .fo-test-result .fo-test-row:nth-child(3){border-right:0}
+.chester-ios .fo-test-row span{font-size:11px}
+.chester-ios .fo-test-row strong{font-size:16px;font-weight:650;color:var(--ios-ink);overflow-wrap:anywhere;line-height:1.25}
+.chester-ios .fo-test-result .fo-test-row{justify-content:flex-start}
+.chester-ios .fo-test-row .ios-unit{display:block;margin-top:3px;font-size:11px;font-weight:400;line-height:1.3;color:var(--ios-muted)}
+.chester-ios .fo-test-result>.cs-muted,.chester-ios .fo-test-result>.fo-muted{grid-column:1/-1;font-size:10px}
+.chester-ios .fo-test-result.error{color:#c9342b}
+.chester-ios :is(details.cs-panel,details.fo-details){padding:0;border-radius:15px;margin-bottom:10px;box-shadow:none}
+.chester-ios :is(.cs-panel summary,.fo-details summary){display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 20px;min-height:58px;font-size:15px;font-weight:500;list-style:none;color:var(--ios-ink)}
+.chester-ios summary::-webkit-details-marker{display:none}
+.chester-ios :is(.cs-panel summary,.fo-details summary)::after{content:'›';color:#a2a2a7;font-size:25px;line-height:1;font-weight:300}
+.chester-ios details[open]>summary::after{transform:rotate(90deg)}
+.chester-ios :is(.cs-details,.fo-details-body){padding:0 20px 20px}
+.chester-ios :is(.cs-field input:not([type=checkbox]),.cs-field select,.fo-field input,.fo-field select){background:#f9f9fb;border:1px solid var(--ios-line);border-radius:10px;color:var(--ios-ink);min-height:44px;font-size:14px}
+.chester-ios input[type=checkbox]{accent-color:var(--ios-blue)}
+.chester-ios :is(.cs-save-row,.fo-actions){position:static;min-height:64px;margin:18px 0 0;padding:10px 0;border:0;background:transparent;box-shadow:none;border-radius:0}
+.chester-ios .fo-order{gap:18px}
+.chester-ios .fo-slot{padding:0}
+.chester-ios .fo-role{color:var(--ios-muted);font-size:12px;font-weight:600;margin-bottom:10px}
+.chester-ios .fo-role-number{width:23px;height:23px;background:#e8e8ed;color:var(--ios-muted);font-size:11px}
+.chester-ios .fo-slot:first-child .fo-role-number{background:#e8f1ff;color:var(--ios-blue)}
+.chester-ios .fo-uplink,.chester-ios .fo-slot:first-child .fo-uplink{background:#fff;border:1px solid var(--ios-line);border-radius:18px;padding:20px;min-height:0;box-shadow:none}
+.chester-ios .fo-uplink-top{margin-bottom:12px}
+.chester-ios .fo-uplink h4{font-size:25px;min-height:0;margin-bottom:12px;letter-spacing:-.035em}
+.chester-ios .fo-icon{background:#f2f2f7;color:var(--ios-ink);width:42px;height:42px;border-radius:11px}
+.chester-ios .fo-icon svg{width:26px;height:26px}
+.chester-ios .fo-grip{border:0;background:#f2f2f7;color:#8e8e93;width:40px;height:40px;min-width:40px;border-radius:10px}
+.chester-ios .fo-in-use{color:var(--ios-blue);font-weight:500;font-size:11px;margin-bottom:5px}
+.chester-ios .fo-uplink-detail{color:var(--ios-muted);min-height:0;font-size:12px;margin-bottom:18px}
+.chester-ios .fo-uplink-action{margin-top:18px}
+.chester-ios .fo-slot.is-drop{border-color:var(--ios-blue);background:#e8f1ff}
+.chester-ios .fo-enable input:checked{background:#34c759}
+.chester-ios .fo-enable strong{font-size:17px;font-weight:600}
+.chester-ios .fo-state{font-size:20px;letter-spacing:-.025em;font-weight:650}
+.chester-ios .fo-card{padding:22px;margin-bottom:18px}
+.chester-ios .fo-order-card{background:transparent;border:0;box-shadow:none;padding:0}
+.chester-ios .fo-order-heading h3{font-weight:600;font-size:18px}
+.chester-ios .fo-order-heading{margin-bottom:15px}
+.chester-ios .fo-ports .misectel-dashboard-port-panel__port{background:#fafafd;border:1px solid var(--ios-line);border-radius:13px;box-shadow:none;min-height:80px}
+.chester-ios .lp-st-brand{font-size:25px;color:var(--ios-ink);letter-spacing:-.035em}
+.chester-ios .lp-st-brand-icon{background:#e8f1ff;color:var(--ios-blue);border-radius:12px}
+.chester-ios .lp-st-go.btn{background:var(--ios-blue)!important;border-radius:11px!important;font-size:14px!important}
+.chester-ios .lp-st-metric{background:#f7f7fa;border:0;border-radius:14px;padding:18px}
+.chester-ios .lp-st-value{color:var(--ios-ink);font-weight:650;letter-spacing:-.045em}
+.chester-ios .lp-st-progress-bar{background:var(--ios-blue)}
+.chester-ios .lp-st-details{border-color:var(--ios-line)}
+@media(max-width:700px){
+ .chester-ios.cs-page,.chester-ios.fo-page,.chester-ios.lp-speedtest{padding:18px 12px;border-radius:19px}
+ .chester-ios :is(.cs-head .ios-title,.fo-heading .ios-title){font-size:30px}
+ .chester-ios .cs-grid,.chester-ios .fo-order{grid-template-columns:1fr;gap:14px}
+ .chester-ios .cs-card{padding:19px;margin-bottom:0}
+ .chester-ios .cs-grid{margin-bottom:16px}
+ .chester-ios .cs-card h3{font-size:24px}
+ .chester-ios .cs-kv{display:flex;justify-content:space-between;font-size:13px;padding:8px 0}
+ .chester-ios .cs-kv strong{display:block;text-align:right;margin:0}
+ .chester-ios .cs-card-top{margin-bottom:5px}
+ .chester-ios .cs-card-actions{padding-top:4px}
+ .chester-ios .cs-live-note{margin:10px 0 14px}
+ .chester-ios :is(.cs-mode,.fo-mode){font-size:12px;min-height:41px}
+ .chester-ios .fo-modes{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .chester-ios .fo-card{padding:18px}
+ .chester-ios .fo-order-card{padding:0}
+ .chester-ios .fo-uplink{padding:18px}
+ .chester-ios .fo-role{margin-bottom:7px}
+ .chester-ios :is(.cs-panel summary,.fo-details summary){padding:16px 17px}
+ .chester-ios :is(.cs-details,.fo-details-body){padding:0 17px 17px}
+ .chester-ios .fo-test-row strong{font-size:16px}
+ .chester-ios .fo-ports{gap:6px}
+ .chester-ios .fo-ports .misectel-dashboard-port-panel__port{padding:12px 5px;min-height:76px}
+}
+.chester-speeds .sp-head .ios-title{margin:0 0 6px;padding:0;border:0;font-size:34px;font-weight:750;letter-spacing:-.045em;line-height:1.15}
+.chester-speeds .sp-head .ios-title{font-size:34px!important;font-weight:750!important;line-height:1.15!important;color:var(--ios-ink)!important}
+.chester-speeds .sp-head{margin-bottom:24px}
+.chester-speeds .sp-muted{color:var(--ios-muted);font-size:12px;line-height:1.6}
+.chester-speeds .sp-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;background:#e6e6eb;border:1px solid #dedee5;padding:4px;border-radius:12px;margin-bottom:22px}
+.chester-speeds .sp-tabs button{border:0;background:transparent;min-height:42px;border-radius:8px;color:#363639;font-size:14px;font-weight:500;cursor:pointer}
+.chester-speeds .sp-tabs button[aria-selected=true]{background:var(--ios-blue);color:white;box-shadow:0 1px 4px #00000012}
+.chester-speeds .sp-tabs button[aria-selected=true],.chester-speeds .sp-start{color:white!important}
+.chester-speeds .sp-panel{border:1px solid var(--ios-line);border-radius:20px;background:white;padding:24px}
+.chester-speeds .sp-panel-head{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:22px;flex-wrap:wrap}
+.chester-speeds .sp-panel-head h3{font-size:25px;font-weight:650;margin:0 0 4px;letter-spacing:-.035em}
+.chester-speeds .sp-actions{display:flex;gap:10px;flex-wrap:wrap}
+.chester-speeds :is(.sp-start,.sp-cancel){border:1px solid var(--ios-blue);border-radius:11px;padding:11px 18px;min-height:44px;font-size:14px;font-weight:600;cursor:pointer}
+.chester-speeds .sp-start{background:var(--ios-blue);color:white}
+.chester-speeds .sp-cancel{background:white;color:var(--ios-blue)}
+.chester-speeds .sp-cancel{color:var(--ios-blue)!important}
+.chester-speeds :is(.sp-start,.sp-cancel){display:inline-flex;align-items:center;justify-content:center;height:auto;line-height:1.25;white-space:normal}
+.chester-speeds .sp-connection{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-top:1px solid var(--ios-line);border-bottom:1px solid var(--ios-line);margin-bottom:18px;color:var(--ios-muted);font-size:13px}
+.chester-speeds .sp-connection select{background:#f9f9fb;border:1px solid var(--ios-line);border-radius:9px;padding:10px;min-height:44px;max-width:75%;color:var(--ios-ink);font-size:13px}
+.chester-speeds .sp-message{font-size:12px;color:var(--ios-muted);min-height:20px;margin-bottom:15px}
+.chester-speeds .sp-message.error{color:#c9342b}
+.chester-speeds .sp-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.chester-speeds .sp-metric{display:flex;flex-direction:column;min-width:0;gap:6px;padding:18px;background:#f5f5f9;border-radius:13px}
+.chester-speeds .sp-metric span,.chester-speeds .sp-metric small{color:var(--ios-muted);font-size:11px}
+.chester-speeds .sp-metric strong{font-size:32px;font-weight:650;letter-spacing:-.045em;line-height:1.2;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.chester-speeds .sp-progress{height:5px;border-radius:5px;overflow:hidden;background:#ededf2;margin:0 0 18px}
+.chester-speeds .sp-progress>div{height:100%;background:var(--ios-blue);transition:width .3s}
+.chester-speeds .sp-details{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:22px 0;padding-top:18px;border-top:1px solid var(--ios-line);font-size:12px}
+.chester-speeds .sp-details>div{display:flex;flex-direction:column;gap:5px;min-width:0;overflow-wrap:anywhere}
+.chester-speeds .sp-details span{color:var(--ios-muted)}
+.chester-speeds .sp-details strong{font-weight:500}
+.chester-speeds .sp-notice{margin:18px 0 0;font-size:11px}
+.chester-speeds .sp-fast iframe{border:1px solid var(--ios-line);border-radius:15px;width:100%;height:610px;background:white}
+.chester-speeds .sp-history-card{border:1px solid var(--ios-line);border-radius:15px;background:white;margin-top:18px}
+.chester-speeds .sp-history-card summary{padding:17px 20px;min-height:58px;cursor:pointer;font-size:15px;font-weight:500}
+.chester-speeds .sp-history{padding:0 20px 16px}
+.chester-speeds .sp-history-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:13px 0;border-top:1px solid var(--ios-line);font-size:12px;overflow-wrap:anywhere}
+.chester-speeds .sp-history-row strong{text-align:right;font-weight:600}
+.chester-speeds .sp-history-row .sp-muted{grid-column:1/-1;font-size:11px}
+@media(max-width:700px){
+ .chester-speeds .sp-head .ios-title{font-size:30px}
+ .chester-speeds .sp-panel{padding:18px}
+ .chester-speeds .sp-panel-head{gap:15px}
+ .chester-speeds .sp-panel-head h3{font-size:24px}
+ .chester-speeds .sp-actions{width:100%}
+ .chester-speeds .sp-actions button{flex:1}
+ .chester-speeds .sp-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .chester-speeds .sp-metric{padding:13px}
+ .chester-speeds .sp-metric strong{font-size:26px}
+ .chester-speeds .sp-details{grid-template-columns:1fr}
+ .chester-speeds .sp-fast iframe{height:650px}
+}
+@media(prefers-reduced-motion:reduce){.chester-ios *{transition:none!important}}
