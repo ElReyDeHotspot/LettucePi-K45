@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/netip"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -17,7 +18,11 @@ import (
 	"time"
 )
 
-const statePath = "/tmp/chester-sim/state.json"
+var statePath = "/tmp/chester-sim/state.json"
+var journalPath = "/tmp/chester-sim/journal.json"
+var simLockPath = "/tmp/chester-sim.lock"
+var cancelPath = "/tmp/chester-sim/cancel"
+var command = systemCommand
 
 type Config struct {
 	Mode            string  `json:"mode"`
@@ -52,6 +57,7 @@ type Card struct {
 	ICCIDEnd  string   `json:"iccid_end,omitempty"`
 	Ready     bool     `json:"ready"`
 	Connected bool     `json:"connected"`
+	IPv4      string   `json:"ipv4,omitempty"`
 	RSRP      *int     `json:"rsrp,omitempty"`
 	Seen      int64    `json:"seen"`
 	Download  *float64 `json:"download,omitempty"`
@@ -80,6 +86,7 @@ type State struct {
 }
 type Request struct {
 	Action string `json:"action"`
+	Queued bool   `json:"queued,omitempty"`
 	Slot   string `json:"slot"`
 }
 type Entry struct {
@@ -95,7 +102,7 @@ var attempts []time.Time
 var failures int
 var validName = regexp.MustCompile(`^[A-Za-z0-9_][A-Za-z0-9_.-]{0,31}$`)
 
-func command(ctx context.Context, seconds int, name string, args ...string) ([]byte, error) {
+func systemCommand(ctx context.Context, seconds int, name string, args ...string) ([]byte, error) {
 	c, cancel := context.WithTimeout(ctx, time.Duration(seconds)*time.Second)
 	defer cancel()
 	return exec.CommandContext(c, name, args...).Output()
@@ -274,6 +281,20 @@ func snapshot() {
 	}
 	v, e := iface()
 	c.Connected = c.Ready && e == nil && v["up"] == true
+	c.IPv4 = ""
+	if c.Connected {
+		if addresses, ok := v["ipv4-address"].([]any); ok {
+			for _, entry := range addresses {
+				if item, ok := entry.(map[string]any); ok {
+					address := str(item["address"])
+					if parsed, e := netip.ParseAddr(address); e == nil && parsed.Is4() {
+						c.IPv4 = address
+						break
+					}
+				}
+			}
+		}
+	}
 	c.Seen = time.Now().Unix()
 }
 func publish() {
@@ -539,16 +560,63 @@ func measurement(v map[string]any, key string) (float64, bool) {
 	return n, ok
 }
 func exists(path string) bool { _, e := os.Stat(path); return e == nil }
+
+// Manual selection commits the requested slot, independently of data attachment.
+func manualSelect(slot, apn string, apnExists bool) {
+	state.Busy = true
+	state.Operation = "switch"
+	state.TestSlot = slot
+	defer func() { state.Busy = false; snapshot(); publish() }()
+	phase("switching", "Selecting SIM "+slot)
+	// Recovery must honor the user's choice, including an offline/empty slot.
+	j, _ := json.Marshal(map[string]any{"slot": slot, "apn": apn, "apn_exists": apnExists, "modem": cfg.Modem})
+	if e := os.WriteFile(journalPath, j, 0600); e != nil {
+		phase("failed", "Could not save the selected SIM context")
+		return
+	}
+	if active() != slot {
+		if _, e := call(root, "set_sim_slot", map[string]string{"config_section": cfg.Modem, "slot": slot}); e != nil {
+			phase("failed", "The requested SIM could not be selected; retry the operation")
+			return
+		}
+	}
+	if active() != slot {
+		phase("failed", "The modem did not confirm the selected SIM slot")
+		return
+	}
+	command(root, 5, "uci", "set", "chester_sim.main.preferred="+slot)
+	command(root, 5, "uci", "commit", "chester_sim")
+	if e := setAPN(apn, apnExists); e != nil {
+		phase("failed", "SIM "+slot+" stays selected, but its APN could not be applied")
+		return
+	}
+	_, e := command(root, 35, "/etc/init.d/qmodem_network", "reconfigure", cfg.Modem)
+	os.Remove(journalPath)
+	if e != nil {
+		phase("failed", "SIM "+slot+" stays selected. Data setup needs attention.")
+		return
+	}
+	phase("completed", "SIM "+slot+" selected. It will stay selected even without data.")
+	event("Manual selection: SIM " + slot + " retained independently of data connectivity")
+}
 func runJob(request Request) {
+	defer func() { state.Busy = false; publish() }()
+	state.Operation = request.Action
+	state.TestSlot = request.Slot
+	if request.Queued && exists(cancelPath) {
+		os.Remove(cancelPath)
+		phase("cancelled", "Operation cancelled before starting.")
+		return
+	}
 	if !state.Supported {
 		phase("failed", "This modem does not expose two switchable SIM slots")
 		return
 	}
-	if e := os.Mkdir("/tmp/chester-sim.lock", 0700); e != nil {
+	if e := os.Mkdir(simLockPath, 0700); e != nil {
 		phase("failed", "A SIM operation is already running")
 		return
 	}
-	defer os.RemoveAll("/tmp/chester-sim.lock")
+	defer os.RemoveAll(simLockPath)
 	if exists("/tmp/chester-link-test.lock") {
 		phase("failed", "Wait for the current link test to finish")
 		return
@@ -568,14 +636,25 @@ func runJob(request Request) {
 		return
 	}
 	originalAPN, apnExists := uciGet("qmodem." + cfg.Modem + ".apn")
+	if request.Action == "switch" {
+		if cfg.Mode != "manual" || (request.Slot != "1" && request.Slot != "2") {
+			phase("failed", "Choose Manual and a valid SIM slot")
+			return
+		}
+		a, p := apnFor(request.Slot, originalAPN, apnExists)
+		manualSelect(request.Slot, a, p)
+		return
+	}
 	journal := map[string]any{"slot": original, "apn": originalAPN, "apn_exists": apnExists, "modem": cfg.Modem}
 	j, _ := json.Marshal(journal)
-	os.WriteFile("/tmp/chester-sim/journal.json", j, 0600)
+	os.WriteFile(journalPath, j, 0600)
 	state.Busy = true
 	state.Operation = request.Action
 	state.TestSlot = request.Slot
 	publish()
-	os.Remove("/tmp/chester-sim/cancel")
+	if !request.Queued {
+		os.Remove(cancelPath)
+	}
 	ctx, cancel := context.WithCancel(root)
 	defer cancel()
 	done := make(chan struct{})
@@ -590,7 +669,7 @@ func runJob(request Request) {
 			case <-ctx.Done():
 				return
 			case <-t.C:
-				if exists("/tmp/chester-sim/cancel") {
+				if exists(cancelPath) {
 					cancel()
 					return
 				}
@@ -600,21 +679,7 @@ func runJob(request Request) {
 	winner := ""
 	restored := false
 	var lastErr error
-	if request.Action == "switch" {
-		if cfg.Mode != "manual" {
-			lastErr = errors.New("choose Manual before selecting a SIM")
-		} else if request.Slot != "1" && request.Slot != "2" {
-			lastErr = errors.New("invalid SIM slot")
-		} else {
-			a, p := apnFor(request.Slot, originalAPN, apnExists)
-			lastErr = switchTo(ctx, request.Slot, a, p)
-			if lastErr == nil {
-				winner = request.Slot
-				command(root, 5, "uci", "set", "chester_sim.main.preferred="+winner)
-				command(root, 5, "uci", "commit", "chester_sim")
-			}
-		}
-	} else if request.Action == "test" {
+	if request.Action == "test" {
 		if cfg.Mode != "manual" || (request.Slot != "1" && request.Slot != "2") {
 			lastErr = errors.New("choose Manual and a valid SIM before testing")
 		} else {
@@ -709,9 +774,9 @@ func runJob(request Request) {
 		event("SIM " + winner + " verified and connected")
 	}
 	if winner != "" || restored {
-		os.Remove("/tmp/chester-sim/journal.json")
+		os.Remove(journalPath)
 	}
-	os.Remove("/tmp/chester-sim/cancel")
+	os.Remove(cancelPath)
 	state.Busy = false
 	snapshot()
 	publish()
@@ -834,12 +899,12 @@ func main() {
 	if !startupPending {
 		os.WriteFile("/tmp/chester-sim/boot-seen", []byte("1"), 0600)
 	}
-	if exists("/tmp/chester-sim/journal.json") {
+	if exists(journalPath) {
 		var j struct {
 			Slot, APN, Modem string
 			APNExists        bool `json:"apn_exists"`
 		}
-		b, _ := os.ReadFile("/tmp/chester-sim/journal.json")
+		b, _ := os.ReadFile(journalPath)
 		json.Unmarshal(b, &j)
 		if j.Modem == cfg.Modem && (j.Slot == "1" || j.Slot == "2") {
 			event("Recovering an interrupted SIM operation")
@@ -870,8 +935,8 @@ func main() {
 			phase("failed", "Interrupted SIM context does not match the selected modem")
 			os.Exit(1)
 		}
-		os.Remove("/tmp/chester-sim/journal.json")
-		os.RemoveAll("/tmp/chester-sim.lock")
+		os.Remove(journalPath)
+		os.RemoveAll(simLockPath)
 	}
 	nextStatus := time.Now()
 	for ctx.Err() == nil {
@@ -886,11 +951,18 @@ func main() {
 			}
 		}
 		if b, e := os.ReadFile("/tmp/chester-sim/request.json"); e == nil {
-			os.Remove("/tmp/chester-sim/request.json")
 			var r Request
 			if json.Unmarshal(b, &r) == nil {
+				// Publish ownership before deleting the pending request. RPC
+				// callers must never see a gap in which another click can win.
+				state.Busy = true
+				state.Operation = r.Action
+				state.TestSlot = r.Slot
+				publish()
+				os.Remove("/tmp/chester-sim/request.json")
 				if r.Action == "refresh" {
 					snapshot()
+					state.Busy = false
 					publish()
 				} else if r.Action == "switch" || r.Action == "select" || r.Action == "test" {
 					runJob(r)

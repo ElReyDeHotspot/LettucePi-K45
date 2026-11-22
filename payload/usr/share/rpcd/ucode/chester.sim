@@ -1,16 +1,22 @@
 #!/usr/bin/ucode
 'use strict';
-import {open,popen,rename} from 'fs';
+import {open,popen,rename,unlink} from 'fs';
 import {cursor} from 'uci';
 function read(path){let f=open(path,'r');if(!f)return '';let v=f.read('all')||'';f.close();return v;}
 function run(command){let f=popen(command,'r');if(!f)return '';let s=f.read('all')||'';f.close();return s;}
 function invalid(message){return {success:false,error:message};}
-function state(){try{return json(read('/tmp/chester-sim/state.json'));}catch(e){return {running:false,busy:false,cards:{},events:[]};}}
+function state(){
+ let out;try{out=json(read('/tmp/chester-sim/state.json'));}catch(e){out={running:false,busy:false,cards:{},events:[]};}
+ // An accepted request is already busy, even before the daemon consumes it.
+ try{let pending=json(read('/tmp/chester-sim/request.json'));if(pending.action){out.busy=true;out.operation=pending.action;out.test_slot=pending.slot||'';out.phase='queued';out.message=pending.action=='switch'?'Selecting SIM '+pending.slot+'…':pending.action=='test'?'Preparing SIM '+pending.slot+' test…':'Refreshing SIM controls…';}}catch(e){}
+ return out;
+}
 function config(){try{return json(run('/usr/libexec/chester-sim-config'));}catch(e){return {};}}
 function queue(action,slot){
- if(state().busy)return invalid('A SIM operation is running. Cancel it or wait for completion.');
+ if(state().busy)return {success:false,busy:true};
+ unlink('/tmp/chester-sim/cancel');
  let f=open('/tmp/chester-sim/request.json.tmp','w');if(!f)return invalid('Could not queue the SIM operation.');
- f.write(sprintf('%J',{action:action,slot:slot||''}));f.close();rename('/tmp/chester-sim/request.json.tmp','/tmp/chester-sim/request.json');
+ f.write(sprintf('%J',{action:action,slot:slot||'',queued:true}));f.close();rename('/tmp/chester-sim/request.json.tmp','/tmp/chester-sim/request.json');
  run('/etc/init.d/chester_sim enabled || /etc/init.d/chester_sim enable; /etc/init.d/chester_sim running || /etc/init.d/chester_sim start');
  return {success:true};
 }
@@ -38,7 +44,7 @@ return {'chester.sim':{
  }},
  cancel:{call:function(){let f=open('/tmp/chester-sim/cancel','w');if(f)f.close();return {success:true};}},
  save:{args:{settings:'String'},call:function(request){
-  if(state().busy)return invalid('Wait for the SIM operation to finish, or cancel it first.');
+  if(state().busy)return {success:false,busy:true};
   let a;try{a=json(request.args.settings);}catch(e){return invalid('Invalid SIM settings.');}
   if(type(a)!='object'||length(request.args.settings)>4096)return invalid('Invalid SIM settings.');
   if(index(['manual','auto_select','auto_switch'],a.mode)<0)return invalid('Choose Manual, Auto-Select or Auto-Switch.');

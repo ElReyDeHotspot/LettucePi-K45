@@ -13,8 +13,10 @@ Auto-Switch uses serving-cell RSRP and/or bound Internet checks, dwell, cooldown
 rate limits and optional preferred-slot failback. Modes are mutually exclusive.
 
 Native QModem APIs discover capabilities, read and set the real modem slot.
-Each operation verifies readback, SIM readiness and cellular connectivity. A
-failed or cancelled operation restores its original slot and APN. A private,
+Manual selection verifies the physical slot, saves its APN and leaves it selected
+without waiting for data. Automatic selection and speed tests also verify SIM
+readiness and cellular connectivity; a failed or cancelled test or automatic
+operation restores its original slot and APN. A private,
 root-owned runtime journal supports recovery after service interruption. Existing
 network monitoring conflicts are rejected. SIM operations and speed tests share
 locks. No modem reset, kernel, device tree or hot-plug setting is changed.
@@ -97,3 +99,46 @@ No operation or link-test lock remained; Failover configuration was unchanged.
 The per-SIM controls now match Failover: blue Test SIM buttons become Cancel test
 while running, with inline progress and Download/Upload/Latency rows plus the
 M-Lab timestamp. Live verification recorded 281.4/6.2 Mbps and 22.0 ms on SIM1.
+
+## Chester Mods navigation and Manual selection
+
+Chester Mods appears above Cellular with a crown icon and links to Failover,
+SIM Selection, Ookla Speedtest and M-Lab NDT. Existing URLs remain usable while
+old duplicate sidebar entries are hidden. M-Lab NDT has a dedicated page for
+independent primary/secondary tests using the existing Failover RPC and locks.
+
+Manual selection no longer uses the data-attachment deadline. It confirms the
+requested physical slot, commits its APN and preferred slot, starts data setup,
+and releases the controls. The modem stays on that SIM even if it is empty or
+has no working data. Recovery records the requested Manual context, so a service
+restart cannot revert a confirmed offline selection. Low-level command timeouts
+still bound unresponsive hardware calls; they are not connectivity deadlines.
+Automatic switching, startup comparison and speed tests retain their attachment
+timeouts and original-slot/APN rollback. No image is built for these changes.
+
+The Manual regression test executes the real dispatcher against a mocked offline
+modem and verifies slot2 remains selected, no connectivity probe is required,
+the preferred slot is saved and the rollback journal/lock are removed. Go tests
+pass. Live selection was observed, but the attempted live offline-hold interval
+was inconclusive because user SIM tests overlapped; data dialing was restored
+to enabled. Subsequent verification avoids switching the owner's SIM.
+
+Accepted requests now count as busy while still queued. The daemon publishes
+ownership before removing the queued file, so a rapid test click cannot replace
+a pending manual selection. Busy responses are silent and retain current
+progress. Queued cancellation is honored before touching the modem. The queue
+exclusion check was validated live with a paused policy daemon and read-only
+refresh request; no SIM or APN changed. Independent test progress/cancellation
+appears only inside its card, with no duplicate top test banner. Both cards have
+an IPv4 row: the active connected slot shows its validated netifd IPv4 address;
+inactive cards say Not active rather than displaying a stale address.
+
+After the owner's reboot, Verizon data was observed connected and its completed
+NDT result was 49.6/4.3 Mbps. This supersedes the earlier pre-reboot failure; no
+additional MBN writes were made. Published bin7 and the vendor kernel remain
+unchanged. These changes are committed as pending the next firmware image.
+
+
+Final queue/cancel verification also confirmed a queued test can be cancelled
+before any hardware action. All four Chester Mods routes, crown placement, IPv4
+rows and absence of the top individual-test banner were verified in the browser.

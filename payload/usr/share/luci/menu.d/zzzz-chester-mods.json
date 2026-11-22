@@ -1,0 +1,62 @@
+{
+  "admin/chester": {
+    "title": "Chester Mods",
+    "order": 24,
+    "action": {
+      "type": "firstchild",
+      "recurse": true
+    }
+  },
+  "admin/chester/failover": {
+    "title": "Failover",
+    "order": 10,
+    "action": {
+      "type": "view",
+      "path": "lettucepi/failover"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-k45p-failover"
+      ]
+    }
+  },
+  "admin/chester/sim": {
+    "title": "SIM Selection",
+    "order": 20,
+    "action": {
+      "type": "view",
+      "path": "misectel-modem/sim"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-chester-sim"
+      ]
+    }
+  },
+  "admin/chester/ookla": {
+    "title": "Ookla Speedtest",
+    "order": 30,
+    "action": {
+      "type": "view",
+      "path": "lettucepi/speedtest"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-lettucepi-speedtest"
+      ]
+    }
+  },
+  "admin/chester/mlab": {
+    "title": "M-Lab NDT",
+    "order": 40,
+    "action": {
+      "type": "view",
+      "path": "lettucepi/mlab"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-k45p-failover"
+      ]
+    }
+  }
+}
