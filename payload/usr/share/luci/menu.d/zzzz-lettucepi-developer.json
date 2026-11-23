@@ -103,14 +103,6 @@
         "order": 31,
         "title": "Wireless (stock)"
     },
-    "admin/developer/services": {
-        "action": {
-            "path": "admin/services",
-            "type": "alias"
-        },
-        "order": 50,
-        "title": "Services"
-    },
     "admin/developer/setup": {
         "action": {
             "path": "setup",
@@ -166,14 +158,6 @@
         },
         "order": 16,
         "title": "Realtime Graphs"
-    },
-    "admin/developer/status-routes": {
-        "action": {
-            "path": "admin/status/routes",
-            "type": "alias"
-        },
-        "order": 12,
-        "title": "Routing Table"
     },
     "admin/developer/status-wireguard": {
         "action": {
