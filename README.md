@@ -26,9 +26,9 @@ Custom firmware and OTA updates for the Chester K45P.
 
 ## Firmware
 
-Latest published: **bin 10 · v1.0.9**.
+Latest published: **bin 11 · v1.0.10**.
 
-[Download firmware](firmware/LettucePi-K45P-1.0.9-sysupgrade.itb) ·
+[Download firmware](firmware/LettucePi-K45P-1.0.10-sysupgrade.itb) ·
 [Release manifest](firmware/latest.json)
 
 Use **Overview → Update** to install updates.
@@ -37,8 +37,6 @@ The Windows installer erases saved settings.
 
 Router address: `192.168.100.1` · Login: `root` / `admin`.
 For K45P hardware only (`misectel,m02k45`). Vendor Linux 6.12.94 is retained.
-
-Source changes after bin 10 are queued for the next image.
 
 ## Build
 

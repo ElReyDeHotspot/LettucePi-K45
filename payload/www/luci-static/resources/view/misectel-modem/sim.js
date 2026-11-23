@@ -1,5 +1,6 @@
 'use strict';
 'require view';
+'require chester-ui.link-result as linkResult';
 'require rpc';
 'require poll';
 'require ui';
@@ -79,14 +80,8 @@ return view.extend({
    function renderRow(x){return E('div',{'class':'cs-kv'},[E('span',{},[x[0]]),E('strong',{},[x[1]])]);}r.body.replaceChildren.apply(r.body,rows.filter(function(x){return ['Connection','IPv4','Signal'].indexOf(x[0])>=0;}).map(renderRow));r.extraBody.replaceChildren.apply(r.extraBody,rows.filter(function(x){return ['Connection','IPv4','Signal'].indexOf(x[0])<0;}).map(renderRow));
    r.live.textContent=active?s.hotplug==='disabled'?'Modem status refreshes automatically. Hardware hot-plug detection is disabled.':'Active-slot status refreshes automatically.':v.seen?'Last checked '+new Date(v.seen*1000).toLocaleTimeString()+'. Inactive presence is not verified live.':'Switch to this SIM to verify its card and connection.';
    var own=s.operation==='test'&&s.test_slot===r.slot,activeTest=own&&s.busy;
-   r.result.replaceChildren();r.result.className='fo-test-result'+(own&&s.phase==='failed'?' error':'');
-   if(activeTest)r.result.textContent=s.message||'Finding an M-Lab server…';
-   else if(own&&(s.phase==='failed'||s.phase==='cancelled'))r.result.textContent=s.phase==='failed'?s.message:'Test cancelled';
-   else if(v.tested){r.result.classList.add('has-metrics');
-    [['Download',v.download,'Mbps'],['Upload',v.upload,'Mbps'],['Latency',v.latency,'ms']].forEach(function(m){r.result.append(E('div',{'class':'fo-test-row'},[E('span',{},[m[0]]),E('strong',{},Number.isFinite(m[1])?[m[1].toFixed(1),E('small',{'class':'ios-unit'},[' '+m[2]])]:['—'])]));});
-    r.result.title='M-Lab NDT · '+(v.server||'')+' · '+new Date(v.tested*1000).toLocaleString();
-    r.result.append(E('div',{'class':'cs-muted',style:'font-size:10px;margin-top:5px'},['M-Lab · '+new Date(v.tested*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})]));
-   }
+   linkResult.render(r.result,v.tested?{timestamp:v.tested,download:v.download,upload:v.upload,latency:v.latency,server:v.server}:null,
+    activeTest?{message:s.message||'Finding an M-Lab server…'}:own&&(s.phase==='failed'||s.phase==='cancelled')?{message:s.phase==='failed'?s.message:'Test cancelled',error:s.phase==='failed'}:null);
   });
   this.log.textContent=(s.events||[]).slice().reverse().join('\n')||'No SIM operations yet.';this.updateButtons();
  },

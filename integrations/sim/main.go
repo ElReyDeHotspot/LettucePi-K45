@@ -19,6 +19,7 @@ import (
 )
 
 var statePath = "/tmp/chester-sim/state.json"
+var resultsPath = "/tmp/chester-sim/results.json"
 var journalPath = "/tmp/chester-sim/journal.json"
 var simLockPath = "/tmp/chester-sim.lock"
 var cancelPath = "/tmp/chester-sim/cancel"
@@ -259,12 +260,7 @@ func snapshot() {
 	}
 	if id := strings.TrimRight(strings.TrimSpace(sim["iccid"]), "Ff"); regexp.MustCompile(`^[0-9]{16,22}$`).MatchString(id) {
 		digest := sha256.Sum256([]byte(id))
-		if c.identity != ([32]byte{}) && c.identity != digest {
-			c.Download = nil
-			c.Upload = nil
-			c.Tested = 0
-		}
-		c.identity = digest
+		observeIdentity(c, digest)
 		c.ICCIDEnd = id[len(id)-4:]
 	}
 	if c.Presence == "absent" {
@@ -296,6 +292,64 @@ func snapshot() {
 		}
 	}
 	c.Seen = time.Now().Unix()
+}
+
+// Cache only completed measurements and their SIM identity, never live status.
+// Like Failover link results, this is runtime data and resets at router reboot.
+type savedResult struct {
+	Identity [32]byte `json:"identity"`
+	Card     Card     `json:"result"`
+}
+
+func saveResults() {
+	results := map[string]savedResult{}
+	for slot, item := range state.Cards {
+		if item.Tested > 0 && item.Download != nil && item.Upload != nil && item.identity != ([32]byte{}) {
+			results[slot] = savedResult{Identity: item.identity, Card: Card{Download: item.Download, Upload: item.Upload, Latency: item.Latency, Server: item.Server, Tested: item.Tested}}
+		}
+	}
+	data, err := json.Marshal(results)
+	if err != nil {
+		return
+	}
+	if os.WriteFile(resultsPath+".tmp", data, 0600) == nil {
+		os.Rename(resultsPath+".tmp", resultsPath)
+	}
+}
+func restoreResults() {
+	data, err := os.ReadFile(resultsPath)
+	if err != nil {
+		return
+	}
+	results := map[string]savedResult{}
+	if json.Unmarshal(data, &results) != nil {
+		return
+	}
+	for slot, saved := range results {
+		if (slot != "1" && slot != "2") || saved.Identity == ([32]byte{}) || saved.Card.Tested <= 0 || saved.Card.Download == nil || saved.Card.Upload == nil {
+			continue
+		}
+		item := card(slot)
+		item.identity = saved.Identity
+		item.Download = saved.Card.Download
+		item.Upload = saved.Card.Upload
+		item.Latency = saved.Card.Latency
+		item.Server = saved.Card.Server
+		item.Tested = saved.Card.Tested
+	}
+}
+func observeIdentity(item *Card, digest [32]byte) {
+	if item.identity != ([32]byte{}) && item.identity != digest {
+		item.Download = nil
+		item.Upload = nil
+		item.Latency = nil
+		item.Server = ""
+		item.Tested = 0
+		item.identity = digest
+		saveResults()
+	} else {
+		item.identity = digest
+	}
 }
 func publish() {
 	state.Mode = cfg.Mode
@@ -473,9 +527,6 @@ func score(c *Card) float64 {
 	return *c.Download + *c.Upload
 }
 func measure(ctx context.Context, slot string) error {
-	card(slot).Download = nil
-	card(slot).Upload = nil
-	card(slot).Tested = 0
 	a, _ := uciGet("failover.main.primary")
 	b, _ := uciGet("failover.main.backup")
 	role := ""
@@ -538,6 +589,7 @@ func measure(ctx context.Context, slot string) error {
 			}
 			item.Server = str(summary["ServerFQDN"])
 			item.Tested = time.Now().Unix()
+			saveResults()
 			publish()
 			return nil
 		}
@@ -889,6 +941,7 @@ func main() {
 		phase("failed", e.Error())
 		os.Exit(1)
 	}
+	restoreResults()
 	capabilities()
 	snapshot()
 	publish()

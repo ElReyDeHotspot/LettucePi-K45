@@ -1,5 +1,6 @@
 'use strict';
 'require view';
+'require chester-ui.link-result as linkResult';
 'require rpc';
 'require poll';
 'require ui';
@@ -238,17 +239,8 @@ return view.extend({
             var activeTest=!!tests.running && result && result.role===tests.role;
             r.testButton.disabled=!!self.testRequest || !!self.portBusy || lanMode || (!!tests.running && !activeTest) || (!activeTest && (self.primary.value!==c.primary || self.backup.value!==c.backup || !v.up));
             r.testButton.textContent=activeTest?'Cancel test':r.index?'Test Secondary':'Test Primary';
-            r.testResult.className='fo-test-result'+(result && result.phase==='failed'?' error':'');
-            r.testResult.replaceChildren();
-            if(result) {
-                if(result.phase==='completed') {r.testResult.classList.add('has-metrics');
-                    [['Download',result.download_mbps,'Mbps'],['Upload',result.upload_mbps,'Mbps'],['Latency',result.latency_ms,'ms']].forEach(function(m){
-                        r.testResult.append(E('div',{'class':'fo-test-row'},[E('span',{},[m[0]]),E('strong',{},Number.isFinite(m[1])?[m[1].toFixed(1),E('small',{'class':'ios-unit'},[' '+m[2]])]:['—'])]));
-                    });
-                    r.testResult.title='M-Lab NDT · '+(result.server||'')+' · '+new Date(result.timestamp*1000).toLocaleString();
-                    r.testResult.append(E('div',{'class':'fo-muted',style:'font-size:10px;margin-top:5px'},['M-Lab · '+new Date(result.timestamp*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})]));
-                } else r.testResult.textContent=result.phase==='failed'?result.error:result.phase==='cancelled'?'Test cancelled':result.phase==='download'?'Testing download…':result.phase==='upload'?'Testing upload…':'Finding an M-Lab server…';
-            }
+            linkResult.render(r.testResult,result?.phase==='completed'?{timestamp:result.timestamp,download:result.download_mbps,upload:result.upload_mbps,latency:result.latency_ms,server:result.server}:null,
+                result&&result.phase!=='completed'?{message:result.phase==='failed'?result.error:result.phase==='cancelled'?'Test cancelled':result.phase==='download'?'Testing download…':result.phase==='upload'?'Testing upload…':'Finding an M-Lab server…',error:result.phase==='failed'}:null);
             r.health.style.display=lanMode?'none':'';
             r.lanAction.style.display=lanMode?'inline-flex':'none';
             r.lanAction.disabled=self.portBusy;

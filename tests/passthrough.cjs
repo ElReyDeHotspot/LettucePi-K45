@@ -10,7 +10,7 @@ function make(options={}){
 }
 const portBuilder=new Function('E','settings','normalizeList',source.slice(source.indexOf('function portLabel('),source.indexOf('function buildWifiSelect('))+';return buildBridgePortChecks;')((tag,attrs={},children=[])=>({tag,attrs,children,disabled:!!attrs.disabled,checked:!!attrs.checked,value:attrs.value,getAttribute:k=>attrs[k]??null}),{icon:()=>({})},v=>Array.isArray(v)?v:v?[v]:[]);
 let ports=portBuilder([],['lan1','lan2','lan3'].map(device=>({device,type:'port',role:'lan'})).concat([{device:'wan',type:'port',role:'wan',assignable:false}]),{},'qmodem_passthrough:modemA');
-assert(ports.inputs.every(i=>i.attrs.type==='radio'));assert.deepEqual(ports.inputs.map(i=>i.value),['wan','lan1','lan2','lan3']);assert(ports.inputs[0].disabled);assert(!ports.inputs[1].disabled);
+assert(ports.inputs.every(i=>i.attrs.type==='radio'));assert.deepEqual(ports.inputs.map(i=>i.value),['lan3','lan2','lan1','wan']);assert(ports.inputs[3].disabled);assert(!ports.inputs[0].disabled);
 ports=portBuilder(['wan'],[{device:'wan',role:'lan',assignable:true}],{},'qmodem_passthrough:modemA');assert(ports.inputs[0].checked&&!ports.inputs[0].disabled);
 ports=portBuilder([],[{device:'wan',role:'lan',assignable:true}],{wan:{provider:'vxlan',instance:'other'}},'qmodem_passthrough:modemA');assert(ports.inputs[0].disabled);
 (async()=>{
