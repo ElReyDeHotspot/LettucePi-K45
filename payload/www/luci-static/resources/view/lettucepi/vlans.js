@@ -41,7 +41,7 @@ return view.extend({
    for(const addr of list(s.ipaddr)){const c=vlans.cidr(addr.includes('/')?addr:addr+'/'+prefix);if(c)model.reserved.push(c);}
   }
   const memberships=uci.sections('network','bridge-vlan').filter(v=>v.device===model.bridge);
-  model.ports=list(bridge?.ports).map(name=>{let native=1,tagged=[];for(const v of memberships)for(const member of list(v.ports)){const [port,flags='']=member.split(':');if(port!==name)continue;if(flags.includes('t'))tagged.push(Number(v.vlan));else native=Number(v.vlan);}return {name,native,tagged};});
+  model.ports=list(bridge?.ports).slice().sort((a,b)=>(/^lan[123]$/.test(a)?-Number(a.slice(3)):a==='wan'?99:100)-(/^lan[123]$/.test(b)?-Number(b.slice(3)):b==='wan'?99:100)).map(name=>{let native=1,tagged=[];for(const v of memberships)for(const member of list(v.ports)){const [port,flags='']=member.split(':');if(port!==name)continue;if(flags.includes('t'))tagged.push(Number(v.vlan));else native=Number(v.vlan);}return {name,native,tagged};});
   return model;
  },
  markDirty(){this.review.hidden=true;this.applyButton.disabled=JSON.stringify(this.model)===this.original||!!this.model.blocked;this.changeNote.textContent=this.applyButton.disabled?'No changes to apply.':'Changes are staged on this page. Your network is unchanged.';},

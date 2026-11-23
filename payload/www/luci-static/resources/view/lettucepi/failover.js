@@ -61,7 +61,7 @@ return view.extend({
         this.portBox = E('div', {'class':'misectel-dashboard-port-panel fo-ports','aria-label':'Ethernet ports'});
         var labels = {}, rawLabels = uci.get('misectel','clients','port_labels') || '';
         String(Array.isArray(rawLabels) ? rawLabels.join(' ') : rawLabels).split(/[\s,]+/).forEach(function(pair) { var kv=pair.split('='); if(kv.length===2) labels[kv[0].toLowerCase()]=kv[1]; });
-        this.portEntries = (data[2] || []).filter(function(p) { return /^lan[123]$|^wan$/.test(p.device); }).sort(function(a,b) { return (a.device==='wan'?99:+a.device.replace('lan',''))-(b.device==='wan'?99:+b.device.replace('lan','')); }).map(function(p) {
+        this.portEntries = (data[2] || []).filter(function(p) { return /^lan[123]$|^wan$/.test(p.device); }).sort(function(a,b) { return (a.device==='wan'?99:-Number(a.device.replace('lan','')))-(b.device==='wan'?99:-Number(b.device.replace('lan',''))); }).map(function(p) {
             var isWan = p.device === 'wan', label = E('strong', {'class':'misectel-dashboard-port-panel__name'}), speed = E('div', {'class':'misectel-dashboard-port-panel__speed'});
             var node = E(isWan?'button':'div', isWan?{type:'button',click:ui.createHandlerFn(self,function() { return self.toggleWanPort(); })}:{}, [label,speed]);
             self.portBox.appendChild(node); return {device:p.device,isWan:isWan,label:label,speed:speed,node:node,name:labels[p.device]||p.device.toUpperCase()};

@@ -12,7 +12,7 @@ function portLabel(device){return /^lan[123]$/.test(device)?'LAN '+device.slice(
 function buildBridgePortChecks(current,devices,ownership,ownerId){
  const selected=normalizeList(current),choices=[],metadata={};
  for(const item of devices||[]){if(item?.type&&item.type!=='port')continue;const device=typeof item==='string'?item:item.device;if(device&&!choices.includes(device)){choices.push(device);metadata[device]=typeof item==='string'?{}:item;}}
- for(const device of selected)if(!choices.includes(device))choices.push(device);choices.sort((a,b)=>a==='wan'?-1:b==='wan'?1:0);
+ for(const device of selected)if(!choices.includes(device))choices.push(device);choices.sort((a,b)=>(/^lan[123]$/.test(a)?-Number(a.slice(3)):a==='wan'?99:100)-(/^lan[123]$/.test(b)?-Number(b.slice(3)):b==='wan'?99:100));
  const inputs=choices.map(device=>{const owner=ownership?.[device],uplink=metadata[device]?.role==='wan'||metadata[device]?.assignable===false,blocked=uplink||(owner&&`${owner.provider}:${owner.instance}`!==ownerId);return E('input',{type:'radio',name:'pt-port-'+ownerId,value:device,disabled:blocked?'disabled':null,checked:selected[0]===device?'checked':null,'aria-label':portLabel(device),'data-owner':uplink?'uplink':blocked?'assigned':''});});
  return {inputs,node:E('div',{'class':'pt-ports'},inputs.map((input,i)=>E('label',{'class':'pt-port'+(input.disabled?' is-unavailable':'')},[input,settings.icon('port'),E('strong',{},[portLabel(choices[i])]),E('span',{},[input.getAttribute('data-owner')==='uplink'?'Internet uplink':input.disabled?'Used by another network':choices[i]==='wan'?'2.5 Gbps':'1 Gbps']),E('i',{'class':'pt-check','aria-hidden':'true'},['✓'])])))};
 }
