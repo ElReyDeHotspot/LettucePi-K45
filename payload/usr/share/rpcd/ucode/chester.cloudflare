@@ -1,9 +1,9 @@
 #!/usr/bin/ucode
 'use strict';
-import {popen} from 'fs';
+import {popen,mkstemp,readlink} from 'fs';
 function quote(s){return "'"+replace(s,"'","'\\''")+"'";}
-function call(action,arg){
- let f=popen('/usr/libexec/chester-cloudflare '+action+(arg?' '+quote(arg):''),'r');
+function call(action,arg,input){
+ let f=popen('/usr/libexec/chester-cloudflare '+action+(arg?' '+quote(arg):'')+(input?' < '+quote(input):''),'r');
  if(!f)return {success:false,error:'Cloudflare service is unavailable'};
  let text=f.read('all');f.close();try{return json(text);}catch(e){return {success:false,error:'Cloudflare operation could not be verified'};}
 }
@@ -11,6 +11,13 @@ return {'chester.cloudflare':{
  status:{call:()=>call('status')},
  save:{args:{settings:'String'},call:(r)=>length(r.args.settings||'')<=8192?call('save',r.args.settings):{success:false,error:'Settings are too long'}},
  register:{args:{accepted:'String'},call:(r)=>r.args.accepted=='1'?call('register','accepted'):{success:false,error:'Accept Cloudflare application terms before registration'}},
+ link_plus:{args:{license:'String',accepted:'String'},call:(r)=>{
+  if(length(r.args.license||'')>128)return {success:false,error:'Invalid WARP+ license key'};
+  let temp=mkstemp();if(!temp)return {success:false,error:'Could not prepare the private subscription request'};
+  temp.write(sprintf('%J',{license:r.args.license,accepted:r.args.accepted}));temp.flush();temp.seek(0);
+  let input='/proc/'+readlink('/proc/self')+'/fd/'+temp.fileno();
+  let result=call('link_plus',null,input);temp.close();return result;
+ }},
  test_dns:{call:()=>call('test_dns')},
  test_warp:{call:()=>call('test_warp')}
 }};

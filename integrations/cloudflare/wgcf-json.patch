@@ -1,0 +1,62 @@
+diff --git a/cloudflare/api.go b/cloudflare/api.go
+index 7eaf958..60f5aea 100644
+--- a/cloudflare/api.go
++++ b/cloudflare/api.go
+@@ -6,0 +7 @@ import (
++	"encoding/json"
+@@ -10,0 +12 @@ import (
++	"regexp"
+@@ -305,0 +308,27 @@ func UpdateLicenseKey(ctx *config.Context) error {
++	if err != nil {
++		var apiError *openapi.GenericOpenAPIError
++		if errors.As(err, &apiError) {
++			var response struct {
++				Errors []struct {
++					Message string `json:"message"`
++				} `json:"errors"`
++				Message string `json:"message"`
++				Error   string `json:"error"`
++			}
++			if json.Unmarshal(apiError.Body(), &response) == nil {
++				message := response.Message
++				if len(response.Errors) > 0 {
++					message = response.Errors[0].Message
++				}
++				if message == "" {
++					message = response.Error
++				}
++				if message != "" {
++					message = regexp.MustCompile(`[A-Za-z0-9]{8}-[A-Za-z0-9]{8}-[A-Za-z0-9]{8}`).ReplaceAllString(message, "[private key]")
++					message = regexp.MustCompile(`[A-Za-z0-9_+/=-]{32,}`).ReplaceAllString(message, "[private identifier]")
++					safe, _ := json.Marshal(map[string]string{"message": message, "status": apiError.Error()})
++					return errors.New(string(safe))
++				}
++			}
++		}
++	}
+diff --git a/cmd/shared/shared.go b/cmd/shared/shared.go
+index 7eec384..6fb0556 100644
+--- a/cmd/shared/shared.go
++++ b/cmd/shared/shared.go
+@@ -3,0 +4 @@ import (
++	"encoding/json"
+@@ -6,0 +8 @@ import (
++	"os"
+@@ -94,0 +97,17 @@ func PrintAccountDetails(account *cloudflare.Account, boundDevices []cloudflare.
++	if os.Getenv("CHESTER_WARP_JSON") == "1" {
++		matches := account.License != nil && *account.License == viper.GetString(config.LicenseKey)
++		active := false
++		for _, device := range boundDevices {
++			if device.Id == viper.GetString(config.DeviceId) {
++				active = device.Active
++			}
++		}
++
++		_ = json.NewEncoder(os.Stdout).Encode(map[string]interface{}{
++			"account_type": account.AccountType, "warp_plus": account.WarpPlus,
++			"license_matches": matches, "device_active": active, "device_count": len(boundDevices),
++			"plus_expires_at": account.PlusExpiresAt, "quota": account.Quota,
++		})
++		return
++	}
++

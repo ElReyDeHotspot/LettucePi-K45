@@ -10,3 +10,15 @@ html[data-chester-appearance=night] #maincontent .st-cloudflare textarea,html[da
 html[data-chester-appearance=night] #maincontent .st-cloudflare .cf-feedback{background:#19334c;border-color:#355e83;color:#bddfff}
 html[data-chester-appearance=night] #maincontent .st-cloudflare .cf-feedback.is-error{background:#422831;border-color:#71414b;color:#ffb1bc}
 @media(max-width:650px){#maincontent .st-cloudflare .cf-actions button{flex:1 1 135px}}
+#maincontent .st-cloudflare .cf-plans{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:16px}
+#maincontent .st-cloudflare .cf-plan-button{display:flex;align-items:center;gap:12px;min-height:86px;padding:18px;border:1px solid var(--st-line);border-radius:16px;background:#f5f7fc;color:inherit;text-align:left;cursor:pointer}
+#maincontent .st-cloudflare .cf-plan-button strong,#maincontent .st-cloudflare .cf-plan-button small{display:block}
+#maincontent .st-cloudflare .cf-plan-button strong{font-size:18px;margin-bottom:4px}
+#maincontent .st-cloudflare .cf-plan-button small{font-size:13px;color:var(--st-muted)}
+#maincontent .st-cloudflare .cf-plan-button.is-active{background:#eaf4ff;border-color:#69aaff;box-shadow:0 0 0 1px #007aff30}
+#maincontent .st-cloudflare .cf-plus-panel{background:#f4f7fc;border:1px solid var(--st-line);border-radius:16px;padding:20px;margin:18px 0}
+#maincontent .st-cloudflare .cf-plus-panel>strong{display:block;font-size:16px;margin-bottom:17px}
+#maincontent .st-cloudflare .cf-plus-panel>p{margin-top:16px}
+html[data-chester-appearance=night] #maincontent .st-cloudflare .cf-plan-button,html[data-chester-appearance=night] #maincontent .st-cloudflare .cf-plus-panel{background:#172e41;border-color:#345067;color:#e5f0ff}
+html[data-chester-appearance=night] #maincontent .st-cloudflare .cf-plan-button.is-active{background:#153f64;border-color:#4a93d5}
+@media(max-width:480px){#maincontent .st-cloudflare .cf-plan-button{padding:13px;gap:8px}#maincontent .st-cloudflare .cf-plan-button strong{font-size:16px}#maincontent .st-cloudflare .cf-plan-button small{font-size:12px}#maincontent .st-cloudflare .cf-plus-panel{padding:16px}}

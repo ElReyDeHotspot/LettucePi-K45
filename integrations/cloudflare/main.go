@@ -29,6 +29,7 @@ type Settings struct {
 	DNS     string   `json:"dns"`
 	IPv4    []string `json:"ipv4"`
 	IPv6    []string `json:"ipv6"`
+	Tier    string   `json:"tier"`
 	WARP    bool     `json:"warp"`
 	Block   bool     `json:"block"`
 	Scope   string   `json:"scope"`
@@ -77,11 +78,14 @@ func readJSON(path string, v any) error {
 	return json.Unmarshal(b, v)
 }
 func settings() Settings {
-	s := Settings{DNS: "system", Scope: "all", IPv4: []string{}, IPv6: []string{}, Clients: []string{}}
+	s := Settings{DNS: "system", Tier: "free", Scope: "all", IPv4: []string{}, IPv6: []string{}, Clients: []string{}}
 	_ = readJSON(dir+"/settings.json", &s)
 	return s
 }
 func validate(s Settings) error {
+	if s.Tier != "" && s.Tier != "free" && s.Tier != "plus" {
+		return errors.New("Choose Free WARP or WARP+")
+	}
 	if !contains([]string{"system", "cloudflare", "malware", "family", "manual"}, s.DNS) {
 		return errors.New("Choose a valid DNS mode")
 	}
@@ -358,8 +362,9 @@ type Profile struct {
 	Addresses []string
 }
 
-func profile() (Profile, error) {
-	b, e := os.ReadFile(dir + "/wgcf-profile.conf")
+func profile() (Profile, error) { return readProfile(planProfile(settings().Tier)) }
+func readProfile(path string) (Profile, error) {
+	b, e := os.ReadFile(path)
 	p := Profile{}
 	if e != nil {
 		return p, errors.New("Register WARP on this router first")
@@ -728,7 +733,7 @@ func status() map[string]any {
 	if !running || time.Since(checked) > 50*time.Second {
 		state.Ready = false
 	}
-	return map[string]any{"success": true, "settings": s, "registered": e == nil, "tunnel": state, "running": running}
+	return map[string]any{"success": true, "settings": s, "registered": e == nil, "plus_registered": plusRegistered(), "plus_pending": plusPending(), "tunnel": state, "running": running}
 }
 func processRunning() bool { _, e := run("/etc/init.d/chester_cloudflare", "running"); return e == nil }
 func resourcesAvailable() error {
@@ -755,6 +760,9 @@ func resourcesAvailable() error {
 	return nil
 }
 func save(s Settings) error {
+	if s.Tier == "" {
+		s.Tier = "free"
+	}
 	if e := validate(s); e != nil {
 		return e
 	}
@@ -762,7 +770,10 @@ func save(s Settings) error {
 		if e := resourcesAvailable(); e != nil {
 			return e
 		}
-		if _, e := profile(); e != nil {
+		if s.Tier == "plus" && !plusRegistered() {
+			return errors.New("Link a WARP+ subscription before enabling this plan")
+		}
+		if _, e := readProfile(planProfile(s.Tier)); e != nil {
 			return e
 		}
 		output, _ := run("uci", "show", "misectel_interface")
@@ -873,6 +884,8 @@ func main() {
 		} else if err = json.Unmarshal([]byte(os.Args[2]), &s); err == nil {
 			err = save(s)
 		}
+	case "link_plus":
+		err = linkPlus(os.Stdin)
 	case "register":
 		if len(os.Args) != 3 || os.Args[2] != "accepted" {
 			err = errors.New("Accept Cloudflare application terms before registration")

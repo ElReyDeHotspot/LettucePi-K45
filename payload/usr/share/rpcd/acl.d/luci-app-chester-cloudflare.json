@@ -1,7 +1,23 @@
 {
- "luci-app-chester-cloudflare": {
-  "description": "Configure Chester Cloudflare DNS and WARP",
-  "read": {"ubus": {"chester.cloudflare": ["status"]}},
-  "write": {"ubus": {"chester.cloudflare": ["save", "register", "test_dns", "test_warp"]}}
- }
+  "luci-app-chester-cloudflare": {
+    "description": "Configure Chester Cloudflare DNS and WARP",
+    "read": {
+      "ubus": {
+        "chester.cloudflare": [
+          "status"
+        ]
+      }
+    },
+    "write": {
+      "ubus": {
+        "chester.cloudflare": [
+          "save",
+          "register",
+          "test_dns",
+          "test_warp",
+          "link_plus"
+        ]
+      }
+    }
+  }
 }
