@@ -1,14 +1,32 @@
 {
-	"admin/apps/sqm": {
-		"title": "Smart Queue",
-		"order": 40,
-		"action": {
-			"type": "view",
-			"path": "chester-sqm/index"
-		},
-		"depends": {
-			"acl": [ "luci-app-chester-sqm" ],
-			"fs": { "/etc/init.d/chester-sqm": "executable" }
-		}
-	}
+  "admin/chester/sqm": {
+    "title": "Smart Queue",
+    "order": 90,
+    "action": {
+      "type": "view",
+      "path": "chester-sqm/index"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-chester-sqm"
+      ],
+      "fs": {
+        "/etc/init.d/chester-sqm": "executable"
+      }
+    }
+  },
+  "admin/apps/sqm": {
+    "action": {
+      "type": "alias",
+      "path": "admin/chester/sqm"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-chester-sqm"
+      ],
+      "fs": {
+        "/etc/init.d/chester-sqm": "executable"
+      }
+    }
+  }
 }

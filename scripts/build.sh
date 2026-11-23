@@ -33,6 +33,8 @@ sed -i -e '/\/misectel\//d' -e '/\/qmodem\//d' -e '/\/video\//d' "$R/etc/apk/rep
 (cd "$REPO/integrations/secure-web/packages"; sha256sum -c SHA256SUMS)
 "$APK" --root "$R" --arch aarch64_cortex-a53 --no-scripts --allow-untrusted add \
   "$REPO"/integrations/secure-web/packages/*.apk
+(cd "$REPO/integrations/cloudflare"; sha256sum -c SHA256SUMS)
+(cd "$REPO/integrations/cloudflare"; sha256sum -c SHA256SUMS)
 python3 "$REPO/scripts/customize.py" "$R"
 printf 'version=%s\nbuilt=2026-11-22\nbuild=%s\nbin=%s\nproduct=K45P\n' "$VERSION" "$BUILD" "$BIN" > "$R/etc/chester-version"
 cp "$WORK/image0" "$WORK/kernel.bin"

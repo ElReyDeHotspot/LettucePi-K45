@@ -1,0 +1,12 @@
+#maincontent .st-cloudflare{max-width:1120px}
+#maincontent .st-cloudflare textarea{resize:vertical;min-height:82px;padding:13px;border:1px solid var(--st-line);border-radius:12px;background:#f6f8fc;color:inherit;font-size:15px}
+#maincontent .st-cloudflare .cf-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+#maincontent .st-cloudflare .cf-feedback{padding:16px 20px;margin-bottom:18px;border:1px solid #b8d7ec;background:#edf8ff;color:#1a5274;border-radius:16px;font-size:15px}
+#maincontent .st-cloudflare .cf-feedback.is-error{background:#fff1f1;border-color:#efc1c1;color:#9d2a37}
+#maincontent .st-cloudflare .cf-terms{padding:16px;background:#f3f6fb;border:1px solid var(--st-line);border-radius:12px;margin-top:16px}
+#maincontent .st-cloudflare .cf-terms label{display:flex;gap:12px;align-items:flex-start;font-size:14px;line-height:1.5}
+#maincontent .st-cloudflare .cf-terms input{width:20px;height:20px;flex-shrink:0}
+html[data-chester-appearance=night] #maincontent .st-cloudflare textarea,html[data-chester-appearance=night] #maincontent .st-cloudflare .cf-terms{background:#162d40;border-color:#355169;color:#e5f0ff}
+html[data-chester-appearance=night] #maincontent .st-cloudflare .cf-feedback{background:#19334c;border-color:#355e83;color:#bddfff}
+html[data-chester-appearance=night] #maincontent .st-cloudflare .cf-feedback.is-error{background:#422831;border-color:#71414b;color:#ffb1bc}
+@media(max-width:650px){#maincontent .st-cloudflare .cf-actions button{flex:1 1 135px}}

@@ -66,8 +66,8 @@ for folder in text_roots:
 menu=root/'www/luci-static/resources/menu-misectel.js'
 s=menu.read_text()
 for a,b in {'misectel-dashboard':'dashboard','misectel-wireless':'wifi','misectel-network':'settings','misectel-system':'settings','misectel-portmap':'portmap'}.items():s=s.replace(a,b)
-if "'apps'" not in s:
-    s=s.replace("const DEFAULT_ALWAYS_SHOW=[","const DEFAULT_ALWAYS_SHOW=['apps','apps/tailscale','apps/speedtest','apps/sqm','apps/zapret',")
+# Chester Mods owns the app navigation; legacy app URLs remain aliases.
+s=s.replace("const DEFAULT_ALWAYS_SHOW=['apps','apps/tailscale','apps/speedtest','apps/sqm','apps/zapret',", "const DEFAULT_ALWAYS_SHOW=[")
 s=s.replace("'system/system',",'').replace(",'system/system'",'')
 menu.write_text(s)
 custom=root/'www/luci-static/misectel/custom.css'
@@ -178,7 +178,7 @@ for provider in ('feishu','pushdeer','serverchan'):
 for script in ('usr/share/misectel/wan5g-probe.sh','usr/share/qmodem/led_scripts/connectivity.sh'):
     (root/script).chmod(0o755)
 
-# VPN starts only after an explicit Apps / Tailscale enable action.
+# VPN starts only after an explicit Chester Mods / Tailscale enable action.
 for link in (root/'etc/rc.d').glob('*tailscale'):
     link.unlink()
 

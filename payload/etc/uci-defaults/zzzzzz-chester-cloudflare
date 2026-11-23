@@ -1,0 +1,6 @@
+#!/bin/sh
+mkdir -p /etc/chester-cloudflare
+chmod 700 /etc/chester-cloudflare
+/etc/init.d/chester_cloudflare enable
+/etc/init.d/chester_cloudflare start
+exit 0
