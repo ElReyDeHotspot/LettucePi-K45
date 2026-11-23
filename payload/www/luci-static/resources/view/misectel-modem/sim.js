@@ -76,7 +76,7 @@ return view.extend({
    r.node.className='cs-card'+(active?' current':'');r.badge.className='cs-pill'+(active?' active':'');r.badge.textContent=active?'✓ Active':'Standby';r.name.textContent=carrier(v.carrier);
    var presence=active?v.presence==='present'?'Detected by modem':v.presence==='absent'?'Not detected':'Checking…':v.presence==='absent'?'Not detected at last check':v.presence==='present'?'Previously detected':'Not checked';
    var rows=[['Card',presence],['Connection',active?(v.ready?(v.connected?'Data connected':'Ready'):'Not ready'):'Not active'],['IPv4',active?(v.connected&&v.ipv4?v.ipv4:'—'):'Not active'],['ICCID',v.iccid_end?'Ending '+v.iccid_end:'—'],['Priority',c.preferred===r.slot?'Preferred SIM':'Normal']];
-   if(active&&Number.isFinite(v.rsrp))rows.push(['Signal',v.rsrp+' dBm']);
+   rows.push(['Signal',active?(Number.isFinite(v.rsrp)?v.rsrp+' dBm':'—'):'Not active']);
    function renderRow(x){return E('div',{'class':'cs-kv'},[E('span',{},[x[0]]),E('strong',{},[x[1]])]);}r.body.replaceChildren.apply(r.body,rows.filter(function(x){return ['Connection','IPv4','Signal'].indexOf(x[0])>=0;}).map(renderRow));r.extraBody.replaceChildren.apply(r.extraBody,rows.filter(function(x){return ['Connection','IPv4','Signal'].indexOf(x[0])<0;}).map(renderRow));
    r.live.textContent=active?s.hotplug==='disabled'?'Modem status refreshes automatically. Hardware hot-plug detection is disabled.':'Active-slot status refreshes automatically.':v.seen?'Last checked '+new Date(v.seen*1000).toLocaleTimeString()+'. Inactive presence is not verified live.':'Switch to this SIM to verify its card and connection.';
    var own=s.operation==='test'&&s.test_slot===r.slot,activeTest=own&&s.busy;

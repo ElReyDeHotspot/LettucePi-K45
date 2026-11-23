@@ -1,0 +1,16 @@
+{
+  "built_date": "2026-11-23",
+  "target": "linux/arm64, CGO_ENABLED=0",
+  "dependencies": "Go standard library only",
+  "binary_sha256": "33640678538e9b464cd70d7aa411c2087960cc395a70f175d0c2062a734e34a5",
+  "sources_sha256": {
+    "main.go": "2061faf807382a80777c1bb6747051702ff4dd7dddfb3891378956ffec7eb804",
+    "main_test.go": "f85c8794e488657d807674fd441963df5909018bb513e9f7c9a242239711f5a5",
+    "go.mod": "e5d7d3dfb5163e1dd064411ca6f9cdabe20e7f561807eb50c60c5030222e72a6"
+  },
+  "references": {
+    "commands": "https://quectel.com/content/uploads/2024/05/Quectel_RG50xQRM5xxQ_Series_AT_Commands_Manual_V1.2.pdf",
+    "provider_codes": "https://www.itu.int/dms_pub/itu-t/opb/sp/T-SP-OB.1280-2023-OAS-PDF-E.pdf",
+    "lte_channel_ranges": "https://www.etsi.org/deliver/etsi_ts/136100_136199/136101/17.14.00_60/ts_136101v171400p.pdf"
+  }
+}
