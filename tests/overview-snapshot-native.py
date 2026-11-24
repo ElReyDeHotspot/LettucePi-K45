@@ -1,0 +1,6 @@
+from pathlib import Path
+import re
+s=(Path(__file__).resolve().parents[1]/'payload/usr/share/rpcd/ucode/chester.overview').read_text(encoding='utf-8')
+s=re.sub(r'^#!/.*\n','',s);s=re.sub(r'^import .*;\n','',s,flags=re.M)
+s=s.replace("return {'chester.overview':", "let api={'chester.overview':")
+print("let started=0;function readfile(path){return index(path,'network')>=0?'bad json':'{\"modem_info\":[{\"key\":\"band\",\"value\":\"N41\"}]}';}function cursor(){return {get:(c,s)=>s=='known'?'modem-device':null};}function system(command){started++;return 0;}"+s+"\nfunction check(ok,message){if(!ok)die(message);}for(let bad in ['../known','known;reboot','missing','',null]){let value=api['chester.overview'].modem.call({args:{config_section:bad}});check(length(value)==0,'Invalid section accepted');}check(started==0,'Invalid section started worker');let result=api['chester.overview'].modem.call({args:{config_section:'known'}});check(result.base.modem_info[0].value=='N41','Cached data changed');check(length(result.network)==0,'Malformed sample accepted');check(started==1,'Worker not requested');print('PASS Overview native snapshot: invalid paths never execute, cached samples preserved, malformed samples isolated.\\n');")

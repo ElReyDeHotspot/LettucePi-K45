@@ -1,0 +1,27 @@
+#!/bin/sh
+# On-demand cache refresh; no daemon, no AT commands, one worker per modem.
+section="$1"
+case "$section" in ''|*[!A-Za-z0-9_]*) exit 1 ;; esac
+[ "${#section}" -le 64 ] || exit 1
+[ "$(uci -q get "qmodem.$section")" = modem-device ] || exit 1
+lock="/tmp/chester-overview-$section.lock"
+now=$(date +%s)
+if [ -d "$lock" ]; then
+ age=$((now - $(stat -c %Y "$lock" 2>/dev/null || echo "$now")))
+ [ "$age" -lt 90 ] && exit 0
+ rmdir "$lock" 2>/dev/null || exit 0
+fi
+mkdir "$lock" 2>/dev/null || exit 0
+trap 'rmdir "$lock" 2>/dev/null' EXIT INT TERM
+stamp="/tmp/chester-overview-$section.updated"
+last=$(cat "$stamp" 2>/dev/null || echo 0)
+case "$last" in ''|*[!0-9]*) last=0 ;; esac
+[ "$((now - last))" -ge 10 ] || exit 0
+printf '%s' "$now" > "$stamp"
+for kind in base network cell sim; do
+ file="/tmp/cache_${kind}_info_$section"
+ modified=$(stat -c %Y "$file" 2>/dev/null || echo 0)
+ [ -s "$file" ] && [ "$(( $(date +%s) - modified ))" -le 10 ] && continue
+ ubus -t 12 call qmodem "${kind}_info" "{\"config_section\":\"$section\"}" >/dev/null 2>&1
+done
+exit 0

@@ -1,0 +1,13 @@
+#!/usr/bin/ucode
+'use strict';
+import {readfile} from 'fs';
+import {cursor} from 'uci';
+function sample(kind,section){try{let value=json(readfile('/tmp/cache_'+kind+'_info_'+section)||'{}');return type(value)=='object'?value:{};}catch(e){return {};}}
+return {'chester.overview':{modem:{args:{config_section:'String'},call:(request)=>{
+ let section=request.args.config_section;
+ if(type(section)!='string'||length(section)>64||!match(section,/^[A-Za-z0-9_]+$/)||cursor().get('qmodem',section)!='modem-device')return {};
+ // Read existing samples first; the worker must never hold the HTTP request.
+ let result={base:sample('base',section),network:sample('network',section),cell:sample('cell',section),sim:sample('sim',section)};
+ system('/usr/libexec/chester-overview-refresh '+section+' </dev/null >/dev/null 2>&1 &');
+ return result;
+}}}};

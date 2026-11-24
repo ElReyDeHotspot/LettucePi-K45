@@ -64,6 +64,9 @@
                 ],
                 "uci": [
                     "get"
+                ],
+                "chester.overview": [
+                    "modem"
                 ]
             },
             "uci": [

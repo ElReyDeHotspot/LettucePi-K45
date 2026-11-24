@@ -1,0 +1,12 @@
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const s=fs.readFileSync(__dirname+'/../payload/www/luci-static/resources/chester-ui/overview-core.js','utf8');
+assert(s.includes("object:'chester.overview',method:'modem',params:['config_section'],expect:{},nobatch:true"));
+assert(!s.includes('get_connect_status'));assert(!s.includes('LOADCHECK'));
+const a=s.indexOf('function k45pConnectionState('),b=s.indexOf('function buildModemInterfaceInfo',a);
+const state=new Function('_',s.slice(a,b)+';return k45pConnectionState;')(x=>x),section={alias:'pcie0'},fallback={tone:'warn',text:'Unknown'};
+assert.equal(state(section,{interface:[{interface:'pcie0',up:true,'ipv4-address':[{address:'192.0.2.2'}]}]},fallback).tone,'online');
+assert.equal(state(section,{interface:[{interface:'pcie0',up:false,'ipv4-address':[{address:'192.0.2.2'}]}]},fallback).tone,'offline');
+assert.equal(state(section,{interface:[{interface:'pcie0',up:true,'ipv6-address':[{address:'2001:db8::2'}]}]},fallback).tone,'online');
+assert.equal(state(section,{interface:[{interface:'pcie0',pending:true}]},fallback).tone,'warn');
+assert.equal(state(section,{interface:[]},fallback),fallback);
+console.log('PASS Overview loading: modem requests are isolated, no AT session probe, IPv4/IPv6 online/down/pending/unknown states follow netifd.');
