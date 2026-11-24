@@ -77,7 +77,13 @@ cfg=root/'etc/config/misectel'
 s=cfg.read_text()
 for name,value in [('brand_name','LettucePi'),('model_name','K45P'),('header_name','Chester K45P'),('apn_country','us')]:
     s=re.sub(r"(option "+name+r"\s+)'[^']*'",lambda m:m[1]+repr(value),s)
+# Set the immutable factory configuration, rather than overriding restored
+# customer cooling settings from a first-boot UCI script on every upgrade.
+for name,value in [('fan_enabled','1'),('fan_mode','2'),('fan_temp_threshold','55')]:
+    s,count=re.subn(r"(?m)^(\s*option "+name+r"\s+)'[^']*'",lambda m:m[1]+repr(value),s)
+    assert count==1, 'Missing or ambiguous factory fan setting: '+name
 cfg.write_text(s)
+(root/'etc/uci-defaults/98-chester-fan-temperature').unlink(missing_ok=True)
 p=root/'etc/config/rpcd'
 p.write_text(re.sub(r"(option username\s+)'admin'",r"\1'root'",p.read_text())+"\nconfig login 'admin'\n\toption username 'admin'\n\toption password '$p$root'\n\tlist read '*'\n\tlist write '*'\n")
 

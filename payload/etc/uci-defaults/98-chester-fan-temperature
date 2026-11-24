@@ -1,5 +1,0 @@
-#!/bin/sh
-# Use the Chester cooling threshold for newly initialized routers only.
-uci -q set misectel.main.fan_temp_threshold='55'
-uci -q commit misectel
-exit 0
