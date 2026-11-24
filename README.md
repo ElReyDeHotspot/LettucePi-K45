@@ -18,7 +18,7 @@ Custom firmware and OTA updates for the Chester K45P.
 
 ## Features
 
-- Cellular overview, dual-SIM selection, APN and band controls.
+- Live cellular overview, dual SIM with hot-plug, and provider-aware band/tower scans.
 - Failover and load balancing.
 - Built-in Ookla and M-Lab speed tests.
 - Wi-Fi, VLANs, fan control, TTL/HL and terminal.
@@ -26,9 +26,9 @@ Custom firmware and OTA updates for the Chester K45P.
 
 ## Firmware
 
-Latest published: **bin 11 · v1.0.10**.
+Latest published: **Rev. 12 · v1.0.12**.
 
-[Download firmware](firmware/LettucePi-K45P-1.0.10-sysupgrade.itb) ·
+[Download firmware](firmware/LettucePi-K45P-1.0.12-sysupgrade.itb) ·
 [Release manifest](firmware/latest.json)
 
 Use **Overview → Update** to install updates.

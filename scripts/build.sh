@@ -6,9 +6,11 @@ BASE=${1:?Usage: build.sh base.itb [work-directory]}
 WORK=${2:-/var/tmp/k45p-build}
 APK=${APK_TOOLS:-/usr/local/bin/apk3}
 FWTOOL=${FWTOOL:-fwtool}
-BUILD=${BUILD_ID:-202611230001}
-VERSION=${VERSION:-1.0.10}
-BIN=${BIN_NUMBER:-11}
+BUILD=${BUILD_ID:-202611230002}
+BIN=${BIN_NUMBER:-12}
+VERSION=${VERSION:-1.0.$BIN}
+case "$BIN" in ''|*[!0-9]*) echo 'Revision must be numeric' >&2; exit 1 ;; esac
+[ "${VERSION##*.}" = "$BIN" ] || { echo 'Version patch must match the revision (for example, 1.0.12 = Rev. 12)' >&2; exit 1; }
 case "$WORK" in /var/tmp/k45p-*|/tmp/k45p-*) ;; *) echo 'Use a dedicated /var/tmp/k45p-* directory' >&2; exit 1 ;; esac
 mkdir -p "$WORK" "$REPO/firmware"
 [ ! -e "$WORK/root" ] || { echo 'Work root already exists; choose a fresh work directory' >&2; exit 1; }
