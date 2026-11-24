@@ -1317,9 +1317,10 @@ qmi_dial()
         awk '{print $22}' "/proc/$cm_pid/stat" > "${MODEM_RUNDIR}/${modem_config}_dir/cm.start"
         m_debug "pid: $!"
         wait "$cm_pid"
+        local cm_exit=$?
         [ "$(cat "$MODEM_RUNDIR/${modem_config}_dir/generation" 2>/dev/null)" = "$QMODEM_GENERATION" ] || return
         sleep 5
-        m_debug "quectel-CM exited, retrying dial"
+        m_debug "quectel-CM exited with status $cm_exit, retrying dial"
     done
 }
 
