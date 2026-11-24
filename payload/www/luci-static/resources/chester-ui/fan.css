@@ -180,3 +180,19 @@ body.theme-misectel #maincontent#maincontent .st-fan .fv-power-button{display:fl
 @media(max-width:1150px) and (min-width:761px){#maincontent .st-fan .fv-fan-column{grid-template-columns:78px 220px;gap:12px}}
 @media(max-width:760px){#maincontent .st-fan .fv-fan-column{grid-template-columns:78px 220px;justify-content:center;gap:14px}}
 @media(max-width:400px){#maincontent .st-fan .fv-fan-column{grid-template-columns:72px 180px;gap:10px}}
+
+/* Center status against the fan row, independently of the slider below. */
+#maincontent .st-fan .fv-card{row-gap:18px}
+#maincontent .fv-card>.fv-info{grid-column:2;grid-row:1;align-self:center}
+#maincontent .fv-card>.fv-under-fan{grid-column:1;grid-row:2;width:268px;margin-left:102px}
+#maincontent .fv-card>.fv-under-fan .fv-controls{padding:0;border:0}
+#maincontent .fv-card>.fv-under-fan .fv-manual-heading{text-align:center;margin:0 0 8px}
+#maincontent .fv-card>.fv-under-fan .fv-manual-heading strong{font-size:13px}
+#maincontent .fv-card>.fv-under-fan .fv-slider-row{position:relative;display:block;margin:0 0 18px}
+#maincontent .fv-card>.fv-under-fan .fv-slider-row>span{position:absolute;display:block;bottom:-14px;line-height:16px;font-size:10px}
+#maincontent .fv-card>.fv-under-fan .fv-slider-row>span:first-child{left:0}
+#maincontent .fv-card>.fv-under-fan .fv-slider-row>span:last-child{right:0}
+#maincontent .fv-card>.fv-under-fan .fv-temperature-control .st-muted{text-align:center}
+@media(max-width:1150px) and (min-width:761px){#maincontent .fv-card>.fv-under-fan{width:220px;margin-left:90px}}
+@media(max-width:760px){#maincontent .fv-card>.fv-info{grid-column:1;grid-row:3}#maincontent .fv-card>.fv-under-fan{width:220px;justify-self:center;margin-left:92px}}
+@media(max-width:400px){#maincontent .fv-card>.fv-under-fan{width:180px;margin-left:82px}}
