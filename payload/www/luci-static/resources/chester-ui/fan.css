@@ -58,8 +58,6 @@ body.theme-misectel #maincontent#maincontent .st-fan .fv-slider-bubble{position:
 #maincontent .fv-preset-section{margin-top:18px;padding-top:14px;border-top:1px solid var(--ct-border)}
 #maincontent .fv-preset-section h4{font-size:16px;margin:0 0 12px}
 #maincontent .fv-preset-choice{display:none}
-#maincontent .st-fan .fv-save-bar{position:sticky;bottom:10px;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;margin:8px 0 0;padding:14px 20px;background:transparent;border:0;border-radius:0;box-shadow:none;pointer-events:none}
-body.theme-misectel #maincontent#maincontent .st-fan .fv-save-bar>.st-button{width:min(100%,360px);min-height:52px;border-radius:16px;font-size:17px;font-weight:650;box-shadow:0 6px 20px #071a2930,inset 0 1px 0 #ffffff25!important;pointer-events:auto}
 #maincontent .fv-save-state{font-size:11px;color:var(--ct-muted);background:var(--ct-page);border-radius:6px;padding:2px 6px}
 #maincontent .fv-save-state:empty{display:none}
 body.theme-misectel #maincontent#maincontent .st-fan .st-threshold{margin-top:20px;background:var(--ct-inset)!important;color:var(--ct-text)!important;border-color:var(--ct-border)!important;box-shadow:none!important}
@@ -98,3 +96,24 @@ body.theme-misectel #maincontent#maincontent .st-fan .fv-under-fan .fv-preset{mi
 body.theme-misectel #maincontent#maincontent .st-fan .fv-under-fan .fv-preset{flex-direction:column;gap:2px}
 #maincontent .st-fan .fv-under-fan .fv-preset strong{font-size:10.5px}
 #maincontent .st-fan .fv-under-fan .fv-preset small{font-size:10px;opacity:.85}
+
+/* Instant controls: presets above modes, output slider alongside. */
+#maincontent .st-fan .fv-card{padding-top:64px}
+#maincontent .st-fan .fv-card>.st-unit-bar{position:absolute;top:16px;right:20px;margin:0;display:flex;justify-content:flex-end}
+#maincontent .st-fan .fv-card>.st-unit-bar .st-unit-button{min-height:32px;padding:6px 12px;font-size:11px}
+#maincontent .fv-under-fan{grid-column:1/-1;min-width:0}
+#maincontent .fv-controls{display:grid;grid-template-columns:268px minmax(0,1fr);align-items:center;gap:26px;padding-top:18px;border-top:1px solid var(--ct-border)}
+#maincontent .fv-button-grid{display:grid;gap:6px;min-width:0}
+#maincontent .fv-under-fan .fv-preset-section{margin:0}
+#maincontent .fv-button-grid .fv-modes{gap:5px}
+body.theme-misectel #maincontent#maincontent .st-fan .fv-button-grid .fv-mode{min-height:40px!important;padding:8px 5px!important;gap:5px;border-radius:9px;flex-direction:row}
+#maincontent .st-fan .fv-button-grid .fv-mode strong{font-size:11px}
+#maincontent .st-fan .fv-button-grid .fv-mode>.st-icon{width:14px;height:14px;flex:0 0 14px}
+#maincontent .st-fan .fv-output-control .fv-manual{border:0;margin:0;padding:0;text-align:left}
+#maincontent .fv-output-control{min-width:0}
+#maincontent .fv-output-control .fv-save-state{display:block;width:fit-content;margin:8px auto 0}
+#maincontent .fv-output-control .fv-save-state:empty{display:none}
+#maincontent .st-fan>.st-threshold[hidden]{display:none}
+@media(max-width:1150px) and (min-width:761px){#maincontent .fv-controls{grid-template-columns:220px minmax(0,1fr);gap:20px}}
+@media(max-width:760px){#maincontent .fv-controls{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}#maincontent .fv-button-grid .fv-mode>.st-icon{display:none}#maincontent .fv-slider-row{gap:8px}#maincontent .fv-slider-row>span{font-size:11px}}
+@media(max-width:480px){#maincontent .fv-controls{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:14px}#maincontent .fv-slider-row{grid-template-columns:minmax(0,1fr);gap:0}#maincontent .fv-slider-row>span{display:none}#maincontent .fv-manual-heading strong{font-size:12px}#maincontent .st-fan .fv-under-fan .fv-preset strong{font-size:9px}#maincontent .st-fan .fv-button-grid .fv-mode strong{font-size:10px}}
