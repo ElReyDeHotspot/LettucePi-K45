@@ -4,6 +4,7 @@ package main
 import (
 	"context"
 	"crypto/sha256"
+	"encoding/csv"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -26,6 +27,7 @@ var cancelPath = "/tmp/chester-sim/cancel"
 var command = systemCommand
 
 type Config struct {
+	Hotplug         bool    `json:"hotplug"`
 	Mode            string  `json:"mode"`
 	Modem           string  `json:"modem"`
 	Interface       string  `json:"interface"`
@@ -51,21 +53,23 @@ type Config struct {
 	APN2            string  `json:"apn2"`
 }
 type Card struct {
-	identity  [32]byte
-	Slot      string   `json:"slot"`
-	Presence  string   `json:"presence"`
-	Carrier   string   `json:"carrier"`
-	ICCIDEnd  string   `json:"iccid_end,omitempty"`
-	Ready     bool     `json:"ready"`
-	Connected bool     `json:"connected"`
-	IPv4      string   `json:"ipv4,omitempty"`
-	RSRP      *int     `json:"rsrp,omitempty"`
-	Seen      int64    `json:"seen"`
-	Download  *float64 `json:"download,omitempty"`
-	Upload    *float64 `json:"upload,omitempty"`
-	Latency   *float64 `json:"latency,omitempty"`
-	Server    string   `json:"server,omitempty"`
-	Tested    int64    `json:"tested,omitempty"`
+	richSeen   time.Time
+	signalSeen time.Time
+	identity   [32]byte
+	Slot       string   `json:"slot"`
+	Presence   string   `json:"presence"`
+	Carrier    string   `json:"carrier"`
+	ICCIDEnd   string   `json:"iccid_end,omitempty"`
+	Ready      bool     `json:"ready"`
+	Connected  bool     `json:"connected"`
+	IPv4       string   `json:"ipv4,omitempty"`
+	RSRP       *int     `json:"rsrp,omitempty"`
+	Seen       int64    `json:"seen"`
+	Download   *float64 `json:"download,omitempty"`
+	Upload     *float64 `json:"upload,omitempty"`
+	Latency    *float64 `json:"latency,omitempty"`
+	Server     string   `json:"server,omitempty"`
+	Tested     int64    `json:"tested,omitempty"`
 }
 type State struct {
 	Operation         string           `json:"operation,omitempty"`
@@ -89,10 +93,6 @@ type Request struct {
 	Action string `json:"action"`
 	Queued bool   `json:"queued,omitempty"`
 	Slot   string `json:"slot"`
-}
-type Entry struct {
-	Key   string `json:"key"`
-	Value any    `json:"value"`
 }
 
 var state = State{Running: true, Phase: "idle", Cards: map[string]*Card{}, Events: []string{}}
@@ -132,19 +132,15 @@ func str(v any) string {
 	}
 	return fmt.Sprint(v)
 }
-func entries(method string) map[string]string {
-	v, err := native(method)
-	out := map[string]string{}
-	if err != nil {
-		return out
+func statusNative(method string) (map[string]any, error) {
+	b, _ := json.Marshal(map[string]string{"config_section": cfg.Modem})
+	out, e := command(root, 3, "ubus", "-t", "2", "-S", "call", "qmodem", method, string(b))
+	if e != nil {
+		return nil, e
 	}
-	b, _ := json.Marshal(v["modem_info"])
-	var a []Entry
-	json.Unmarshal(b, &a)
-	for _, e := range a {
-		out[strings.ToLower(e.Key)] = str(e.Value)
-	}
-	return out
+	var v map[string]any
+	e = json.Unmarshal(out, &v)
+	return v, e
 }
 func active() string {
 	v, e := native("get_sim_slot")
@@ -157,21 +153,48 @@ func active() string {
 	}
 	return s
 }
+
+var statusATPort, statusATModem string
+
 func readAT(at string) string {
-	port, _ := uciGet("qmodem." + cfg.Modem + ".at_port")
-	if !strings.HasPrefix(port, "/dev/") {
-		return ""
+	if statusATModem != cfg.Modem {
+		statusATPort = ""
+		statusATModem = cfg.Modem
 	}
-	params, _ := json.Marshal(map[string]string{"port": port, "at": at, "use_ubus": "1"})
-	v, e := call(root, "send_at", map[string]string{"config_section": cfg.Modem, "params": string(params)})
-	if e != nil {
-		return ""
+	configured, _ := uciGet("qmodem." + cfg.Modem + ".at_port")
+	alternatives, _ := uciGet("qmodem." + cfg.Modem + ".valid_at_ports")
+	ports := []string{statusATPort, configured}
+	ports = append(ports, strings.Fields(alternatives)...)
+	used := map[string]bool{}
+	for _, port := range ports {
+		if used[port] || !regexp.MustCompile(`^/dev/(mhi_DUN|ttyUSB[0-9]+|ttyACM[0-9]+)$`).MatchString(port) {
+			continue
+		}
+		used[port] = true
+		seconds := 5
+		if at == "core" {
+			seconds = 9
+		}
+		out, _ := command(root, seconds, "/usr/libexec/chester-sim-status-at", port, at)
+		text := string(out)
+		prefix := map[string]string{"core": "+QUIMSLOT:", "AT+QUIMSLOT?": "+QUIMSLOT:", "AT+QSIMSTAT?": "+QSIMSTAT:", "AT+CPIN?": "+CPIN:", "AT+QSIMDET?": "+QSIMDET:", "AT+QCCID": "+QCCID:", "AT+COPS?": "+COPS:", `AT+QENG="servingcell"`: "+QENG:"}[at]
+		if prefix != "" && (strings.Contains(text, prefix) || (at == "AT+CPIN?" && strings.Contains(text, "+CME ERROR:"))) {
+			statusATPort = port
+			return text
+		}
 	}
-	a, ok := v["at_cfg"].(map[string]any)
-	if !ok {
-		return ""
+	return ""
+}
+func statusSlot() string {
+	if m := regexp.MustCompile(`\+QUIMSLOT:\s*([12])`).FindStringSubmatch(readAT("AT+QUIMSLOT?")); len(m) == 2 {
+		return m[1]
 	}
-	return str(a["res"])
+	if v, e := statusNative("get_sim_slot"); e == nil {
+		if slot := str(v["sim_slot"]); slot == "1" || slot == "2" {
+			return slot
+		}
+	}
+	return ""
 }
 func insertionState(response string) string {
 	m := regexp.MustCompile(`\+QSIMSTAT:\s*[01],\s*([012])`).FindStringSubmatch(response)
@@ -229,51 +252,149 @@ func ping(ctx context.Context) bool {
 	}
 	return false
 }
+func csvFields(text string) []string {
+	r := csv.NewReader(strings.NewReader(strings.TrimSpace(text)))
+	r.TrimLeadingSpace = true
+	r.FieldsPerRecord = -1
+	v, e := r.Read()
+	if e != nil {
+		return nil
+	}
+	return v
+}
+func liveCarrier(text string) string {
+	for _, line := range strings.Split(strings.ReplaceAll(text, "\r", "\n"), "\n") {
+		if strings.HasPrefix(strings.TrimSpace(line), "+COPS:") {
+			v := csvFields(strings.SplitN(line, ":", 2)[1])
+			if len(v) >= 3 {
+				return v[2]
+			}
+		}
+	}
+	return ""
+}
+func liveRSRP(text string) *int {
+	var lte, nr *int
+	for _, line := range strings.Split(strings.ReplaceAll(text, "\r", "\n"), "\n") {
+		if !strings.HasPrefix(strings.TrimSpace(line), "+QENG:") {
+			continue
+		}
+		v := csvFields(strings.SplitN(line, ":", 2)[1])
+		if len(v) > 2 && v[0] == "servingcell" {
+			v = v[2:]
+		}
+		if len(v) == 0 {
+			continue
+		}
+		i := -1
+		if v[0] == "LTE" {
+			i = 11
+		} else if v[0] == "NR5G-NSA" {
+			i = 4
+		} else if v[0] == "NR5G-SA" {
+			i = 10
+		}
+		if i < 0 || len(v) <= i {
+			continue
+		}
+		if n, e := strconv.Atoi(v[i]); e == nil && n >= -160 && n <= -20 {
+			value := n
+			if v[0] == "LTE" {
+				lte = &value
+			} else {
+				nr = &value
+			}
+		}
+	}
+	if nr != nil {
+		return nr
+	}
+	return lte
+}
 func snapshot() {
-	s := active()
+	previousActive := state.Active
+	core := readAT("core")
+	s := ""
+	if match := regexp.MustCompile(`\+QUIMSLOT:\s*([12])`).FindStringSubmatch(core); len(match) == 2 {
+		s = match[1]
+	} else if v, e := statusNative("get_sim_slot"); e == nil {
+		if slot := str(v["sim_slot"]); slot == "1" || slot == "2" {
+			s = slot
+		}
+	}
+	// A busy AT port is not evidence of a SIM removal. Retain the last
+	// confirmed observation briefly; never extend its timestamp on failure.
+	confirmed := strings.Contains(core, "+CPIN:") || strings.Contains(core, "+CME ERROR: 10")
+	if (s == "" || !confirmed) && previousActive != "" {
+		previous := card(previousActive)
+		if previous.Seen > 0 && time.Now().Unix()-previous.Seen <= 12 {
+			return
+		}
+	}
 	state.Active = s
 	if s == "" {
+		// Unknown modem ownership must never leave an old green Connected card.
+		for _, c := range state.Cards {
+			c.Ready = false
+			c.Connected = false
+			c.IPv4 = ""
+			c.RSRP = nil
+			if c.Presence != "absent" {
+				c.Presence = "unknown"
+			}
+		}
+		publish()
 		return
 	}
 	c := card(s)
-	c.Presence = "unknown"
-	sim := entries("sim_info")
-	cell := entries("cell_info")
-	status := strings.ToLower(sim["sim status"])
-	c.Ready = status == "ready"
-	c.Connected = false
-	// No attach/registration failure is ever translated into physical absence.
-	if c.Ready || strings.Contains(status, "pin") || strings.Contains(status, "puk") {
-		c.Presence = "present"
+	previousPresence, previousReady := c.Presence, c.Ready
+	presence := insertionState(core)
+	pin := core
+	ready := regexp.MustCompile(`\+CPIN:\s*READY(?:[\r\n]|$)`).MatchString(pin)
+	if strings.Contains(pin, "+CME ERROR: 10") {
+		presence = "absent"
+	} else if strings.Contains(pin, "+CPIN:") && presence != "absent" {
+		presence = "present"
 	}
-	if strings.Contains(status, "not inserted") || status == "absent" || status == "not present" {
-		c.Presence = "absent"
+	c.Presence = presence
+	if c.Presence == "" {
+		c.Presence = "unknown"
 	}
-	if presence := insertionState(readAT("AT+QSIMSTAT?")); presence != "" {
-		c.Presence = presence
-		if presence != "present" {
-			c.Ready = false
-		}
-	}
-	if sim["isp"] != "" {
-		c.Carrier = sim["isp"]
-	}
-	if id := strings.TrimRight(strings.TrimSpace(sim["iccid"]), "Ff"); regexp.MustCompile(`^[0-9]{16,22}$`).MatchString(id) {
-		digest := sha256.Sum256([]byte(id))
-		observeIdentity(c, digest)
-		c.ICCIDEnd = id[len(id)-4:]
+	c.Ready = ready && c.Presence != "absent"
+	c.Seen = time.Now().Unix()
+	if !c.Ready || previousPresence != c.Presence || previousReady != c.Ready {
+		c.Connected = false
+		c.IPv4 = ""
+		c.RSRP = nil
+		publish()
 	}
 	if c.Presence == "absent" {
 		c.Carrier = ""
 		c.ICCIDEnd = ""
-		// Retain the previous test through temporary absence during switching.
-		// A different observed ICCID invalidates it above.
+		publish()
+		return
 	}
-	c.RSRP = nil
-	if fields := strings.Fields(cell["rsrp"]); len(fields) > 0 {
-		if n, e := strconv.Atoi(fields[0]); e == nil && n >= -160 && n <= -20 {
-			c.RSRP = &n
+	if !c.Ready {
+		return
+	}
+	// Carrier, identity and signal come from current AT replies, not cached sim_info.
+	changed := previousPresence != c.Presence || previousReady != c.Ready || previousActive != s
+	if changed || time.Since(c.richSeen) >= 60*time.Second {
+		if carrier := liveCarrier(readAT("AT+COPS?")); carrier != "" {
+			c.Carrier = carrier
 		}
+		if m := regexp.MustCompile(`\+QCCID:\s*([0-9]{16,22})`).FindStringSubmatch(readAT("AT+QCCID")); len(m) == 2 {
+			id := m[1]
+			observeIdentity(c, sha256.Sum256([]byte(id)))
+			c.ICCIDEnd = id[len(id)-4:]
+		}
+		c.richSeen = time.Now()
+	}
+	if changed || time.Since(c.signalSeen) >= 10*time.Second {
+		if rsrp := liveRSRP(readAT(`AT+QENG="servingcell"`)); rsrp != nil {
+			c.RSRP = rsrp
+		}
+		c.signalSeen = time.Now()
 	}
 	v, e := iface()
 	c.Connected = c.Ready && e == nil && v["up"] == true
@@ -421,6 +542,82 @@ func capabilities() {
 		}
 	}
 }
+
+var hotplugPendingPath = "/etc/chester-sim/hotplug-pending.json"
+var nextHotplugCheck time.Time
+
+func hotplugWrite(action string) bool {
+	if statusATPort == "" {
+		return false
+	}
+	out, e := command(root, 5, "/usr/libexec/chester-sim-hotplug", statusATPort, action)
+	return e == nil && regexp.MustCompile(`(?m)(^|[\r\n])OK(?:[\r\n]|$)`).Match(out)
+}
+func ensureHotplug() {
+	if !cfg.Hotplug || state.Busy || exists(simLockPath) || exists("/tmp/chester-link-test.lock") {
+		return
+	}
+	vendor, _ := uciGet("qmodem." + cfg.Modem + ".manufacturer")
+	if strings.ToLower(vendor) != "quectel" {
+		return
+	}
+	match := regexp.MustCompile(`\+QSIMDET:\s*([01]),\s*([01])`).FindStringSubmatch(readAT("AT+QSIMDET?"))
+	if len(match) != 3 {
+		return
+	}
+	boot, _ := os.ReadFile("/proc/sys/kernel/random/boot_id")
+	var pending struct {
+		Boot  string `json:"boot"`
+		Modem string `json:"modem"`
+	}
+	saved, _ := os.ReadFile(hotplugPendingPath)
+	json.Unmarshal(saved, &pending)
+	if match[1] == "1" && match[2] == "1" {
+		state.Hotplug = "enabled"
+		if pending.Boot != "" && pending.Modem == cfg.Modem && pending.Boot == strings.TrimSpace(string(boot)) {
+			state.Hotplug = "pending_restart"
+			return
+		}
+		if pending.Boot != "" {
+			os.Remove(hotplugPendingPath)
+		}
+		if strings.Contains(readAT("AT+QSIMSTAT?"), "+QSIMSTAT: 0,") {
+			hotplugWrite("report")
+		}
+		return
+	}
+	if pending.Boot != "" && pending.Modem == cfg.Modem {
+		state.Hotplug = "needs_attention"
+		state.Message = "SIM hot-plug initialization needs attention; automatic restart will not repeat."
+		publish()
+		return
+	}
+	if !hotplugWrite("detect") {
+		return
+	}
+	confirmed := regexp.MustCompile(`\+QSIMDET:\s*1,\s*1`).MatchString(readAT("AT+QSIMDET?"))
+	if !confirmed {
+		return
+	}
+	hotplugWrite("report")
+	if os.MkdirAll("/etc/chester-sim", 0700) != nil {
+		return
+	}
+	data, _ := json.Marshal(map[string]string{"boot": strings.TrimSpace(string(boot)), "modem": cfg.Modem})
+	if len(boot) == 0 || os.WriteFile(hotplugPendingPath, data, 0600) != nil {
+		state.Hotplug = "pending_restart"
+		state.Message = "Hot-plug is enabled. Restart this router once to activate it."
+		publish()
+		return
+	}
+	state.Hotplug = "pending_restart"
+	state.Message = "Activating SIM hot-plug. This first initialization restarts the router once."
+	publish()
+	event("SIM hot-plug initialized; one-time activation restart")
+	command(root, 5, "sync")
+	command(root, 5, "/sbin/reboot")
+}
+
 func uciGet(key string) (string, bool) {
 	b, e := command(root, 5, "uci", "-q", "get", key)
 	return strings.TrimSpace(string(b)), e == nil
@@ -1027,6 +1224,13 @@ func main() {
 				capabilities()
 			}
 			snapshot()
+			if time.Now().After(nextHotplugCheck) {
+				ensureHotplug()
+				nextHotplugCheck = time.Now().Add(30 * time.Second)
+				if state.Hotplug == "enabled" {
+					nextHotplugCheck = time.Now().Add(10 * time.Minute)
+				}
+			}
 			publish()
 			if startupPending {
 				if cfg.Mode != "auto_select" {
@@ -1044,7 +1248,7 @@ func main() {
 					phase("waiting_modem", "Waiting for the modem before startup SIM selection")
 				}
 			}
-			nextStatus = time.Now().Add(10 * time.Second)
+			nextStatus = time.Now().Add(2 * time.Second)
 			if cfg.Mode == "auto_switch" && state.Supported {
 				autoTick()
 			} else if state.Phase == "monitoring" || state.Phase == "backoff" {

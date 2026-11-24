@@ -1,0 +1,9 @@
+#!/bin/sh
+# Fixed K45P hot-plug settings. No arbitrary AT command input.
+case "$1" in /dev/mhi_DUN|/dev/ttyUSB[0-9]*|/dev/ttyACM[0-9]*) ;; *) exit 2;; esac
+case "$2" in detect) at='AT+QSIMDET=1,1';; report) at='AT+QSIMSTAT=1';; *) exit 2;; esac
+[ -c "$1" ] || exit 1
+key=$(printf '%s' "$1" | tr -c 'A-Za-z0-9_' '_')
+exec 6>"/var/lock/qmodem-at-$key.lock"
+flock -w 2 -x 6 || exit 1
+exec tom_modem -u -d "$1" -o a -t 2 -c "$at"

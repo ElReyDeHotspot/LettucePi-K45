@@ -57,7 +57,7 @@ return view.extend({
    E('div',{'class':'cs-save-row'},[this.saveMessage,this.saveButton])
   ]);
   root.addEventListener('input',function(){self.dirty();});root.addEventListener('change',function(){self.dirty();});
-  this.updateMode();this.update(s);poll.add(async function(){try{self.update(await status());}catch(e){self.message.textContent='SIM status is temporarily unavailable.';}},3);
+  this.updateMode();this.update(s);poll.add(async function(){try{self.update(await status());}catch(e){self.message.textContent='SIM status is temporarily unavailable.';}},2);
   return root;
  },
  dirty:function(){this.isDirty=true;this.saveMessage.textContent='Unsaved changes';this.updateButtons();},

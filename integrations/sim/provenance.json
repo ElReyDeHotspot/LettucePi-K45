@@ -3,12 +3,13 @@
   "go": "go1.27.4 linux/amd64",
   "target": "linux/arm64, CGO_ENABLED=0",
   "dependencies": "Go standard library only",
-  "binary_sha256": "16df48d6730b4d00e3d2dc8b5c971d2b72823c81e13ab30c37bcbffdf221de23",
+  "binary_sha256": "51b3afd3dfcb5c20dcdda54c37a2d209b6933f80abd79e424833bda2bfb49f36",
   "sources_sha256": {
-    "main.go": "7f26678b08845e3cf43a85a9d949afb129774a10d06b0d3e76f716a019a7a14d",
+    "main.go": "d50e2c82212258995a182b51f025471318a11709d8e4b80dc6f4c34496cb3b6e",
     "main_test.go": "6a0272ad02b0ac0255cfdc4346d370f55c9248e0e538c327666b246c62bcd025",
     "manual_test.go": "392d5fce7727450da4c8bcf1671a1ab2c2a70ce03794d6a7864abf4e63e87f47",
     "results_test.go": "7ae55dcbc60e5afce4d1f4b9cec137471c4e796bdc68f05042c4df9957cecc3d",
+    "hotplug_test.go": "76e10139ae78f37d8a39eb07a53046877edf2fd0cb6b79c0d9928c9d1685fde3",
     "go.mod": "55ac0dc4724db0940ef06bc93e5dc45acb9c362d1b08269a0d272b097b5d2d36"
   }
 }

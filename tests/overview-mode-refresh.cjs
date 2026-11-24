@@ -1,0 +1,12 @@
+const fs=require('fs'),path=require('path'),assert=require('assert/strict');
+const code=fs.readFileSync(path.join(__dirname,'../payload/www/luci-static/resources/chester-ui/overview-core.js'),'utf8');
+const start=code.indexOf('modeControl(modem){'),end=code.indexOf('renderModems(modems){',start);
+let calls=0,lastModel,select;
+const control=new Function('chesterModeButtons','dom','return ({'+code.slice(start,end)+'});')((model,callback)=>{calls++;lastModel=model;select=callback;return {control:true};},{});
+Object.assign(control,{modeModels:{},modeControls:{},selectedModes:{}});
+const first=control.modeControl({id:'test',carrier:'old'});
+for(let i=0;i<20;i++)assert.equal(control.modeControl({id:'test',carrier:'new',sequence:i}),first);
+assert.equal(calls,1,'refresh must not recreate mode controls and resend preference queries');
+assert.equal(lastModel.carrier,'new');assert.equal(lastModel.sequence,19);
+select('nsa');assert.equal(control.selectedModes.test,'nsa');
+console.log('PASS: 20 live refreshes reuse one mode control and modem model; selected mode persists.');

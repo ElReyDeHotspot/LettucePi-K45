@@ -348,6 +348,7 @@ function chesterSelectedMode(pref,disabled){
  return '';
 }
 function chesterModeButtons(modem,onSelected){
+	var modeVersion=0;
 	var status=E('span',{'class':'chester-mode__status'},['']);
 	var port=null;
 	try{port=uci.get('qmodem',modem.id,'at_port');}catch(err){port=null;}
@@ -357,16 +358,17 @@ function chesterModeButtons(modem,onSelected){
 	   string left both null: every call returned status "0" -- which reads
 	   like success until you notice the modem never changed. */
 	function at(cmd){
-		return callSendAt(modem.id,{at:cmd,port:port}).then(function(res){
+		return callSendAt(modem.id,{at:cmd,port:port,use_ubus_flag:"1"}).then(function(res){
 			var cfg=res&&res.at_cfg?res.at_cfg:{};
 			if(String(cfg.status)!=='1')throw new Error(_('the modem rejected the command'));
-			return String(cfg.res||'');
+			var text=String(cfg.res||'');if(!/(?:^|[\r\n])OK(?:[\r\n]|$)/.test(text)||/(?:^|[\r\n])(?:ERROR|\+CME ERROR:|\+CMS ERROR:)/.test(text))throw new Error(_('the modem did not confirm the command'));return text;
 		});
 	}
 
 	var buttons=CHESTER_MODES.map(function(mode){
 		var btn=E('button',{'type':'button','class':'chester-mode__btn'},[_(mode.label)]);
 		btn.addEventListener('click',function(){
+            modeVersion++;
 			buttons.forEach(function(b){b.disabled=true;});
 			status.className='chester-mode__status';
 			status.textContent=_('Applying...');
@@ -394,13 +396,15 @@ function chesterModeButtons(modem,onSelected){
 	   connection: mode_pref can be AUTO while the radio happens to be on SA,
 	   and those are different answers to "what is this set to". */
 	if(port){
-		Promise.all([at('AT+QNWPREFCFG="mode_pref"'),at('AT+QNWPREFCFG="nr5g_disable_mode"')])
+		function readPreference(attempt){return at('AT+QNWPREFCFG="mode_pref"').then(function(pref){return at('AT+QNWPREFCFG="nr5g_disable_mode"').then(function(dis){return [pref,dis];});})
 			.then(function(out){
+                if(modeVersion)return;
 				var pref=(String(out[0]).match(/"mode_pref",([^\r\n]*)/)||[])[1]||'';
 				var dis=(String(out[1]).match(/"nr5g_disable_mode",\s*(\d)/)||[])[1]||'';
 				var id=chesterSelectedMode(pref,dis);if(id&&onSelected)onSelected(id);
 				CHESTER_MODES.forEach(function(m,i){if(m.id===id)buttons[i].classList.add('is-active');});
-			}).catch(function(){});
+			}).catch(function(){if(!modeVersion&&attempt<2)setTimeout(function(){readPreference(attempt+1);},3000);});}
+        readPreference(0);
 	}
 
 	return E('div',{'class':'chester-mode'},[
@@ -488,6 +492,21 @@ function homeSignalValue(modem,key){
  if(!hasMeaningfulValue(value))return '—';const text=String(value);return /dB/i.test(text)?text:text+' '+(key==='RSRP'?'dBm':'dB');
 }
 
+function homeApplyLiveSIM(data,sim){
+ if(!sim||!sim.cards||!sim.config?.modem)return data;
+ const c=sim.running!==false&&sim.active?sim.cards[sim.active]:null;
+ const modems=(data.modems||[]).map(m=>{
+  if(m.id!==sim.config.modem)return m;
+  const ready=c?.ready===true,connected=ready&&c?.connected===true;
+  const copy=Object.assign({},m,{operator:ready?chesterCarrierName(c.carrier)||'Cellular':'Cellular',status:{tone:connected?'online':'offline',text:!c?'Checking SIM':c.presence==='absent'?'No SIM inserted':!ready?'SIM not ready':connected?'Connected':'No data connection'},ipv4:connected?(c.ipv4||'—'):'—'});
+  copy.signals=(ready?m.signals||[]:[]).filter(x=>!String(x.label).endsWith('RSRP'));
+  if(ready&&Number.isFinite(c.rsrp))copy.signals.push({label:(/5G|NR/i.test(m.modeLabel||'')?'5G':'LTE')+' RSRP',value:c.rsrp+' dBm'});
+  copy.rawSignals=ready?Object.assign({},m.rawSignals,{rsrp:Number.isFinite(c.rsrp)?c.rsrp:null}):{};
+  if(!ready){copy.carriers=[];copy.description=(m.description||[]).filter(x=>/model|imei|firmware|manufacturer|port/i.test(x.label));}
+  return copy;
+ });
+ return Object.assign({},data,{simStatus:sim,modems,primaryModem:modems.find(m=>m.id===data.primaryModem?.id)||modems[0]||null,onlineModemCount:modems.filter(m=>m.status?.tone==='online').length});
+}
 return baseclass.extend({methods:{load(){return Promise.resolve();},async fetchData(){await L.resolveDefault(uci.load(['qmodem','misectel','firewall','network','wireless']),null);const configuredTempNode=findConfiguredTempNode();const[board,systemInfo,cpuInfo,cpuUsage,systemTempInfo,configuredTempInfo,systemTime,oemModelInfo,builtinPorts,tcpConnections,internetStatus,deviceStatusMap,interfaceDump,clientData,modemTempInfo,ledPowerInfo,ttlInfo,videoInfo,wanToLanInfo,homeFailover,homeSim]=await Promise.all([L.resolveDefault(callSystemBoard(),{}),L.resolveDefault(callSystemInfo(),{}),L.resolveDefault(callCPUInfo(),{}),L.resolveDefault(callCPUUsage(),{}),L.resolveDefault(callTempInfo(),{}),configuredTempNode?L.resolveDefault(callConfiguredTempStatus(configuredTempNode),{}):Promise.resolve(null),L.resolveDefault(callSystemTime(),{}),L.resolveDefault(callOemModelName(),{}),L.resolveDefault(callBuiltinEthernetPorts(),[]),L.resolveDefault(callTcpConnections(),{}),L.resolveDefault(callInternetStatus(),{}),L.resolveDefault(callNetworkDevicesStatusMap(),{}),L.resolveDefault(callInterfaceDump(),{}),L.resolveDefault(clients.fetchRuntimeData(),{hostHints:{},wirelessData:{},wiredInterfaces:[],radioByIfname:{},assoclists:[],neighbors:[]}),L.resolveDefault(callModemTemp(),{}),L.resolveDefault(callLedPower(),{}),L.resolveDefault(callTtlStatus(),{}),L.resolveDefault(callVideoEngine(),{}),L.resolveDefault(callWanToLan(),{}),withTimeoutState(callHomeFailoverStatus(),MODEM_RPC_TIMEOUT).then(r=>r.value),withTimeoutState(callHomeSIMStatus(),MODEM_RPC_TIMEOUT).then(r=>r.value)]);const builtinPortList=Array.isArray(builtinPorts)?builtinPorts:ensureArray(builtinPorts?.result);const modemSections=this.getModemSections();this.pruneModemSnapshotCache(modemSections);const modems=await Promise.all(modemSections.map((section)=>this.fetchModem(section,interfaceDump)));const ports=await this.fetchPorts(builtinPortList,deviceStatusMap);const memory=L.isObject(cpuUsage.memory)?cpuUsage.memory:(L.isObject(systemInfo.memory)?systemInfo.memory:{});const memoryUsed=(memory.total!=null&&memory.available!=null)?(memory.total-memory.available):null;const memoryPercent=(memory.total>0&&memoryUsed!=null)?(memoryUsed/memory.total)*100:null;const cpuPercent=typeof cpuUsage.cpu_percent==='number'&&Number.isFinite(cpuUsage.cpu_percent)?cpuUsage.cpu_percent:null;const tempInfo=hasMeaningfulValue(extractTempText(configuredTempInfo))?configuredTempInfo:systemTempInfo;const onlineModemCount=modems.filter((modem)=>modem.status.tone==='online').length;const onlineDeviceCount=clients.countOnlineDevices(clientData,{staticLeases:{}});const tcpConnectionCount=parseNumericValue(tcpConnections?.count);const wanInterfaces=this.buildWanInterfaces(interfaceDump,deviceStatusMap);const logicalInterfaces=this.buildLogicalInterfaces(interfaceDump,deviceStatusMap);const primaryModem=modems.find((modem)=>modem.status.tone==='online')||modems[0]||null;const configuredWifiEnabled=isWifiConfiguredEnabled();const runtimeWifiEnabled=Object.keys(clientData?.wirelessData||{}).some((name)=>isRadioUp(clientData.wirelessData[name]));const wifiEnabled=configuredWifiEnabled===null?runtimeWifiEnabled:configuredWifiEnabled;const oemModelName=String(oemModelInfo?.model_name||'').trim();return{board,failoverStatus:homeFailover,simStatus:homeSim,deviceModel:oemModelName||board.model,systemInfo,cpuInfo,cpuUsage,cpuPercent,tempInfo,systemTime,tempNode:configuredTempNode||configuredTempInfo?.node||systemTempInfo?.node||null,modemTemp:(modemTempInfo&&modemTempInfo.value)?String(modemTempInfo.value):null,ledPowerOn:(ledPowerInfo&&typeof ledPowerInfo.enabled==='boolean')?ledPowerInfo.enabled:null,ttlOn:(ttlInfo&&typeof ttlInfo.enabled==='boolean')?ttlInfo.enabled:null,videoOn:(videoInfo&&typeof videoInfo.enabled==='boolean')?videoInfo.enabled:null,wanToLanOn:(wanToLanInfo&&typeof wanToLanInfo.enabled==='boolean')?wanToLanInfo.enabled:null,modems,primaryModem,onlineModemCount,onlineDeviceCount,tcpConnectionCount,internetStatus,wifiEnabled,setupCompleted:this.isSetupCompleted(),passwordUnset:this.hasUnsetPasswordWarning(),ports,logicalInterfaces,wanInterfaces,memory,memoryUsed,memoryPercent};},hasUnsetPasswordWarning(){const warnings=document.querySelectorAll('#maincontent .alert-message.warning');let matched=false;warnings.forEach((node)=>{const heading=node.querySelector('h4');const title=heading?heading.textContent.trim():'';if(title!==_('No password set!'))
 return;node.style.display='none';matched=true;});return matched;},isSetupCompleted(){return String(uci.get('misectel','setup','completed')||'0')==='1';},buildWanInterfaces(interfaceDump,deviceStatusMap){const wanRole=(uci.get('misectel','network_defaults','wan_role')||'').trim();if(!wanRole)
 return[];const primary=findInterfaceInfo(interfaceDump,wanRole);if(!primary)
@@ -508,7 +527,7 @@ return Object.assign({},entryState,{stale:false});return{tone:'offline',text:_('
 return;if(portNames.indexOf(port.device)===-1)
 portNames.push(port.device);roleMap[port.device]=port.role;});Object.keys(statusMap).forEach((name)=>{if(managedPortNames.indexOf(name)===-1||!isPhysicalPortName(name,statusMap[name])||portNames.indexOf(name)!==-1)
 return;portNames.push(name);});const ports=await Promise.all(portNames.map(async(name)=>{const knownStatus=L.isObject(statusMap[name])&&Object.keys(statusMap[name]).length?statusMap[name]:null;const status=knownStatus||await L.resolveDefault(callNetworkDeviceStatus(name),{});return{name:name,role:roleMap[name],status:L.isObject(status)?status:{}};}));return ports.filter((port)=>hiddenPortNames().indexOf(String(port.name||'').toLowerCase())===-1).filter((port)=>portExists(port)).sort((a,b)=>portDisplayOrder(portLabel(a.name))-portDisplayOrder(portLabel(b.name))).map((port)=>{const status=port.status;const carrier=status.carrier===true?true:status.carrier===false?false:null;const speedText=carrier==null?_('Unknown'):(carrier?formatLinkSpeed(status.speed):_('Not connected'));return{name:portLabel(port.name),logical:String(port.name||''),role:formatPortRole(port.role,port.name),mac:asDisplayValue(status.macaddr,'--'),link:carrier==null?_('Unknown'):(carrier?_('Connected'):_('Disconnected')),speed:speedText,speedTier:carrier?linkSpeedTier(status.speed):'offline',tone:carrier==null?'warn':(carrier?'online':'offline')};});},createShell(){
- this.modemSnapshotCache={};this.metricHistory={};this.selectedModes={};
+ this.modemSnapshotCache={};this.metricHistory={};this.selectedModes={};this.modeControls={};this.modeModels={};
  this.securityNode=E('div',{'class':'misectel-dashboard-setup',style:'display:none'});
  this.onlineBadge=E('span',{'class':'ch-badge'},['Checking…']);
  this.summaryNode=E('div',{'class':'ch-summary-grid'});
@@ -528,7 +547,7 @@ return;portNames.push(name);});const ports=await Promise.all(portNames.map(async
  const controlCard=E('section',{'class':'ch-card'},[E('h3',{},['Quick Controls']),this.ledToggleWrap]);
  this.wanSection=E('section',{},[E('h4',{},['WAN status']),this.wanNode]);
  return E('div',{'class':'chester-home'},[
-  E('link',{rel:'stylesheet',href:L.resource('chester-ui/overview.css')+'?v=a7bd0b071507'}),
+  E('link',{rel:'stylesheet',href:L.resource('chester-ui/overview.css')+'?v=20261123-mode'}),
   E('div',{'class':'ch-head'},[E('div',{},[E('div',{'class':'ch-title-row'},[E('div',{'class':'ch-title',role:'heading','aria-level':'2'},['Overview']),this.onlineBadge]),E('p',{'class':'ch-muted'},['Your Chester K45P, at a glance.'])])]),
   this.securityNode,this.summaryNode,
   E('div',{'class':'ch-layout'},[E('section',{'class':'ch-card ch-cellular-card'},[E('div',{'class':'ch-card-heading'},[E('h3',{},['Cellular']),this.modemSelectWrap]),this.modemNode]),E('div',{'class':'ch-side'},[portCard,controlCard])]),
@@ -548,7 +567,7 @@ return[E('div',{'class':'misectel-dashboard-setup__main'},[E('div',{'class':'mis
  let policy='Unavailable',hint='Open connection settings';
  if(c){policy=!c.enabled?'Failover Off':({balance:'Load Balance',auto:'Automatic Failover',wan:'Primary only',cell:'Secondary only'}[c.mode]||'Failover');hint=c.enabled?[homeConnectionName(c.primary),homeConnectionName(c.backup)].join(' + '):'Using the router’s current routing';}
  const cards=[
-  {label:carrier+(mode?' · '+mode:''),hint:sim?.active?'SIM '+sim.active+' active':modem?.status?.text||'No modem detected',icon:'cellular',href:L.url('admin','chester','sim')},
+  {label:carrier+(mode?' · '+mode:''),hint:sim?.active?'SIM '+sim.active+' '+(sim.cards?.[sim.active]?.presence==='absent'?'absent':sim.cards?.[sim.active]?.connected?'active':sim.cards?.[sim.active]?.ready?'ready':'not ready'):modem?.status?.text||'No modem detected',icon:'cellular',href:L.url('admin','chester','sim')},
   {label:policy,hint:hint,icon:'network',href:L.url('admin','chester','failover')},
   {label:data.onlineDeviceCount+(data.onlineDeviceCount===1?' Device':' Devices'),hint:'Client List',icon:'clients',href:CLIENTS_URL},
   {label:'Wi-Fi',hint:data.wifiEnabled?'Enabled':'Disabled',icon:'wifi',href:WIFI_SETTINGS_URL}
@@ -566,7 +585,11 @@ renderRuntimeMetrics(data){
 renderStatCard(options){const tone=options.tone||'neutral';const className=['misectel-dashboard-stat',`misectel-dashboard-stat--${tone}`,options.href?'misectel-dashboard-stat--clickable':''].filter(Boolean).join(' ');const children=misectel.compactNodes([E('div',{'class':'misectel-dashboard-stat__head'},misectel.compactNodes([E('span',{'class':'misectel-dashboard-stat__label'},[options.label]),options.sparkline||(hasMeaningfulValue(options.badge)?E('span',{'class':'misectel-dashboard-stat__badge'},[options.badge]):null)])),E('div',{'class':'misectel-dashboard-stat__value'},[options.value])]);if(hasMeaningfulValue(options.hint))
 children.push(E('div',{'class':'misectel-dashboard-stat__hint'},[options.hint]));if(options.progress!=null){children.push(E('div',{'class':'misectel-dashboard-progress'},[E('span',{'style':`width:${Math.max(0, Math.min(100, options.progress))}%`})]));}
 if(Array.isArray(options.footer)&&options.footer.length){children.push(E('div',{'class':'misectel-dashboard-stat__footer'},options.footer.map((item)=>E('div',{'class':'misectel-dashboard-stat__meta'},[E('span',{'class':'misectel-dashboard-stat__meta-label'},[item.label]),E('strong',{'class':'misectel-dashboard-stat__meta-value'},[item.value])]))));}
-return options.href?E('a',{'class':className,'href':options.href},children):E('div',{'class':className},children);},renderSystem(data){const board=L.isObject(data.board)?data.board:{};const release=L.isObject(board.release)?board.release:{};const systemInfo=L.isObject(data.systemInfo)?data.systemInfo:{};const systemTime=L.isObject(data.systemTime)?data.systemTime:{};const fields=[{label:_('Device Model'),value:asDisplayValue(data.deviceModel,'--')},{label:_('Firmware Version'),value:asDisplayValue(release.description||release.version,'--')},{label:_('Kernel Version'),value:asDisplayValue(board.kernel,'--')},{label:_('CPU Model'),value:asDisplayValue(data.cpuInfo.cpuinfo||board.system,'--')},{label:_('Local Time'),value:hasMeaningfulValue(systemTime.local_time)?systemTime.local_time:formatDateTime(systemInfo.localtime)},{label:_('Uptime'),value:formatDuration(systemInfo.uptime)},{label:_('System Load'),value:formatLoad(systemInfo.load)},{label:_('Available Memory'),value:(data.memory.available!=null&&data.memory.total!=null)?`${formatBytes(data.memory.available)} / ${formatBytes(data.memory.total)}`:'--'}].filter((field)=>hasMeaningfulValue(field.value));return fields.length?fields.map((field)=>misectel.createInfoItem(field.label,field.value)):[misectel.createEmptyState(_('No System Info'))];},renderModems(modems){
+return options.href?E('a',{'class':className,'href':options.href},children):E('div',{'class':className},children);},renderSystem(data){const board=L.isObject(data.board)?data.board:{};const release=L.isObject(board.release)?board.release:{};const systemInfo=L.isObject(data.systemInfo)?data.systemInfo:{};const systemTime=L.isObject(data.systemTime)?data.systemTime:{};const fields=[{label:_('Device Model'),value:asDisplayValue(data.deviceModel,'--')},{label:_('Firmware Version'),value:asDisplayValue(release.description||release.version,'--')},{label:_('Kernel Version'),value:asDisplayValue(board.kernel,'--')},{label:_('CPU Model'),value:asDisplayValue(data.cpuInfo.cpuinfo||board.system,'--')},{label:_('Local Time'),value:hasMeaningfulValue(systemTime.local_time)?systemTime.local_time:formatDateTime(systemInfo.localtime)},{label:_('Uptime'),value:formatDuration(systemInfo.uptime)},{label:_('System Load'),value:formatLoad(systemInfo.load)},{label:_('Available Memory'),value:(data.memory.available!=null&&data.memory.total!=null)?`${formatBytes(data.memory.available)} / ${formatBytes(data.memory.total)}`:'--'}].filter((field)=>hasMeaningfulValue(field.value));return fields.length?fields.map((field)=>misectel.createInfoItem(field.label,field.value)):[misectel.createEmptyState(_('No System Info'))];},modeControl(modem){
+ this.modeModels[modem.id]=Object.assign(this.modeModels[modem.id]||{},modem);
+ if(!this.modeControls[modem.id])this.modeControls[modem.id]=chesterModeButtons(this.modeModels[modem.id],id=>{this.selectedModes[modem.id]=id;if(this.latestData)dom.content(this.summaryNode,this.renderQuickStatus(this.latestData));});
+ return this.modeControls[modem.id];
+},renderModems(modems){
  if(!modems.length)return [E('p',{'class':'ch-muted'},['No modem detected.'])];
  if(!this.selectedModemId||!modems.some(m=>m.id===this.selectedModemId))this.selectedModemId=modems[0].id;
  const modem=modems.find(m=>m.id===this.selectedModemId)||modems[0],qualityLevel=modemSignalLevel({rsrp:homeSignalValue(modem,'RSRP'),sinr:homeSignalValue(modem,'SINR')}),quality=['Unknown','Weak','Fair','Good','Excellent'][qualityLevel];
@@ -577,7 +600,7 @@ return options.href?E('a',{'class':className,'href':options.href},children):E('d
   E('div',{'class':'ch-carrier'},[E('strong',{},[modem.operator||modem.title||'Modem']),E('span',{'class':'ch-network-badge'},[homeNetworkName(modem.modeLabel)||modem.status.text])]),
   E('div',{'class':'ch-radio-grid'},metrics),
   E('div',{'class':'ch-station-id'},[E('span',{},[station?station.label:'eNB']),E('strong',{},[station?station.value:'—'])]),
-  E('section',{'class':'ch-mode-section'},[E('h4',{},['Network Mode']),modem.id?chesterModeButtons(modem,(id)=>{this.selectedModes[modem.id]=id;if(this.latestData)dom.content(this.summaryNode,this.renderQuickStatus(this.latestData));}):'']),
+  E('section',{'class':'ch-mode-section'},[E('h4',{},['Network Mode']),modem.id?this.modeControl(modem):'']),
   E('section',{'class':'ch-band-section'},[E('h4',{},[modem.status.tone==='online'?'Connected Bands':'Last Reported Bands']),bands.length?E('div',{'class':'ch-band-grid'},Array.from({length:Math.max(4,bands.length)},(_,i)=>bands[i]||{}).map((c,i)=>E('section',{'class':'ch-band-column','aria-label':i?'SCC'+i:'PCC'},[
    E('strong',{'class':'ch-band-head'},[i?'SCC'+i:'PCC']),
    ...[['Band',c.band],['ARFCN',c.arfcn],['PCI',c.pci],['BW',c.bw]].map(([label,value])=>E('div',{'class':'ch-band-row'},[E('span',{},[label]),E('strong',{},[value||'—'])]))
@@ -598,7 +621,7 @@ renderSystemCompact(data){const board=L.isObject(data.board)?data.board:{};const
 return[misectel.createEmptyState(_('WAN management is unavailable'))];return interfaces.map((iface)=>E('article',{'class':'misectel-dashboard-wan misectel-dashboard-wan--compact'},[E('div',{'class':'misectel-dashboard-wan__head'},[E('div',{'class':'misectel-dashboard-wan__title'},[E('h4',{'class':'misectel-dashboard-wan__name'},[iface.name]),E('div',{'class':'misectel-dashboard-wan__meta'},[`${iface.l3Device} / ${iface.proto}`])]),misectel.createBadge(iface.statusText,iface.tone)]),E('div',{'class':'misectel-dashboard-wan__grid misectel-dashboard-wan__grid--compact'},[this.renderDashboardDetail('IPv4',iface.ipv4),this.renderDashboardDetail(_('Gateway'),iface.gateway),this.renderDashboardDetail(_('RX Traffic'),iface.rx),this.renderDashboardDetail(_('TX Traffic'),iface.tx)])]));},renderDashboardDetail(label,value){return E('div',{'class':'misectel-dashboard-detail'},[E('span',{'class':'misectel-dashboard-detail__label'},[label]),E('span',{'class':'misectel-dashboard-detail__value'},[value])]);},renderWanInterfaces(interfaces){if(!interfaces.length)
 return[misectel.createEmptyState(_('WAN management is unavailable'))];return interfaces.map((iface)=>E('article',{'class':'misectel-dashboard-wan'},[E('div',{'class':'misectel-dashboard-wan__head'},[E('div',{'class':'misectel-dashboard-wan__title'},[E('h4',{'class':'misectel-dashboard-wan__name'},[iface.name]),E('div',{'class':'misectel-dashboard-wan__meta'},[`${iface.l3Device} / ${iface.proto}`])]),misectel.createBadge(iface.statusText,iface.tone)]),E('div',{'class':'misectel-dashboard-wan__grid'},[this.renderDashboardDetail('IPv4',iface.ipv4),this.renderDashboardDetail('IPv6',iface.ipv6),this.renderDashboardDetail(_('Gateway'),iface.gateway),this.renderDashboardDetail(_('Online Time'),iface.uptime),this.renderDashboardDetail(_('RX Traffic'),iface.rx),this.renderDashboardDetail(_('TX Traffic'),iface.tx)])]));},renderLogicalInterfaces(interfaces){if(!interfaces.length)
 return[misectel.createEmptyState(_('No interface data available.'))];const headers=[_('Name'),_('Type'),_('Status'),_('Device'),_('MAC Address'),'IPv4','IPv6',_('Link Speed'),_('RX Traffic'),_('TX Traffic')];return[E('div',{'class':'misectel-dashboard-interface-table-wrap'},[E('table',{'class':'misectel-dashboard-interface-table'},[E('thead',{},[E('tr',{},headers.map((label)=>E('th',{},[label])))]),E('tbody',{},interfaces.map((iface)=>E('tr',{'class':`is-${iface.tone || 'offline'}`},[E('td',{'data-label':_('Name')},[iface.name]),E('td',{'data-label':_('Type')},[iface.type]),E('td',{'data-label':_('Status')},[misectel.createBadge(iface.statusText,iface.tone)]),E('td',{'data-label':_('Device')},[iface.device]),E('td',{'data-label':_('MAC Address')},[iface.mac]),E('td',{'data-label':'IPv4'},[iface.ipv4]),E('td',{'data-label':'IPv6'},[iface.ipv6]),E('td',{'data-label':_('Link Speed')},[iface.speed]),E('td',{'data-label':_('RX Traffic')},[iface.rx]),E('td',{'data-label':_('TX Traffic')},[iface.tx])])))])])];},updateShell(data){
- this.latestData=data;if(data.simStatus?.active)this.lastHomeSimStatus=data.simStatus;
+ this.latestRawData=data;if(this.latestLiveSIM&&(!data.simStatus||this.latestLiveSIM.updated>=data.simStatus.updated))data.simStatus=this.latestLiveSIM;data=homeApplyLiveSIM(data,data.simStatus);this.latestData=data;if(data.simStatus)this.lastHomeSimStatus=data.simStatus;
  for(const [key,node,sync] of [['ledPowerOn','ledToggle','syncLedToggle'],['ttlOn','ttlToggle','syncTtlToggle'],['videoOn','videoToggle','syncVideoToggle']]){
   if(typeof data[key]==='boolean'){this[key]=data[key];this[sync](data[key]);this[node].querySelector('.ch-control-state').textContent=data[key]?'On':'Off';}
  }
@@ -609,6 +632,23 @@ return[misectel.createEmptyState(_('No interface data available.'))];const heade
  this.updateModemSelect(data.modems);this.securityNode.style.display=(!data.setupCompleted||data.passwordUnset)?'':'none';dom.content(this.securityNode,this.renderSetupGuide(data.setupCompleted,data.passwordUnset));
  const modemDetailsOpen=this.modemNode.querySelector('details')?.open===true;dom.content(this.summaryNode,this.renderQuickStatus(data));dom.content(this.modemNode,this.renderModems(data.modems));const modemDetails=this.modemNode.querySelector('details');if(modemDetails)modemDetails.open=modemDetailsOpen;dom.content(this.portPanelNode,this.renderPorts(data.ports));dom.content(this.metricsNode,this.renderRuntimeMetrics(data));dom.content(this.systemNode,this.renderSystemCompact(data));dom.content(this.wanNode,this.renderWanCompact(data.wanInterfaces));this.loadingNode.style.display='none';
 },
+async refreshFull(){if(this.fullRefreshing)return;this.fullRefreshing=true;try{this.updateShell(await this.fetchData());}finally{this.fullRefreshing=false;}},
+async refreshLive(){
+ if(this.liveRefreshing||!this.latestRawData)return;this.liveRefreshing=true;
+ try{
+  const [reply,cpu,ports]=await Promise.all([L.resolveDefault(callHomeSIMStatus(),null),L.resolveDefault(callCPUUsage(),{}),L.resolveDefault(callNetworkDevicesStatusMap(),{})]);const raw=this.latestRawData;
+  const sim=reply||{cards:{},active:'',running:false,config:raw.simStatus?.config,updated:raw.simStatus?.updated};this.latestLiveSIM=sim;raw.simStatus=sim;
+  if(Number.isFinite(cpu.cpu_percent))raw.cpuPercent=cpu.cpu_percent;
+  if(cpu.memory?.total>0&&Number.isFinite(cpu.memory.available)){raw.memory=cpu.memory;raw.memoryUsed=cpu.memory.total-cpu.memory.available;raw.memoryPercent=100*raw.memoryUsed/cpu.memory.total;}
+  raw.ports=(raw.ports||[]).map(p=>{const v=ports?.[p.logical];if(!v)return p;const on=v.carrier===true;return Object.assign({},p,{tone:on?'online':v.carrier===false?'offline':'warn',link:on?'Connected':v.carrier===false?'Disconnected':'Unknown',speed:on?formatLinkSpeed(v.speed):'Disconnected',speedTier:on?linkSpeedTier(v.speed):'offline'});});
+  const data=homeApplyLiveSIM(raw,sim);this.latestData=data;
+  const open=this.modemNode.querySelector('details')?.open===true;
+  dom.content(this.summaryNode,this.renderQuickStatus(data));dom.content(this.modemNode,this.renderModems(data.modems));if(open&&this.modemNode.querySelector('details'))this.modemNode.querySelector('details').open=true;
+  dom.content(this.portPanelNode,this.renderPorts(data.ports));dom.content(this.metricsNode,this.renderRuntimeMetrics(data));
+  const card=sim.cards?.[sim.active],key=[sim.active,card?.presence,card?.ready,card?.iccid_end].join(':');
+  if(this.liveSIMKey&&key!==this.liveSIMKey)this.refreshFull().catch(()=>{});this.liveSIMKey=key;
+ }catch(e){}finally{this.liveRefreshing=false;}
+},
 updateModemSelect(modems){if(modems.length<=1){this.selectedModemId=modems.length?modems[0].id:null;this.modemSelectWrap.style.display='none';dom.content(this.modemSelect,[]);return;}
 if(!this.selectedModemId||!modems.some((modem)=>modem.id===this.selectedModemId))
-this.selectedModemId=modems[0].id;dom.content(this.modemSelect,modems.map((modem)=>E('option',{'value':modem.id,'selected':modem.id===this.selectedModemId?'selected':null},[modem.title])));this.modemSelectWrap.style.display='';},render(){const shell=this.createShell();return this.fetchData().then((data)=>{this.updateShell(data);poll.add(()=>this.fetchData().then((nextData)=>{this.updateShell(nextData);}).catch(()=>{}),REFRESH_INTERVAL);return shell;}).catch(()=>{this.loadingNode.style.display='none';dom.content(this.modemNode,[misectel.createEmptyState(_('Failed to load Overview'))]);return shell;});},handleSaveApply:null,handleSave:null,handleReset:null}});
+this.selectedModemId=modems[0].id;dom.content(this.modemSelect,modems.map((modem)=>E('option',{'value':modem.id,'selected':modem.id===this.selectedModemId?'selected':null},[modem.title])));this.modemSelectWrap.style.display='';},render(){const shell=this.createShell();return this.fetchData().then((data)=>{this.updateShell(data);poll.add(()=>this.refreshFull().catch(()=>{}),REFRESH_INTERVAL);poll.add(()=>this.refreshLive(),2);return shell;}).catch(()=>{this.loadingNode.style.display='none';dom.content(this.modemNode,[misectel.createEmptyState(_('Failed to load Overview'))]);return shell;});},handleSaveApply:null,handleSave:null,handleReset:null}});

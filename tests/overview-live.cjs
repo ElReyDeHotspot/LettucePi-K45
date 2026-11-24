@@ -1,0 +1,11 @@
+const fs=require('fs'),path=require('path'),assert=require('assert/strict');
+const source=fs.readFileSync(path.join(__dirname,'../payload/www/luci-static/resources/chester-ui/overview-core.js'),'utf8');
+const apply=new Function('chesterCarrierName',source.slice(source.indexOf('function homeApplyLiveSIM('),source.indexOf('return baseclass.extend({methods:'))+';return homeApplyLiveSIM;')(v=>v||'');
+const modem={id:'modem1',operator:'Old carrier',modeLabel:'5G NSA',status:{tone:'online',text:'Connected'},ipv4:'192.0.2.1',signals:[{label:'5G RSRP',value:'-80 dBm'},{label:'5G SINR',value:'20 dB'}],rawSignals:{rsrp:-80},carriers:[{band:'n41'}],description:[{label:'IPv4',value:'192.0.2.1'},{label:'IMEI',value:'static-model-id'}]};
+const data={modems:[modem],primaryModem:modem};
+const status={running:true,active:'1',config:{modem:'modem1'},cards:{'1':{presence:'absent',ready:false,connected:false}}};
+let next=apply(data,status);assert.equal(next.primaryModem.status.tone,'offline');assert.equal(next.primaryModem.ipv4,'—');assert.equal(next.primaryModem.carriers.length,0);assert.equal(next.primaryModem.signals.length,0);assert.equal(modem.status.tone,'online');assert.equal(modem.ipv4,'192.0.2.1');
+status.cards['1']={presence:'present',ready:true,connected:true,ipv4:'192.0.2.5',carrier:'T-Mobile',rsrp:-101};next=apply(data,status);assert.equal(next.primaryModem.ipv4,'192.0.2.5');assert.equal(next.primaryModem.operator,'T-Mobile');assert(next.primaryModem.signals.some(x=>x.value==='-101 dBm'));
+next=apply(data,{...status,active:''});assert.equal(next.primaryModem.status.text,'Checking SIM');assert.equal(next.primaryModem.ipv4,'—');
+next=apply(data,{...status,running:false});assert.equal(next.primaryModem.status.tone,'offline');
+console.log('PASS live Overview: removed/unknown SIM clears connected/IP/signal/bands; current SIM data replaces old snapshot without mutation.');

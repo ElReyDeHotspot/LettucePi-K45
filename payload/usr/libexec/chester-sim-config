@@ -10,7 +10,7 @@ let modem=get('modem',modems[0]||'');
 let iface=u.get('qmodem',modem,'alias')||'';
 if(!iface)u.foreach('network','interface',function(s){if(s.modem_config==modem&&s.proto!='dhcpv6')iface=s['.name'];});
 print(sprintf('%J\n',{
- mode:get('mode','manual'),modem:modem,interface:iface,preferred:get('preferred','1'),criteria:get('criteria','DLUL'),
+ hotplug:flag('hotplug',true),mode:get('mode','manual'),modem:modem,interface:iface,preferred:get('preferred','1'),criteria:get('criteria','DLUL'),
  min_down:number('min_down',10),min_up:number('min_up',10),include1:flag('include1',true),include2:flag('include2',true),
  compare_both:flag('compare_both',true),only_threshold:flag('only_threshold',false),signal:flag('signal',true),
  rsrp:number('rsrp',-110),dwell:number('dwell',45),connection:flag('connection',true),failures:number('failures',3),

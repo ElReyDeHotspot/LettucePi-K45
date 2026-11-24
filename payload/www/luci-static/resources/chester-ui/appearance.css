@@ -43,7 +43,7 @@ html[data-chester-appearance=night] .chester-home .ch-port:not(.is-online) .ch-i
 html[data-chester-appearance=night] .chester-home .ch-station-id{background:linear-gradient(110deg,#2a3d50,#253848)!important;color:var(--ap-text)!important}
 html[data-chester-appearance=night] :is(.ch-band-head,.chester-mode__row,.cs-modes,.fo-modes,.sp-tabs,.z2-tabbar,.st-unit-options){background:linear-gradient(#2d4052,#243443)!important;color:var(--ap-text)!important;border-color:#5b7186!important}
 html[data-chester-appearance=night] .chester-home .chester-mode__btn{color:var(--ap-text)!important;border-color:var(--ap-border)!important;background:transparent!important}
-html[data-chester-appearance=night] .chester-home .chester-mode__btn.is-active{background:linear-gradient(#1686ff,#0067ef)!important;color:white!important}
+html[data-chester-appearance=night] .chester-home .chester-mode__btn.is-active{background:#007aff!important;color:white!important}
 html[data-chester-appearance=night] .chester-home :is(.ch-control,.ch-control.is-off){background:linear-gradient(110deg,#233444,#182736)!important;border-color:#475a6d!important;color:var(--ap-text)!important}
 html[data-chester-appearance=night] .chester-home .ch-shortcut{background:linear-gradient(#193b5b,#162d44)!important;border-color:#315e88!important;color:#62bcff!important}
 html[data-chester-appearance=night] .chester-home .ch-shortcut.is-neutral{background:linear-gradient(#253647,#1a2939)!important;color:var(--ap-text)!important;border-color:#475a6d!important}
@@ -225,3 +225,5 @@ body.theme-misectel .chester-session-expired button.chester-session-login:focus-
 html[data-chester-appearance=night] body.theme-misectel #modal_overlay>.modal.chester-session-expired{background:linear-gradient(115deg,#1c3042,#142332)!important;color:#f3f6fc!important;border-color:#3e566d!important;box-shadow:0 22px 80px #0006!important}
 html[data-chester-appearance=night] body.theme-misectel .chester-session-expired .chester-session-icon{background:#1b4268;color:#9acfff}
 html[data-chester-appearance=night] body.theme-misectel .chester-session-expired .chester-session-message{color:#b4c4d6!important}
+
+#maincontent .chester-home .chester-mode__btn.is-active{background:#007aff!important;color:#fff!important;animation:none!important;transition:none!important}
