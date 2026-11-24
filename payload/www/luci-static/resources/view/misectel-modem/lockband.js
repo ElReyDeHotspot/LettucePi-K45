@@ -31,7 +31,7 @@ return view.extend({
   function sync(){
    const values=selected(),dirty=!(sameBands(values,current)||(current.length===1&&current[0]==='0'&&!values.length));save.disabled=busy||!dirty||!values.length;inputs.forEach(i=>{i.disabled=busy;});
    dom.content(count,[values.length+' / '+ids.length+' selected']);
-   dom.content(notice,[current.includes('0')&&!dirty?'The modem reports a custom setting. It stays unchanged until you choose bands and save.':!values.length?'Choose at least one band before saving.':dirty?'Unsaved selection. Your current bands stay active until you save.':'Your current modem selection is shown.']);
+   dom.content(notice,[current.includes('0')&&!dirty?'The modem reports a custom setting. It stays unchanged until you choose bands and save.':!values.length?'Choose at least one band before saving.':dirty?'Unsaved selection. Your current bands stay active until you save.':'']);notice.hidden=!notice.textContent;
   }
   const grid=E('div',{'class':'bl-grid'},ids.map(id=>{
    const input=E('input',{type:'checkbox',value:id,checked:current.includes(id)?'checked':null,'aria-label':modeName(key)+' '+bandName(key,id)});inputs.push(input);input.addEventListener('change',()=>{dom.content(result,[]);sync();});
@@ -40,7 +40,7 @@ return view.extend({
   const select=(values)=>{if(busy)return;inputs.forEach(i=>i.checked=values.includes(i.value));dom.content(result,[]);sync();};
   const all=settings.button('Select all',()=>select(ids),{'class':'st-button secondary'}),clear=settings.button('Clear',()=>select([]),{'class':'st-button secondary'}),restore=settings.button('Restore current',()=>select(current),{'class':'st-button secondary'});
   sync();return settings.card(modeName(key)+' bands',key==='LTE'?'LTE bands are also used as the anchor for 5G NSA.':key==='NR'?'Standalone 5G bands.':key==='UMTS'?'Legacy 3G bands, where available.':'Non-standalone 5G bands used alongside LTE.',[
-   E('div',{'class':'bl-tools'},[count,E('div',{'class':'bl-actions'},[all,clear,restore])]),grid,notice,result,settings.footer(save,'A band change may briefly interrupt cellular service.')
+   E('div',{'class':'bl-tools'},[count,E('div',{'class':'bl-actions'},[all,clear,restore])]),grid,notice,result,settings.footer(save)
   ],'network');
  },
  async refresh(){
@@ -69,6 +69,6 @@ return view.extend({
   const selector=E('select',{},this.modems.map(m=>E('option',{value:m.id,selected:m.id===this.selectedModemId?'selected':null},[modemHelper.modemLabel(m)])));
   selector.addEventListener('change',()=>{this.selectedModemId=selector.value;this.refresh();this.liveCellular.refresh();});
   this.liveCellular=liveCellular.create(()=>this.modems.find(m=>m.id===this.selectedModemId));
-  const shell=settings.sheet([settings.head('Band Lock','Choose which bands your modem can use.','network'),this.liveCellular.node,E('p',{'class':'st-muted bl-intro'},['Keep all bands selected for normal use. Select fewer bands only when you want to limit the connection. Each radio group saves separately.']),this.modems.length>1?settings.card('Modem','',[settings.field('Modem',selector)]):'',this.content],'st-bands');this.refresh();return shell;
+  const shell=settings.sheet([settings.head('Band Lock','Choose which bands your modem can use.','network'),this.liveCellular.node,this.modems.length>1?settings.card('Modem','',[settings.field('Modem',selector)]):'',this.content],'st-bands');this.refresh();return shell;
  },handleSave:null,handleSaveApply:null,handleReset:null
 });

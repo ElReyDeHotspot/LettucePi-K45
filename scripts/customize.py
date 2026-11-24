@@ -208,3 +208,9 @@ for link in ['S99chester_sim','K09chester_sim']:
 # K45P has no configured modem-boost GPIO. Keep the unused polling service frozen.
 for link in (root/'etc/rc.d').glob('*misectel_modem_boost'):
     if link.is_symlink():link.unlink()
+
+# Match the shared page-loader title in both initial and dynamic view loads.
+for name in ('www/luci-static/resources/luci.js', 'usr/share/ucode/luci/template/view.ut'):
+    page=root/name
+    text=page.read_text(encoding='utf-8')
+    page.write_text(text.replace('Loading view', 'Loading View'),encoding='utf-8')
