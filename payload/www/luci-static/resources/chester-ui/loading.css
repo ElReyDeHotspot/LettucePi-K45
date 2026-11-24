@@ -7,6 +7,7 @@ body.theme-misectel.logged-in:has(#view) .main > .loading{display:none!important
  border:1px solid var(--load-edge)!important;border-radius:30px!important;background:linear-gradient(145deg,rgba(107,228,174,.07),transparent 70%),var(--load-bg)!important;
  color:var(--load-text)!important;box-shadow:var(--load-shadow)!important;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
  text-align:center;font-family:inherit;font-size:16px!important;font-weight:600;line-height:1.45;letter-spacing:.02em;isolation:isolate;
+ animation:chester-loader-reveal .18s ease-out .6s both;
 }
 #view > .spinning::before{
  content:""!important;position:relative!important;inset:auto!important;display:block!important;flex:0 0 74px;
@@ -26,3 +27,12 @@ html[data-chester-appearance=night] #view > .spinning{
 @keyframes chester-leaf-breathe{0%,100%{opacity:.85;transform:scale(.96)}50%{opacity:1;transform:scale(1)}}
 @media(max-width:600px){#view > .spinning{width:calc(100% - 24px);max-width:360px;margin:52px auto!important;border-radius:26px!important}}
 @media(prefers-reduced-motion:reduce){#view > .spinning::before,#view > .spinning::after{animation:none!important}#view > .spinning::after{border-color:rgba(71,206,152,.4);border-top-color:#47ce98}}
+
+/* Fast views skip the loader; animate the complete view once, not its polls. */
+#view:not(:has(> .spinning)){animation:chester-view-enter .24s cubic-bezier(.22,1,.36,1) both}
+@keyframes chester-loader-reveal{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes chester-view-enter{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){
+ #view:not(:has(> .spinning)){animation:none!important}
+ #view > .spinning{animation:chester-loader-reveal 1ms linear .6s both}
+}
