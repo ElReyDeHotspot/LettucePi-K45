@@ -1,112 +1,84 @@
-#maincontent .fv-card{position:relative;padding:25px;display:flex;flex-direction:column;align-items:center;text-align:center;background:var(--ct-card);border:1px solid var(--ct-border);border-radius:24px;margin:22px 0;overflow:hidden}
-#maincontent .fv-caption{font-size:10px;font-weight:700;letter-spacing:2.5px;color:var(--ct-muted)}
-#maincontent .fv-orbit{position:relative;width:220px;height:220px;margin:20px 0}
-#maincontent .fv-ring{position:absolute;inset:0;border:1px solid var(--ct-border);border-radius:50%;box-shadow:inset 0 0 25px #007aff0d,0 0 0 9px #007aff05}
-#maincontent .fv-ring:after{content:'';position:absolute;inset:11px;border:1px dashed var(--ct-border);border-radius:50%}
-#maincontent .fv-rotor{position:absolute;inset:14px;color:var(--ct-accent);opacity:.35;transform-origin:50% 50%;will-change:transform;pointer-events:none}
-#maincontent .fv-rotor svg{width:100%;height:100%}
-#maincontent .fv-reading{position:absolute;inset:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border-radius:50%;background:var(--ct-card);border:1px solid var(--ct-border);box-shadow:0 4px 18px #071a2910}
-#maincontent .fv-reading strong{font-size:25px;line-height:1.1;font-variant-numeric:tabular-nums;color:var(--ct-text)}
-#maincontent .fv-reading span{font-size:10px;color:var(--ct-muted);font-weight:600}
-#maincontent .fv-detail{font-size:12px;color:var(--ct-muted);margin:0}
-#maincontent .fv-card.is-stopped .fv-rotor{opacity:.15}
-@media(prefers-reduced-motion:reduce){#maincontent .fv-rotor{display:none}#maincontent .fv-ring{border-width:2px}}
-
-#maincontent .fv-presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-#maincontent .fv-preset{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:1px solid var(--ct-border);border-radius:18px;padding:22px 14px;cursor:pointer}
-#maincontent .fv-preset .st-icon{width:28px;height:28px}
-#maincontent .fv-preset svg{width:100%;height:100%}
-#maincontent .fv-preset strong{font-size:16px}
-#maincontent .fv-preset b{font-size:26px;line-height:1.1}
-#maincontent .fv-preset small{font-size:12px}
-#maincontent .fv-preset-choice{font-size:12px;margin:16px 0 0;text-align:center}
-@media(max-width:600px){#maincontent .fv-presets{gap:8px}#maincontent .fv-preset{padding:18px 6px}#maincontent .fv-preset strong{font-size:13px}#maincontent .fv-preset small{font-size:10px}}
-
-#maincontent .st-fan .fv-save-bar{position:sticky;bottom:12px;z-index:10;display:flex;align-items:center;justify-content:center;min-height:74px;margin:20px 0 0;padding:16px 20px;border:1px solid var(--ct-border);border-radius:18px;background:var(--ct-card);box-shadow:0 8px 35px #071a291a;backdrop-filter:blur(16px)}
-#maincontent .st-fan .fv-save-bar>.st-button{width:min(100%,320px);min-height:48px}
-@media(max-width:700px){#maincontent .st-fan .fv-save-bar{bottom:8px;padding:12px}}
-
-#maincontent .st-fan .fv-preset{height:auto!important;min-height:164px!important;padding:20px 14px!important;line-height:1.3!important;white-space:normal!important;box-sizing:border-box}
-#maincontent .st-fan .fv-preset[aria-pressed=true] .st-icon{color:inherit!important}
-@media(max-width:600px){#maincontent .st-fan .fv-preset{min-height:148px!important;padding:16px 6px!important}}
-
-body.theme-misectel #maincontent#maincontent .st-fan .fv-preset[aria-pressed=true] .st-icon{color:var(--ct-on-primary)!important}
-
-#maincontent .st-fan .fv-manual{margin-top:22px;padding:22px;background:var(--ct-inset);border:1px solid var(--ct-border);border-radius:18px}
+/* Chester Fan Control — approved cooling-console design. */
+#maincontent .st-fan{max-width:1200px}
+#maincontent .st-fan .fv-card{position:relative;display:grid;grid-template-columns:268px minmax(0,1fr);align-items:center;gap:26px;padding:24px;margin:22px 0;background:var(--ct-card);border:1px solid var(--ct-border);border-radius:23px;text-align:left;overflow:hidden;box-shadow:inset 0 1px 0 #ffffff08}
+#maincontent .st-fan .fv-orbit{position:relative;width:268px;height:268px;margin:0;border-radius:50%;border:1px solid #b0bdc9;background:linear-gradient(140deg,#c4ced8 0%,#647380 19%,#253442 38%,#a9b6c3 67%,#344451 85%,#81919f 100%);box-shadow:0 9px 20px #0004,inset 0 1px 1px #fff9}
+#maincontent .fv-orbit:before{content:'';position:absolute;inset:6px;border:1px solid #5b6c7c;border-radius:50%;background:radial-gradient(circle at 45% 35%,#1d3042,#0b1724 65%,#07111c);box-shadow:inset 0 2px 5px #0009}
+#maincontent .fv-orbit:after{content:'';position:absolute;inset:15px;border:1px solid #4f647744;border-radius:50%;pointer-events:none}
+#maincontent .fv-ring{position:absolute;inset:11px;border-radius:50%;pointer-events:none;z-index:2}
+#maincontent .fv-ring svg{display:block;width:100%;height:100%;overflow:visible}
+#maincontent .fv-dial-ticks{stroke:#d8e3ed;stroke-width:.8;opacity:.8}
+#maincontent .fv-gauge-track{fill:none;stroke:#2a3d50;stroke-width:3}
+#maincontent .fv-gauge-level{fill:none;stroke:#168cff;stroke-width:3.5;stroke-linecap:round;transform:rotate(-90deg);transform-origin:100px 100px;transition:stroke-dashoffset .7s ease;filter:drop-shadow(0 0 2px #007aff55)}
+#maincontent .fv-rotor{position:absolute;inset:23px;transform-origin:50% 50%;will-change:transform;filter:drop-shadow(0 2px 3px #0008);pointer-events:none}
+#maincontent .fv-rotor svg{display:block;width:100%;height:100%}
+#maincontent .fv-reading{position:absolute;inset:32%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border-radius:50%;z-index:3;background:linear-gradient(140deg,#253442 0%,#101a26 50%,#070e17 100%);border:1px solid #708091;box-shadow:0 3px 10px #0009,inset 0 1px 2px #ffffff30;text-align:center}
+body.theme-misectel #maincontent#maincontent .st-fan .fv-reading strong{font-size:31px;line-height:1;letter-spacing:-1.3px;color:#f4f7fc!important;font-variant-numeric:tabular-nums;text-shadow:0 2px 3px #0005}
+body.theme-misectel #maincontent#maincontent .st-fan .fv-reading span{font-size:8px;letter-spacing:.1px;text-transform:uppercase;color:#e0e9f2!important}
+#maincontent .fv-info{min-width:0}
+#maincontent .fv-caption{font-size:10px;font-weight:650;letter-spacing:2.8px;color:var(--ct-muted);margin:0 0 9px}
+#maincontent .st-fan .fv-title{font-size:25px!important;line-height:1.2;letter-spacing:-.5px;margin:0 0 14px!important}
+#maincontent .fv-detail{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid var(--ct-border);border-radius:99px;background:var(--ct-inset);color:var(--ct-muted);font-size:11px;line-height:1.3;margin:0}
+#maincontent .fv-detail:before{content:'';width:6px;height:6px;flex:0 0 6px;border-radius:50%;background:var(--ct-accent)}
+#maincontent .fv-card.is-stopped .fv-rotor{opacity:.4}
+#maincontent .fv-card.is-stopped .fv-detail:before{background:var(--ct-muted)}
+#maincontent .fv-card.is-unavailable .fv-rotor{opacity:.2}
+#maincontent .st-fan .fv-telemetry .st-summary{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:20px 0 0}
+#maincontent .st-fan .fv-telemetry .st-stat{min-width:0;padding:14px 12px;border:1px solid var(--ct-border);border-radius:14px;gap:10px;box-shadow:none}
+#maincontent .fv-telemetry .st-stat>.st-icon{flex:0 0 25px;width:25px;height:25px}
+#maincontent .fv-telemetry .st-stat>div{min-width:0}
+#maincontent .fv-telemetry .st-stat span{font-size:11px;line-height:1.3}
+#maincontent .st-fan .fv-telemetry .st-stat strong{font-size:20px;line-height:1.3;margin-top:3px}
+#maincontent .st-fan .fv-telemetry .st-unit-bar{margin:16px 0 0;justify-content:flex-end}
+#maincontent .st-fan .fv-telemetry .st-unit-button{min-height:33px;font-size:11px;padding:6px 12px}
+#maincontent .st-fan>.st-card{padding:22px 24px;border-radius:21px}
+#maincontent .st-fan>.st-card .st-card-head{margin-bottom:18px}
+#maincontent .st-fan>.st-card h3{font-size:25px!important}
+#maincontent .fv-modes,#maincontent .fv-presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+body.theme-misectel #maincontent#maincontent .st-fan :is(.fv-mode,.fv-preset){height:auto!important;min-height:50px!important;display:flex;align-items:center;justify-content:center;flex-direction:row;gap:12px;padding:12px 15px!important;line-height:1.2!important;white-space:normal!important;border:1px solid var(--ct-border)!important;border-radius:14px;background:linear-gradient(155deg,var(--ct-inset),var(--ct-card))!important;color:var(--ct-text)!important;box-shadow:inset 0 1px 0 #ffffff0c!important;cursor:pointer}
+body.theme-misectel #maincontent#maincontent .st-fan :is(.fv-mode[aria-checked=true],.fv-preset[aria-pressed=true]){background:linear-gradient(160deg,#1493ff,#0076fb)!important;border-color:#369fff!important;color:#fff!important;box-shadow:0 3px 10px #007aff16,inset 0 1px 0 #ffffff25!important}
+#maincontent .st-fan :is(.fv-mode,.fv-preset)>.st-icon{width:23px;height:23px;flex:0 0 23px}
+#maincontent .st-fan :is(.fv-mode,.fv-preset) svg{display:block;width:100%;height:100%}
+#maincontent .st-fan :is(.fv-mode,.fv-preset) strong{font-size:15px;font-weight:600;line-height:1.25}
+body.theme-misectel #maincontent#maincontent .st-fan :is(.fv-mode[aria-checked=true],.fv-preset[aria-pressed=true]) .st-icon{color:#fff!important}
+#maincontent .st-fan .fv-manual{margin:18px 0 0;padding:16px 0 0;background:none;border:0;border-top:1px solid var(--ct-border);border-radius:0}
 #maincontent .st-fan .fv-manual[hidden]{display:none}
-#maincontent .fv-manual-heading{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:18px}
-#maincontent .fv-manual-heading>strong:last-child{font-size:26px;color:var(--ct-accent);font-variant-numeric:tabular-nums}
-#maincontent .fv-manual input[type=range]{width:100%;height:36px;cursor:pointer;accent-color:var(--ct-primary);margin:0}
-#maincontent .fv-slider-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--ct-muted);margin-top:6px}
-
-/* Clear mode selection and readable controls in Sun and Night. */
-#maincontent .st-fan .fv-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
-#maincontent .st-fan .fv-card{padding:20px}
-#maincontent .st-fan .fv-orbit{width:180px;height:180px;margin:16px 0}
-#maincontent .st-fan .fv-reading{inset:49px}
-#maincontent .fv-modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-#maincontent .st-fan .fv-mode{height:auto!important;min-height:116px!important;padding:18px 12px!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;line-height:1.3!important;white-space:normal!important;border:1px solid var(--ct-border);border-radius:16px;cursor:pointer}
-#maincontent .fv-mode .st-icon{width:25px;height:25px}
-#maincontent .fv-mode svg{width:100%;height:100%}
-#maincontent .fv-mode strong{font-size:16px}
-#maincontent .fv-mode small{font-size:11px}
-body.theme-misectel #maincontent#maincontent .st-fan .fv-mode[aria-checked=true] .st-icon{color:var(--ct-on-primary)!important}
-#maincontent .st-fan .fv-manual{background:var(--ct-inset);margin-top:20px}
-#maincontent .fv-preset-section{border-top:1px solid var(--ct-border);padding-top:20px;margin-top:20px}
-#maincontent .fv-preset-section h4{margin:0 0 14px;font-size:14px}
-#maincontent .st-fan .fv-preset{min-height:125px!important;padding:16px 10px!important;gap:8px}
-#maincontent .st-fan .fv-preset .st-icon{width:21px;height:21px}
-#maincontent .st-fan .fv-preset b{font-size:22px}
-#maincontent .st-fan input[type=range]{appearance:none!important;-webkit-appearance:none!important;height:36px!important;width:100%!important;padding:0!important;border:0!important;background:transparent!important;cursor:pointer;touch-action:pan-y}
-#maincontent .st-fan input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:99px;background:linear-gradient(to right,var(--ct-primary) 0%,var(--ct-primary) var(--fv-fill,0%),var(--ct-border) var(--fv-fill,0%),var(--ct-border) 100%)}
-#maincontent .st-fan input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-9px;border:4px solid var(--ct-on-primary);border-radius:50%;background:var(--ct-primary);box-shadow:0 2px 9px #071a2940}
-#maincontent .st-fan input[type=range]::-moz-range-track{height:8px;border-radius:99px;background:var(--ct-border)}
+#maincontent .fv-manual-heading{margin:0 0 10px}
+#maincontent .fv-manual-heading strong{font-size:16px;line-height:1.3}
+#maincontent .fv-slider-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:end;gap:18px}
+#maincontent .fv-slider-row>span{font-size:15px;line-height:36px;color:var(--ct-muted)}
+#maincontent .fv-slider-control{position:relative;padding-top:25px;min-width:0}
+body.theme-misectel #maincontent#maincontent .st-fan .fv-slider-bubble{position:absolute;top:0;transform:translateX(-50%);min-width:46px;height:25px;padding:4px 8px;box-sizing:border-box;border:1px solid #399fff;border-radius:8px;background:#007aff;color:#fff!important;text-align:center;font-size:14px;line-height:16px;box-shadow:0 3px 9px #0002;font-variant-numeric:tabular-nums;pointer-events:none}
+#maincontent .fv-slider-bubble:after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#007aff}
+#maincontent .st-fan input[type=range]{appearance:none!important;-webkit-appearance:none!important;display:block;height:36px!important;width:100%!important;padding:0!important;margin:0!important;border:0!important;background:transparent!important;cursor:pointer;touch-action:pan-y}
+#maincontent .st-fan input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:99px;background:linear-gradient(to right,var(--ct-primary) 0%,var(--ct-primary) var(--fv-fill,0%),#526477 var(--fv-fill,0%),#526477 100%);box-shadow:inset 0 1px 2px #0003}
+#maincontent .st-fan input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-9px;border:2px solid #007aff;border-radius:50%;background:#f8fbff;box-shadow:0 2px 6px #0004}
+#maincontent .st-fan input[type=range]::-moz-range-track{height:8px;border-radius:99px;background:#526477}
 #maincontent .st-fan input[type=range]::-moz-range-progress{height:8px;border-radius:99px;background:var(--ct-primary)}
-#maincontent .st-fan input[type=range]::-moz-range-thumb{height:19px;width:19px;border:4px solid var(--ct-on-primary);border-radius:50%;background:var(--ct-primary);box-shadow:0 2px 9px #071a2940}
-#maincontent .st-fan .fv-save-bar{flex-direction:column;gap:8px}
-#maincontent .fv-save-state{font-size:11px;color:var(--ct-muted)}
+#maincontent .st-fan input[type=range]::-moz-range-thumb{height:22px;width:22px;border:2px solid #007aff;border-radius:50%;background:#f8fbff;box-shadow:0 2px 6px #0004}
+#maincontent .fv-preset-section{margin-top:18px;padding-top:14px;border-top:1px solid var(--ct-border)}
+#maincontent .fv-preset-section h4{font-size:16px;margin:0 0 12px}
+#maincontent .fv-preset-choice{display:none}
+#maincontent .st-fan .fv-save-bar{position:sticky;bottom:10px;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;margin:8px 0 0;padding:14px 20px;background:transparent;border:0;border-radius:0;box-shadow:none;pointer-events:none}
+body.theme-misectel #maincontent#maincontent .st-fan .fv-save-bar>.st-button{width:min(100%,360px);min-height:52px;border-radius:16px;font-size:17px;font-weight:650;box-shadow:0 6px 20px #071a2930,inset 0 1px 0 #ffffff25!important;pointer-events:auto}
+#maincontent .fv-save-state{font-size:11px;color:var(--ct-muted);background:var(--ct-page);border-radius:6px;padding:2px 6px}
 #maincontent .fv-save-state:empty{display:none}
-@media(max-width:600px){#maincontent .fv-modes{gap:8px}#maincontent .st-fan .fv-mode{padding:14px 6px!important;min-height:110px!important}#maincontent .fv-mode strong{font-size:13px}#maincontent .fv-mode small{font-size:10px}#maincontent .st-fan .fv-manual{padding:16px}#maincontent .st-fan .fv-preset{min-height:116px!important;padding:14px 6px!important}}
-
-body.theme-misectel #maincontent#maincontent .st-fan .st-threshold{background:var(--ct-inset)!important;border-color:var(--ct-border)!important;color:var(--ct-text)!important;box-shadow:none!important}
+body.theme-misectel #maincontent#maincontent .st-fan .st-threshold{margin-top:20px;background:var(--ct-inset)!important;color:var(--ct-text)!important;border-color:var(--ct-border)!important;box-shadow:none!important}
 body.theme-misectel #maincontent#maincontent .st-fan .st-threshold :is(strong,label){color:var(--ct-text)!important}
 body.theme-misectel #maincontent#maincontent .st-fan .st-threshold .st-muted{color:var(--ct-muted)!important}
+@media(max-width:1150px) and (min-width:761px){#maincontent .st-fan .fv-card{grid-template-columns:220px minmax(0,1fr);gap:20px}#maincontent .st-fan .fv-orbit{width:220px;height:220px}#maincontent .st-fan .fv-telemetry .st-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#maincontent .fv-telemetry .st-stat:last-child{grid-column:1/-1}}
+@media(max-width:760px){#maincontent .st-fan .fv-card{grid-template-columns:1fr;gap:24px;text-align:center;padding:22px 18px}#maincontent .st-fan .fv-orbit{margin:0 auto;width:240px;height:240px}#maincontent .st-fan .fv-telemetry .st-summary{grid-template-columns:repeat(2,minmax(0,1fr));text-align:left}#maincontent .fv-telemetry .st-stat:last-child{grid-column:1/-1}#maincontent .st-fan .fv-telemetry .st-unit-bar{justify-content:center}#maincontent .st-fan>.st-card{padding:20px 16px}}
+@media(max-width:500px){#maincontent .fv-modes,#maincontent .fv-presets{gap:8px}body.theme-misectel #maincontent#maincontent .st-fan :is(.fv-mode,.fv-preset){flex-direction:column;gap:5px;min-height:68px!important;padding:10px 6px!important}#maincontent .st-fan :is(.fv-mode,.fv-preset) strong{font-size:12px}#maincontent .fv-slider-row{gap:12px}#maincontent .fv-slider-row>span{font-size:12px}#maincontent .st-fan .fv-title{font-size:23px!important}}
+@media(prefers-reduced-motion:reduce){#maincontent .fv-rotor{will-change:auto}#maincontent .fv-gauge-level{transition:none}}
 
-/* A crisp fan housing, seven sculpted blades and an actual-output gauge. */
-#maincontent .st-fan .fv-orbit{width:212px;height:212px;border-radius:38px;border:1px solid var(--ct-border);background:linear-gradient(145deg,var(--ct-inset),var(--ct-card));box-shadow:inset 0 1px 0 #ffffff12,0 12px 28px #071a2915;margin:18px 0}
-#maincontent .st-fan .fv-ring{inset:8px;border:0;box-shadow:none;border-radius:0}
-#maincontent .st-fan .fv-ring:after{display:none}
-#maincontent .st-fan .fv-ring>svg{display:block;width:100%;height:100%;overflow:visible}
-#maincontent .fv-gauge-track{fill:none;stroke:var(--ct-border);stroke-width:2}
-#maincontent .fv-gauge-level{fill:none;stroke:var(--ct-accent);stroke-width:3;stroke-linecap:round;transform:rotate(-90deg);transform-origin:100px 100px;transition:stroke-dashoffset .7s ease}
-#maincontent .fv-bolt{fill:var(--ct-muted);opacity:.4}
-#maincontent .st-fan .fv-rotor{inset:15px;opacity:.92;filter:drop-shadow(0 2px 3px #071a2920)}
-#maincontent .st-fan .fv-reading{inset:61px;background:linear-gradient(145deg,var(--ct-card),var(--ct-inset));border:1px solid var(--ct-border);box-shadow:0 3px 12px #071a2920,inset 0 1px 0 #ffffff18}
-#maincontent .st-fan .fv-reading strong{font-size:27px;letter-spacing:-1px}
-#maincontent .st-fan .fv-reading span{font-size:9px;letter-spacing:.2px}
-#maincontent .st-fan .fv-detail{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--ct-border);border-radius:99px;background:var(--ct-inset);padding:7px 13px;font-size:11px}
-#maincontent .st-fan .fv-detail:before{content:'';width:5px;height:5px;border-radius:50%;background:var(--ct-accent)}
-#maincontent .st-fan .fv-card.is-stopped .fv-rotor{opacity:.35}
-#maincontent .st-fan .fv-card.is-stopped .fv-detail:before{background:var(--ct-muted)}
-#maincontent .st-fan .fv-card.is-unavailable .fv-rotor{opacity:.2}
-@media(prefers-reduced-motion:reduce){#maincontent .st-fan .fv-rotor{display:block;will-change:auto}#maincontent .fv-gauge-level{transition:none}}
-
-/* Instrument-panel layout: the dial reports live output; controls remain below. */
-#maincontent .st-fan .fv-card{display:grid;grid-template-columns:236px minmax(0,1fr);align-items:center;gap:34px;padding:26px 30px;text-align:left}
-#maincontent .st-fan .fv-orbit{width:230px;height:230px;margin:0;border-radius:46px;border-color:var(--ct-muted);box-shadow:inset 0 1px 0 #ffffff25,inset 0 -2px 4px #071a291a,0 9px 22px #071a2912}
-#maincontent .st-fan .fv-orbit:before{content:'';position:absolute;inset:5px;border-radius:40px;border:1px solid var(--ct-border);pointer-events:none}
-#maincontent .st-fan .fv-ring{inset:9px}
-#maincontent .fv-dial-ticks{stroke:var(--ct-muted);stroke-width:1;opacity:.7}
-#maincontent .st-fan .fv-gauge-level{filter:drop-shadow(0 0 3px #007aff40)}
-#maincontent .st-fan .fv-reading{inset:65px;gap:5px;text-align:center}
-#maincontent .st-fan .fv-reading strong{font-size:30px}
-#maincontent .st-fan .fv-reading span{font-size:9px;letter-spacing:.9px;text-transform:uppercase}
-#maincontent .st-fan .fv-caption{font-size:10px;letter-spacing:2.3px;margin-bottom:9px}
-#maincontent .st-fan .fv-title{font-size:24px!important;line-height:1.2;margin:0 0 13px!important;letter-spacing:-.5px}
-#maincontent .fv-info{min-width:0}
-#maincontent .st-fan .fv-telemetry .st-summary{margin:18px 0 0;gap:12px}
-#maincontent .st-fan .fv-telemetry .st-stat{padding:13px 15px;background:var(--ct-inset);border:1px solid var(--ct-border);border-radius:14px;box-shadow:none}
-#maincontent .st-fan .fv-telemetry .st-stat strong{font-size:20px}
-#maincontent .st-fan .fv-telemetry .st-unit-bar{margin:14px 0 0}
-#maincontent .st-fan .fv-telemetry .st-unit-button{min-height:32px;font-size:11px;padding:5px 10px}
-@media(max-width:760px){#maincontent .st-fan .fv-card{grid-template-columns:1fr;gap:22px;padding:22px;text-align:center}#maincontent .st-fan .fv-orbit{margin:0 auto;width:212px;height:212px}#maincontent .st-fan .fv-reading{inset:60px}#maincontent .st-fan .fv-telemetry .st-unit-bar{justify-content:center}#maincontent .st-fan .fv-telemetry .st-stat{text-align:left}}
+/* Approved sculpted fan art; one cached asset with independently rotating blades. */
+#maincontent .st-fan .fv-orbit{background:none;border:0;box-shadow:none;filter:drop-shadow(0 6px 10px #0004)}
+#maincontent .st-fan .fv-orbit:before,#maincontent .st-fan .fv-orbit:after{display:none}
+#maincontent .fv-frame{position:absolute;inset:0;overflow:visible;pointer-events:none}
+#maincontent .st-fan .fv-rotor{inset:0;clip-path:circle(39% at 50% 50%);filter:none;z-index:1}
+#maincontent .st-fan .fv-fan-art{position:absolute;display:block;max-width:none!important;width:120.93%!important;height:118.64%!important;left:-9.64%;top:-9.46%;pointer-events:none;user-select:none}
+#maincontent .st-fan .fv-ring{inset:22px;z-index:2}
+#maincontent .st-fan .fv-reading{background:none;border:0;box-shadow:none;inset:32%;z-index:3}
+body.theme-misectel #maincontent#maincontent .st-fan .fv-reading strong{font-size:33px}
+#maincontent .st-fan .fv-card.is-stopped .fv-rotor{opacity:1}
+#maincontent .st-fan .fv-card.is-unavailable .fv-frame{opacity:.5}
+#maincontent .st-fan .fv-card.is-unavailable .fv-rotor{opacity:.5}

@@ -1,10 +1,11 @@
 {
   "luci-app-chester-fan-status": {
-    "description": "Read the configured fan CPU temperature sensor",
+    "description": "Read CPU and cached modem temperatures",
     "read": {
       "ubus": {
         "misectel": [
-          "temp_status"
+          "temp_status",
+          "modem_temp"
         ]
       }
     }
