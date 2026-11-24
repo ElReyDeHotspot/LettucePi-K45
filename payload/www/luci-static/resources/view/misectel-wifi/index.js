@@ -73,7 +73,7 @@ createNetworkFields(radios,shared){
 },
 renderLinkedSection(radios){return this.createNetworkFields(radios,true);},
 renderSeparateSection(radios){const controls={};return {node:E('div',{'class':'wf-networks'},radios.map(r=>{const result=this.createNetworkFields([r],false);controls[r.name]=result.controls;return result.node;})),controls};},
-async saveChanges(button,apply=true){
+async saveChanges(button){
  if(this.saving)return;this.saving=true;
  const buttons=this.saveButtons||[button];buttons.forEach(b=>misectel.setButtonBusy(b,true));
  try{
@@ -104,14 +104,8 @@ async saveChanges(button,apply=true){
    if(country)uci.set('wireless',radio.name,'country',country);else uci.unset('wireless',radio.name,'country');
    if(t.powerSelect.value)uci.set('wireless',radio.name,'txpower',t.powerSelect.value);else uci.unset('wireless',radio.name,'txpower');
   });
-  if(apply){
-   await misectel.saveAndApplyUnchecked(uci);
-   window.setTimeout(()=>window.location.reload(),300);
-  }else{
-   await uci.save();
-   await ui.changes.init();
-   misectel.notify(_('Wi-Fi changes saved.'),'success');
-  }
+  await misectel.saveAndApplyUnchecked(uci);
+  window.setTimeout(()=>window.location.reload(),300);
  }catch(err){misectel.notify(_('Failed to save Wi-Fi settings: %s').format(err.message||err),'error');}
  finally{this.saving=false;buttons.forEach(b=>misectel.setButtonBusy(b,false));}
 },switchMode(linked){this.linkedMode=linked;if(this.linkedToggle)
@@ -124,15 +118,14 @@ dom.content(this.linkedModeText,[linked?_('Shared'):_('Separate')]);dom.content(
  this.modeBody=E('div');this.linkedToggle=this.radioState.length>1?E('input',{type:'checkbox',checked:this.linkedMode?'checked':null,'aria-label':'Use one name and password'}):null;
  this.linkedModeText=E('span',{'class':'wf-state'},[this.linkedMode?'Shared':'Separate']);
  if(this.linkedToggle)this.linkedToggle.addEventListener('change',()=>this.switchMode(this.linkedToggle.checked));
- const save=settings.button('Save',ui.createHandlerFn(this,ev=>this.saveChanges(ev.currentTarget,false)),{'class':'st-button secondary'});
- const apply=settings.button('Save & Apply',ui.createHandlerFn(this,ev=>this.saveChanges(ev.currentTarget,true)));
- this.saveButtons=[save,apply];
+ const apply=settings.button('Save & Apply',ui.createHandlerFn(this,ev=>this.saveChanges(ev.currentTarget)));
+ this.saveButtons=[apply];
  const page=settings.sheet([
  settings.head('Wi-Fi','Your network. Simple to connect. Easy to manage.','router'),
  this.linkedToggle?settings.card('Network setup','Choose how devices connect to your two Wi-Fi bands.',[
  E('div',{'class':'wf-power'},[settings.toggle('Use one name and password',this.linkedToggle,'Recommended: both bands share the same Wi-Fi name and password.'),this.linkedModeText])
  ]):'',this.modeBody,
- E('div',{'class':'wf-save-bar'},[E('div',{'class':'wf-save-actions'},[save,apply])])
+ E('div',{'class':'wf-save-bar'},[E('div',{'class':'wf-save-actions'},[apply])])
  ],'st-wifi');
  this.switchMode(!!linked&&this.linkedMode);return page;
 },handleSave:null,handleSaveApply:null,handleReset:null});
