@@ -62,6 +62,10 @@ for section in $(uci -q show ttyd | sed -n 's/^ttyd\.\([^=]*\)=ttyd$/\1/p'); do
  esac
 done
 uci -q commit ttyd
+# Live SIM status is required in every SIM mode. Migrate older retained
+# service-disable flags so a settings-preserving update cannot suppress it.
+/etc/init.d/chester_sim enable
+/etc/init.d/chester_sim start
 # Retain the frozen boost policy after vendor first-boot service setup.
 /etc/init.d/misectel_modem_boost stop >/dev/null 2>&1 || true
 /etc/init.d/misectel_modem_boost disable >/dev/null 2>&1 || true

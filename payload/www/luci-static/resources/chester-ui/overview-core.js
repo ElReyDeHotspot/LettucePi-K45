@@ -48,9 +48,9 @@ function formatTemperatureNumber(value,unit){if(value==null||isNaN(value))
 return null;let normalized=Number(value);let normalizedUnit=unit?String(unit).toUpperCase():'C';const absolute=Math.abs(normalized);if(!unit){if(absolute>=1000)
 normalized/=1000;else if(absolute>=200)
 normalized/=10;}
-const decimals=Math.abs(normalized%1)>=0.05?1:0;return`${normalized.toFixed(decimals)}Â°${normalizedUnit}`;}
+const decimals=Math.abs(normalized%1)>=0.05?1:0;return`${normalized.toFixed(decimals)}\u00b0${normalizedUnit}`;}
 function normalizeTemperatureText(value){if(isEmptyValue(value))
-return null;const text=String(value).trim();const match=text.match(/^([+-]?\d+(?:\.\d+)?)(?:\s*(?:Â°)?\s*([cCfF]))?$/);if(!match)
+return null;const text=String(value).trim();const match=text.match(/^([+-]?\d+(?:\.\d+)?)(?:\s*(?:\u00b0|\u00c2\u00b0)?\s*([cCfF]))?$/);if(!match)
 return text;const numeric=parseFloat(match[1]);if(isNaN(numeric))
 return text;return formatTemperatureNumber(numeric,match[2]||null)||text;}
 function formatLinkSpeed(speed){if(isEmptyValue(speed))

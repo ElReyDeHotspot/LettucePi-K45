@@ -2,11 +2,11 @@
   "product": "K45P",
   "board": "misectel,m02k45",
   "version": "1.0.12",
-  "build": "202611230003",
+  "build": "202611230004",
   "bin": "12",
   "built": "2026-11-23",
   "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.12-sysupgrade.itb",
-  "sha256": "b36c5ead0366a471cd42e02f61709c7cc8db72e82d5c1f62dcf263866069a042",
+  "sha256": "7a601c3737ddd4156013f8fb99b3a94b67eec20e5713fab601e3dd6b32d4d0bd",
   "size": 38134014,
   "notes": "Band / Tower Scan with provider names.\nSIM hot-plug initialization, stable live SIM status and solid blue network-mode selection.\nFaster navigation with smooth Sun/Night loading transitions.\nSymmetrical Software Update with full firmware details, signed release notes and Rev. naming.\nAll prior Chester features and bundled speed tests included. Vendor Linux 6.12.94 retained."
 }
