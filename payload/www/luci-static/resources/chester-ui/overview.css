@@ -97,10 +97,9 @@
 .chester-home .ch-port-settings:hover{background:var(--ct-soft,#e8f2ff)}
 .chester-home .ch-port-settings:focus-visible{outline:2px solid var(--ct-primary,#007aff);outline-offset:3px}
 
-/* Equal-size Home shortcuts, matching the approved blue and neutral design. */
+/* Home links reuse Quick Controls surfaces, type and icon colors. */
 .chester-home .ch-shortcuts{gap:8px;padding-top:16px}
-.chester-home .ch-shortcuts .ch-shortcut{display:grid;grid-template-rows:32px 34px;align-content:center;justify-items:center;gap:8px;height:112px;min-height:112px;padding:8px 3px;border-radius:14px;font-size:16px;font-weight:600;line-height:1.2;letter-spacing:-.02em}
-.chester-home .ch-shortcuts .ch-shortcut .ch-icon{width:32px;height:32px;color:inherit}
-.chester-home .ch-shortcut-label{display:flex;align-items:center;justify-content:center;height:34px;max-width:100%;white-space:normal;text-wrap:balance;text-align:center;line-height:1.15}
-html[data-chester-appearance=night] .chester-home .ch-shortcuts .ch-shortcut{background:linear-gradient(145deg,#104973,#0c3354)!important;border-color:#3987b5!important;color:#f3f8ff!important}
-@media(max-width:650px){.chester-home .ch-shortcuts{gap:7px}.chester-home .ch-shortcuts .ch-shortcut{font-size:13px;border-radius:12px;padding:8px 2px}}
+.chester-home .ch-shortcuts .ch-shortcut.ch-control{gap:8px!important;min-height:100px!important}
+.chester-home .ch-shortcut-label{display:flex;align-items:center;justify-content:center;min-height:34px;max-width:100%;white-space:normal;text-wrap:balance;text-align:center;line-height:1.15}
+.chester-home .ch-shortcuts .ch-control strong{font-size:clamp(14px,1.2vw,20px)}
+@media(max-width:650px){.chester-home .ch-shortcuts{gap:7px}.chester-home .ch-shortcuts .ch-control strong{font-size:13px}}

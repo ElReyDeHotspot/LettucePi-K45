@@ -9,5 +9,6 @@ assert.deepEqual(shortcuts,[
  ['Speedtest','speed','/admin/chester/ookla']
 ]);
 assert(!source.includes('callHomeUpdateStatus'));
+assert(source.includes("'class':'ch-shortcut ch-control'"),'Home links must reuse the Quick Controls component');
 for(const icon of ['apn','bandlock','terminal'])assert(source.includes(icon+":'"));
 console.log('PASS Home shortcuts: requested order, dedicated icons, correct destinations and no unused update polling.');
