@@ -1,0 +1,54 @@
+{
+  "luci-app-chester-guest": {
+    "description": "Manage Chester guest network",
+    "read": {
+      "uci": [
+        "network",
+        "wireless",
+        "dhcp",
+        "firewall"
+      ],
+      "ubus": {
+        "network.interface": [
+          "dump"
+        ],
+        "luci-rpc": [
+          "getHostHints"
+        ]
+      }
+    },
+    "write": {
+      "uci": [
+        "network",
+        "wireless",
+        "dhcp",
+        "firewall"
+      ]
+    }
+  },
+  "luci-app-chester-dmz": {
+    "description": "Manage Chester dmz network",
+    "read": {
+      "uci": [
+        "network",
+        "firewall",
+        "dhcp"
+      ],
+      "ubus": {
+        "network.interface": [
+          "dump"
+        ],
+        "luci-rpc": [
+          "getHostHints"
+        ]
+      }
+    },
+    "write": {
+      "uci": [
+        "network",
+        "firewall",
+        "dhcp"
+      ]
+    }
+  }
+}

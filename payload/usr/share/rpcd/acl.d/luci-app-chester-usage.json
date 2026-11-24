@@ -1,0 +1,26 @@
+{
+  "luci-app-chester-usage": {
+    "description": "Manage modem data usage settings",
+    "read": {
+      "ubus": {
+        "qmodem": [
+          "get_stats",
+          "get_traffic_reset_schedule"
+        ]
+      },
+      "uci": [
+        "qmodem"
+      ]
+    },
+    "write": {
+      "ubus": {
+        "chester.usage": [
+          "save"
+        ],
+        "qmodem": [
+          "clear_stats"
+        ]
+      }
+    }
+  }
+}

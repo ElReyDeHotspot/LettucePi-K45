@@ -1,0 +1,18 @@
+#!/usr/bin/ucode
+'use strict';
+import {cursor} from 'uci';
+import {popen,mkdir} from 'fs';
+function run(cmd){let f=popen(cmd,'r');if(!f)return '';let text=f.read('all')||'';f.close();return trim(text);}
+function invalid(error){return {success:false,error:error};}
+return {'chester.usage':{save:{args:{modem:'String',persistent:'String',enabled:'String',period:'String',hour:'String',day:'String'},call:function(req){
+ let a=req.args,u=cursor();if(index(['0','1'],a.persistent)<0||index(['0','1'],a.enabled)<0||!match(a.hour||'',/^[0-9]{1,2}$/)||!match(a.day||'',/^[0-9]{1,2}$/))return invalid('Invalid counter settings.');a.persistent=a.persistent=='1';a.enabled=a.enabled=='1';a.hour=int(a.hour);a.day=int(a.day);if(!match(a.modem||'',/^[A-Za-z0-9_]+$/)||u.get('qmodem',a.modem)!='modem-device')return invalid('Choose a configured modem.');
+ if(index(['daily','monthly'],a.period)<0||a.hour<0||a.hour>23||a.day<1||a.day>31)return invalid('Choose a valid reset time.');
+ let schedule={config_section:a.modem,enabled:a.enabled?'1':'0',reset_type:a.period,hour:''+a.hour,day:''+a.day};
+ let same=(u.get('qmodem','main','usage_stats_nvram_save')=='1')==a.persistent&&(u.get('qmodem',a.modem,'usage_reset_enabled')=='1')==a.enabled&&(u.get('qmodem',a.modem,'usage_reset_type')||'monthly')==a.period&&int(u.get('qmodem',a.modem,'usage_reset_hour')||'0')==a.hour&&int(u.get('qmodem',a.modem,'usage_reset_day')||'1')==a.day;if(same)return {success:true,unchanged:true,persistent:a.persistent};
+ // All string values above are validated; serialize the native RPC's string arguments.
+ let text=run("printf '%s' '"+sprintf('%J',schedule)+"' | /usr/libexec/rpcd/qmodem call set_traffic_reset_schedule");let result;try{result=json(text);}catch(e){return invalid('The reset scheduler did not respond. No counter reset was requested.');}
+ if(result.result!==true)return invalid(result.message||result.error||'The reset schedule could not be saved.');
+ mkdir('/tmp/chester-usage-uci',0700);u=cursor('/etc/config','/tmp/chester-usage-uci');let before=u.get('qmodem','main','usage_stats_nvram_save')=='1';
+ if(before!=a.persistent){if(!u.get('qmodem','main'))u.set('qmodem','main','main');u.set('qmodem','main','usage_stats_nvram_save',a.persistent?'1':'0');if(!u.save('qmodem')||!u.commit('qmodem'))return invalid('Reset schedule saved, but the counter retention setting could not be saved.');if(run('if /etc/init.d/qmodem_usage_stats restart >/dev/null 2>&1; then echo ok; else echo failed; fi')!='ok')return invalid('Settings saved, but the counter retention service did not restart.');}
+ return {success:true,schedule:result,persistent:a.persistent};
+}}}};

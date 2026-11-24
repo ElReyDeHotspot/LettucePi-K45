@@ -74,5 +74,203 @@
         "luci-app-chester-update"
       ]
     }
+  },
+  "admin/network/traffic": {
+    "title": "Traffic Statistics",
+    "order": 120,
+    "action": {
+      "type": "view",
+      "path": "misectel-modem/traffic"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-chester-usage"
+      ]
+    }
+  },
+  "admin/modem/traffic": {
+    "hidden": true,
+    "action": {
+      "type": "alias",
+      "path": "admin/network/traffic"
+    }
+  },
+  "admin/modem/sim": {
+    "title": "SIM Selection",
+    "order": 11,
+    "hidden": false,
+    "action": {
+      "type": "view",
+      "path": "misectel-modem/sim"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-chester-sim"
+      ]
+    }
+  },
+  "admin/chester/sim": {
+    "hidden": true,
+    "action": {
+      "type": "alias",
+      "path": "admin/modem/sim"
+    }
+  },
+  "admin/chester/fan": {
+    "hidden": true
+  },
+  "admin/developer/modem-network-monitor": {
+    "title": "Network Monitoring",
+    "order": 43,
+    "action": {
+      "type": "view",
+      "path": "misectel-modem/network-monitor"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-misectel-modem"
+      ]
+    }
+  },
+  "admin/modem/network-monitor": {
+    "hidden": true,
+    "action": {
+      "type": "alias",
+      "path": "admin/developer/modem-network-monitor"
+    }
+  },
+  "admin/network/guest": {
+    "title": "Guest Network",
+    "order": 105,
+    "action": {
+      "type": "view",
+      "path": "lettucepi/guest"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-chester-guest"
+      ]
+    }
+  },
+  "admin/network/vlans": {
+    "title": "VLANs",
+    "order": 115,
+    "action": {
+      "type": "view",
+      "path": "lettucepi/vlans"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-chester-vlans"
+      ]
+    }
+  },
+  "admin/chester/vlans": {
+    "hidden": true,
+    "action": {
+      "type": "alias",
+      "path": "admin/network/vlans"
+    }
+  },
+  "admin/firewall": {
+    "title": "Firewall",
+    "order": 22,
+    "action": {
+      "type": "firstchild",
+      "recurse": true
+    }
+  },
+  "admin/firewall/traffic": {
+    "title": "Live Traffic",
+    "order": 10,
+    "action": {
+      "type": "view",
+      "path": "lettucepi/traffic"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-chester-traffic"
+      ]
+    }
+  },
+  "admin/chester/traffic": {
+    "hidden": true,
+    "action": {
+      "type": "alias",
+      "path": "admin/firewall/traffic"
+    }
+  },
+  "admin/firewall/protection": {
+    "title": "Block Lists",
+    "order": 20,
+    "action": {
+      "type": "view",
+      "path": "lettucepi/protection"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-chester-guard"
+      ]
+    }
+  },
+  "admin/chester/protection": {
+    "hidden": true,
+    "action": {
+      "type": "alias",
+      "path": "admin/firewall/protection"
+    }
+  },
+  "admin/firewall/zapret": {
+    "title": "Zapret2",
+    "order": 30,
+    "action": {
+      "type": "view",
+      "path": "chester-zapret/streaming"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-zapret2"
+      ]
+    }
+  },
+  "admin/chester/zapret": {
+    "hidden": true,
+    "action": {
+      "type": "alias",
+      "path": "admin/firewall/zapret"
+    }
+  },
+  "admin/firewall/cloudflare": {
+    "title": "Cloudflare",
+    "order": 40,
+    "action": {
+      "type": "view",
+      "path": "chester-cloudflare/index"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-chester-cloudflare"
+      ]
+    }
+  },
+  "admin/chester/cloudflare": {
+    "hidden": true,
+    "action": {
+      "type": "alias",
+      "path": "admin/firewall/cloudflare"
+    }
+  },
+  "admin/firewall/dmz": {
+    "title": "DMZ",
+    "order": 50,
+    "action": {
+      "type": "view",
+      "path": "lettucepi/dmz"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-chester-dmz"
+      ]
+    }
   }
 }
