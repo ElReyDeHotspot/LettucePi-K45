@@ -82,3 +82,19 @@ body.theme-misectel #maincontent#maincontent .st-fan .fv-reading strong{font-siz
 #maincontent .st-fan .fv-card.is-stopped .fv-rotor{opacity:1}
 #maincontent .st-fan .fv-card.is-unavailable .fv-frame{opacity:.5}
 #maincontent .st-fan .fv-card.is-unavailable .fv-rotor{opacity:.5}
+
+#maincontent .fv-fan-column{min-width:0}
+#maincontent .fv-under-fan .fv-preset-section{border:0;margin:14px 0 0;padding:0}
+#maincontent .fv-under-fan h4{display:none}
+#maincontent .fv-under-fan .fv-presets{gap:5px}
+body.theme-misectel #maincontent#maincontent .st-fan .fv-under-fan .fv-preset{min-height:34px!important;padding:7px 5px!important;border-radius:9px;gap:0}
+#maincontent .fv-under-fan .fv-preset>.st-icon{display:none}
+#maincontent .st-fan .fv-under-fan .fv-preset strong{font-size:10px;white-space:normal;text-align:center}
+#maincontent .fv-save-state.is-error{max-width:100%;text-align:center}
+@media(max-width:760px){#maincontent .fv-fan-column{width:min(100%,280px);margin:0 auto}}
+
+@media(max-width:760px){body.theme-misectel #maincontent#maincontent .st-fan .fv-under-fan .fv-preset{min-height:40px!important}}
+
+body.theme-misectel #maincontent#maincontent .st-fan .fv-under-fan .fv-preset{flex-direction:column;gap:2px}
+#maincontent .st-fan .fv-under-fan .fv-preset strong{font-size:10.5px}
+#maincontent .st-fan .fv-under-fan .fv-preset small{font-size:10px;opacity:.85}

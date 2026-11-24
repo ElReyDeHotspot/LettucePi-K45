@@ -7,6 +7,7 @@ prelude='''let pwm='100',enabled='1',present=true,ready=true,requested=255,write
 let config={fan_mode:'1',fan_temp_threshold:'70',fan_speed_percent:'100'};
 function unlink(path){return true;}
 function system(command){return 0;}
+function sleep(milliseconds){return true;}
 function cursor(){return {get:(a,b,c)=>c==null?'main':config[c],set:(a,b,c,v)=>{writes++;config[c]=v;},save:()=>true,commit:()=>true};}
 function glob(path){return present?['/mock/fan']:[];}
 function readfile(path){
