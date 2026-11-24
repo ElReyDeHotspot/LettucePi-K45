@@ -82,9 +82,9 @@ cfg.write_text(s)
 p=root/'etc/config/rpcd'
 p.write_text(re.sub(r"(option username\s+)'admin'",r"\1'root'",p.read_text())+"\nconfig login 'admin'\n\toption username 'admin'\n\toption password '$p$root'\n\tlist read '*'\n\tlist write '*'\n")
 
-# Add the existing clients view to the ported dashboard menu.
+# Preserve old Client List bookmarks while the network menu owns its entry.
 p=root/'usr/share/luci/menu.d/luci-app-misectel-dashboard.json'
-d=json.loads(p.read_text());d['admin/dashboard/clients']={'title':'Connected Devices','order':10,'action':{'type':'view','path':'misectel-device/index'},'depends':{'acl':['luci-app-misectel-device']}}
+d=json.loads(p.read_text());d['admin/dashboard/clients']={'hidden':True,'action':{'type':'alias','path':'admin/network/clients'},'depends':{'acl':['luci-app-misectel-device']}}
 # Preserve the vendor's unauthenticated setup route; the wizard is reachable
 # from setup and can be revisited using its normal setup entry.
 p.write_text(json.dumps(d,indent=2)+'\n')

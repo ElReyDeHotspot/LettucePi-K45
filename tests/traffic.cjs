@@ -1,0 +1,14 @@
+const fs=require('fs'),assert=require('assert/strict');
+const root=__dirname+'/../payload/www/luci-static/resources/';
+const source=fs.readFileSync(root+'view/lettucepi/traffic.js','utf8');
+const helpers=new Function(source.slice(source.indexOf('function amount('),source.indexOf('return view.extend('))+';return {amount,service,application,matches};')();
+assert.equal(helpers.amount(null),'\u2014');assert.equal(helpers.amount(1000000),'1 MB');
+assert.equal(helpers.application({destination_port:'443'})[0],'Unknown');
+assert.equal(helpers.application({destination_port:'53'})[1],'Port hint');
+assert(helpers.matches({source:'192.168.1.2',destination:'1.1.1.1',protocol:'tcp',direction:'Outbound'},'framework','Outbound','tcp',{name:'FrameWorkPC'}));
+assert(!helpers.matches({protocol:'udp',direction:'Inbound'},'','Outbound','udp',{}));
+const icons=new Function('baseclass',fs.readFileSync(root+'chester-ui/devices.js','utf8'))({extend:x=>x});
+const grouped=Object.values(icons.categories).flat();assert.equal(new Set(grouped).size,40);assert.equal(grouped.length,40);assert.deepEqual([...grouped].sort(),Object.keys(icons.catalog).sort());
+const clients=fs.readFileSync(root+'view/misectel-device/index.js','utf8');const name=new Function(clients.slice(clients.indexOf('function deviceName('),clients.indexOf('function present('))+';return deviceName;')();
+assert.equal(name({displayName:'My laptop',hostname:'old-host'}),'My laptop');assert.equal(name({hostname:'--'}),'Unnamed Device');
+console.log('PASS traffic: names/search, protocol/direction filters, honest encrypted-app labels, missing rates, and 40 unique categorized device icons.');

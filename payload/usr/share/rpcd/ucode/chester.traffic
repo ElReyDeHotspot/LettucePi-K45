@@ -1,0 +1,4 @@
+#!/usr/bin/ucode
+'use strict';
+import {popen} from 'fs';
+return {'chester.traffic':{snapshot:{call:function(){let f=popen('/usr/libexec/chester-traffic','r');if(!f)return {success:false,error:'Traffic collector unavailable.'};let s=f.read('all');f.close();try{return json(s);}catch(e){return {success:false,error:'Could not read traffic counters.'};}}}}};

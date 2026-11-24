@@ -76,7 +76,7 @@ return view.extend({
 			/* connect / connect-ssh answer with the login URL when the node is
 			 * not authenticated yet. */
 			if (/^https:\/\//.test(msg)) return self.showAuth(msg);
-			ui.addNotification(null, E('p', {}, msg), 'info');
+			ui.addNotification(null, E('p', {}, msg ? msg.charAt(0).toUpperCase() + msg.slice(1) : _('Done.')), 'success');
 			return self.refresh();
 		}).catch(function (err) {
 			ui.hideModal();

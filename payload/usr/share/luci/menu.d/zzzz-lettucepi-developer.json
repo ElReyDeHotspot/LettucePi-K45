@@ -71,6 +71,14 @@
         "order": 33,
         "title": "Diagnostics"
     },
+    "admin/developer/network-dns": {
+        "action": {
+            "path": "admin/network/dns",
+            "type": "alias"
+        },
+        "order": 36,
+        "title": "DNS Config"
+    },
     "admin/developer/network-firewall-zones": {
         "action": {
             "path": "admin/network/firewall/zones",
@@ -87,6 +95,14 @@
         "order": 30,
         "title": "Interfaces"
     },
+    "admin/developer/network-portmap": {
+        "action": {
+            "path": "admin/network/portmap",
+            "type": "alias"
+        },
+        "order": 37,
+        "title": "Port Forwarding"
+    },
     "admin/developer/network-routes": {
         "action": {
             "path": "admin/network/routes",
@@ -94,6 +110,19 @@
         },
         "order": 34,
         "title": "Static Routes"
+    },
+    "admin/developer/network-switch": {
+        "action": {
+            "path": "admin/network/switch",
+            "type": "alias"
+        },
+        "depends": {
+            "fs": {
+                "/sbin/swconfig": "executable"
+            }
+        },
+        "order": 38,
+        "title": "Switch"
     },
     "admin/developer/network-wireless": {
         "action": {

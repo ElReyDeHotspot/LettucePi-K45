@@ -1,0 +1,23 @@
+#maincontent .st-lan{max-width:1240px;--ln-text:#273646}
+#maincontent .ln-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:stretch}
+#maincontent .ln-layout .st-card{height:100%;box-sizing:border-box;margin-bottom:0}
+#maincontent .ln-range{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+#maincontent .ln-preview{color:var(--st-muted);font-size:12px;line-height:1.6;margin:15px 0 0}
+#maincontent .ln-notice,#maincontent .ln-reconnect{border:1px solid #1688ff55;background:#1688ff0a;border-radius:16px;padding:16px;color:var(--ln-text);font-size:13px;line-height:1.6;margin-bottom:20px}
+#maincontent .ln-notice.is-error,#maincontent .ln-error{border-color:#ec5d7355;color:#cc3451}
+#maincontent .ln-error{padding:14px 18px;font-size:13px;background:#ec5d730b;border:1px solid #ec5d7355;border-radius:14px;margin-top:18px}
+#maincontent :is(.ln-notice,.ln-error,.ln-reconnect)[hidden]{display:none}
+#maincontent .ln-links{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}
+#maincontent .ln-links>a{display:flex;align-items:center;gap:16px;padding:20px;background:#7e9ab008;border:1px solid var(--st-line);border-radius:18px;text-decoration:none!important;color:var(--ln-text)!important}
+#maincontent .ln-links strong{display:block;font-size:15px;color:inherit!important}
+#maincontent .ln-links small{display:block;font-size:12px;color:var(--st-muted);line-height:1.5;margin-top:6px}
+#maincontent .ln-links .st-icon{width:28px;height:28px;color:#1688ff}
+#maincontent .ln-advanced{padding:12px 0 18px;color:var(--st-muted);font-size:13px;line-height:1.7}
+#maincontent .ln-advanced summary{cursor:pointer;min-height:38px;font-weight:600}
+#maincontent .ln-advanced-links{display:flex;gap:10px;flex-wrap:wrap}
+#maincontent .ln-advanced-links a{padding:10px 14px;min-height:44px;box-sizing:border-box;background:#1688ff0a;border:1px solid var(--st-line);border-radius:11px;text-decoration:none}
+#maincontent .ln-layout input:disabled,#maincontent .ln-layout select:disabled{opacity:.5}
+html[data-chester-appearance=night] #maincontent .st-lan{--ln-text:#e2edf7}
+html[data-chester-appearance=night] #maincontent .ln-error{color:#ffadbd}
+@media(max-width:850px){#maincontent .ln-layout,#maincontent .ln-links{grid-template-columns:1fr}}
+@media(max-width:480px){#maincontent .ln-range{grid-template-columns:1fr}}

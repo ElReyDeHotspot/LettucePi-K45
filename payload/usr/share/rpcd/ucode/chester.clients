@@ -1,0 +1,39 @@
+#!/usr/bin/ucode
+'use strict';
+import {cursor} from 'uci';
+import {mkdir,open} from 'fs';
+function profiles(){let out={},u=cursor();u.foreach('chester_clients','device',function(s){if(s.mac)out[uc(s.mac)]={name:s.name||'',icon:s.icon||'auto'};});return out;}
+function ipv4(s){let parts=split(s||'','.');if(length(parts)!=4)return null;let out=0;for(let part in parts){if(!match(part,/^[0-9]{1,3}$/)||int(part)>255)return null;out=out*256+int(part);}return out;}
+function leases(u){let out=[];u.foreach('dhcp','host',function(s){push(out,s);});return out;}
+function addresses(){let u=cursor();return leases(u);}
+return {'chester.clients':{
+ address:{args:{mac:'String',mode:'String',ip:'String'},call:function(req){
+  let a=req.args,mac=uc(a.mac||'');if(!match(mac,/^([0-9A-F]{2}:){5}[0-9A-F]{2}$/)||!match(mac,/^[0-9A-F][02468ACE]:/)||mac=='00:00:00:00:00:00')return {success:false,error:'Choose a valid device MAC address.'};
+  if(index(['auto','static'],a.mode)<0)return {success:false,error:'Choose Automatic or Static IP.'};
+  mkdir('/tmp/chester-client-uci',0700);let u=cursor('/etc/config','/tmp/chester-client-uci'),all=leases(u),existing=null;
+  for(let entry in all){let macs=type(entry.mac)=='array'?entry.mac:[entry.mac];for(let v in macs){if(uc(v||'')==mac){if(existing)return {success:false,error:'This device has more than one reservation. Review advanced DHCP settings first.'};existing=entry;if(length(macs)>1)return {success:false,error:'This reservation covers multiple MAC addresses. Review advanced DHCP settings first.'};}}}
+  if(a.mode=='static'){
+   let ip=ipv4(a.ip),lan=u.get('network','lan','ipaddr');if(type(lan)=='array')lan=lan[0];let cidr=split(lan||'','/'),router=ipv4(cidr[0]),mask=ipv4(u.get('network','lan','netmask')||'255.255.255.0');if(length(cidr)>1){let bits=int(cidr[1]);if(bits<1||bits>32)return {success:false,error:'The LAN prefix is invalid.'};mask=(0xffffffff<<(32-bits))&0xffffffff;}
+   if(ip==null||router==null||mask==null||(ip&mask)!=(router&mask)||ip==router||ip==(router&mask)||ip==((router&mask)|((~mask)&0xffffffff)))return {success:false,error:'Choose a usable IPv4 address in the LAN subnet, excluding the router address.'};
+   let lf=open('/tmp/dhcp.leases','r');if(lf){let text=lf.read('all')||'';lf.close();for(let line in split(text,'\n')){let fields=split(trim(line),/[[:space:]]+/);if(length(fields)>2&&fields[2]==a.ip&&uc(fields[1])!=mac)return {success:false,error:'That IP is currently leased to another device.'};}}
+   for(let entry in all)if(entry.ip==a.ip&&(!existing||entry['.name']!=existing['.name']))return {success:false,error:'That IP is already reserved for another device.'};
+   let sid=existing?existing['.name']:u.add('dhcp','host');u.set('dhcp',sid,'mac',[lc(mac)]);u.set('dhcp',sid,'ip',a.ip);u.set('dhcp',sid,'interface','lan');
+  }else if(existing)u.delete('dhcp',existing['.name']);else return {success:true};
+  if(!u.save('dhcp')||!u.commit('dhcp'))return {success:false,error:'Could not save the IP assignment.'};
+  let code=system('/etc/init.d/dnsmasq reload >/dev/null 2>&1');if(code!=0)return {success:false,error:'The IP assignment was saved, but DHCP could not reload. Check the DNS/DHCP service.'};return {success:true};
+ }},
+
+ list:{call:function(){return {devices:profiles()};}},
+ save:{args:{mac:'String',name:'String',icon:'String'},call:function(req){
+ let a=req.args,mac=uc(a.mac||''),name=trim(a.name||''),icon=a.icon;
+ if(!match(mac,/^([0-9A-F]{2}:){5}[0-9A-F]{2}$/)||!match(mac,/^[0-9A-F][02468ACE]:/)||mac=='00:00:00:00:00:00')return {success:false,error:'Choose a valid device MAC address.'};
+ if(length(name)>64||match(name,/[[:cntrl:]]/))return {success:false,error:'Use a name of up to 64 characters without control characters.'};
+ if(index(["auto", "ethernet", "wifi", "desktop", "laptop", "printer", "car", "light", "phone", "tablet", "watch", "speaker", "tv", "fridge", "washer", "dryer", "microwave", "streaming", "alarm", "purifier", "ev", "plug", "garage", "camera", "thermostat", "console", "accesspoint", "router", "switch", "nas", "server", "doorbell", "lock", "vacuum", "dishwasher", "oven", "fan", "solar", "sensor", "device"],icon)<0)return {success:false,error:'Choose an available device icon.'};
+ let u=cursor(),sid='d'+replace(mac,/:/g,''),count=0;u.foreach('chester_clients','device',function(s){count++;});
+ if(count>=512&&!u.get('chester_clients',sid))return {success:false,error:'The device customization limit has been reached.'};
+ if(name==''&&icon=='auto')u.delete('chester_clients',sid);
+ else {u.set('chester_clients',sid,'device');u.set('chester_clients',sid,'mac',mac);u.set('chester_clients',sid,'name',name);u.set('chester_clients',sid,'icon',icon);}
+ if(!u.save('chester_clients')||!u.commit('chester_clients'))return {success:false,error:'Could not save the device. Try again.'};
+ return {success:true,devices:profiles()};
+ }}
+}};

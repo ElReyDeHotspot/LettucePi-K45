@@ -6,3 +6,7 @@ tpws -text
 *.cmd -text whitespace=cr-at-eol
 # Preserve the official CLI documentation as supplied by Ookla.
 payload/usr/share/chester/ookla/speedtest.md -whitespace
+
+# Preserve third-party traffic-engine licenses as distributed.
+integrations/traffic/licenses/* -whitespace
+payload/usr/share/chester/traffic-licenses/* -whitespace

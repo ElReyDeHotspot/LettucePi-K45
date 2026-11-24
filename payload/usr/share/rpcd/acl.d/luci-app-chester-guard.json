@@ -1,0 +1,1 @@
+{"luci-app-chester-guard":{"description":"Manage Chester protection categories, exceptions and device policies","read":{"ubus":{"chester.guard":["status"],"chester.clients":["list"]},"uci":["dhcp","misectel"]},"write":{"ubus":{"chester.guard":["save","update"]}}}}

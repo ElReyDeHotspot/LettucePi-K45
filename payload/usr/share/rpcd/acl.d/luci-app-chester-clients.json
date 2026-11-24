@@ -1,0 +1,20 @@
+{
+  "luci-app-chester-clients": {
+    "description": "Customize client display names and device icons",
+    "read": {
+      "ubus": {
+        "chester.clients": [
+          "list"
+        ]
+      }
+    },
+    "write": {
+      "ubus": {
+        "chester.clients": [
+          "save",
+          "address"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,53 @@
+/* Shared LuCI notifications: neutral surfaces with clear severity accents. */
+body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message{
+ --nt-bg:#fff;--nt-text:#273646;--nt-line:#d8e3ee;--nt-accent:#0879ec;--nt-soft:#eaf3ff;--nt-icon:"i";
+ box-sizing:border-box;opacity:1!important;position:relative!important;display:flex!important;flex-wrap:wrap;align-items:center!important;gap:12px 16px!important;
+ width:100%;max-width:1120px;min-height:74px;margin:16px auto 20px!important;padding:18px 20px 18px 64px!important;
+ border:1px solid var(--nt-line)!important;border-radius:18px!important;background:var(--nt-bg)!important;color:var(--nt-text)!important;
+ box-shadow:0 6px 22px #18395309!important;font:500 14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+ text-align:left!important;justify-items:normal!important;overflow-wrap:anywhere;overflow:hidden;
+}
+body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message::before{display:none!important;content:none!important}
+body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message::after{
+ content:var(--nt-icon)!important;position:absolute!important;inset:18px auto auto 18px!important;transform:none!important;
+ display:grid!important;place-items:center;width:28px!important;height:28px!important;border:0!important;border-radius:50%!important;
+ background:var(--nt-soft)!important;color:var(--nt-accent)!important;box-shadow:none!important;font:700 17px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+}
+body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message.success{--nt-icon:"\2713";--nt-accent:#178b52;--nt-soft:#e5f7ed;--nt-line:#c4e8d3}
+body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message:is(.warning,.notice){--nt-icon:"!";--nt-accent:#a36c0b;--nt-soft:#fff1d4;--nt-line:#ead9b8}
+body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message:is(.danger,.error){--nt-icon:"!";--nt-accent:#d0354c;--nt-soft:#ffebef;--nt-line:#edc9d0}
+body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message>div{padding:0!important;color:inherit!important;font:inherit!important;text-align:left!important;min-width:0}
+body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message>div:first-child{flex:1 1 200px!important}
+body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message>div:last-child:not(:first-child){flex:0 0 auto!important;align-self:center!important;display:flex;align-items:center}
+body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message :is(p,h4){color:inherit!important;text-align:left!important;padding:0!important;margin:0!important}
+body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message h4{font-size:17px!important;line-height:1.35!important;font-weight:650!important;letter-spacing:-.02em;flex-basis:100%;margin-bottom:4px!important}
+body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message p{font:inherit!important}
+body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message a{color:var(--nt-accent)!important;text-underline-offset:3px}
+body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message :is(.btn,.cbi-button){
+ height:auto!important;min-height:40px!important;min-width:44px;padding:8px 15px!important;margin:0!important;border:1px solid var(--nt-line)!important;border-radius:11px!important;
+ color:var(--nt-accent)!important;background:var(--nt-soft)!important;box-shadow:none!important;font:600 13px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;text-transform:none!important;
+}
+body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message :is(.btn,.cbi-button):focus-visible{outline:2px solid var(--nt-accent)!important;outline-offset:3px}
+body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message.spinning::after{content:""!important;box-sizing:border-box;border:2px solid var(--nt-accent)!important;border-right-color:transparent!important;background:none!important;animation:chester-notice-spin 1s linear infinite}
+body.theme-misectel #maincontent>.alert-message.fade-in{animation:chester-notice-enter .2s ease-out both}
+body.theme-misectel #maincontent>.alert-message.fade-out{animation:none!important;opacity:0!important;transform:translateY(-3px);transition:opacity .16s,transform .16s;pointer-events:none}
+html[data-chester-appearance=night] body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message{--nt-bg:#192938;--nt-text:#e2edf7;--nt-line:#354b60;--nt-accent:#9bcaff;--nt-soft:#243d57;box-shadow:0 6px 22px #0002!important}
+html[data-chester-appearance=night] body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message.success{--nt-accent:#92e5b7;--nt-soft:#234b39;--nt-line:#365e4a}
+html[data-chester-appearance=night] body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message:is(.warning,.notice){--nt-accent:#f2cb7c;--nt-soft:#473c28;--nt-line:#66553b}
+html[data-chester-appearance=night] body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message:is(.danger,.error){--nt-accent:#ffb0bb;--nt-soft:#4a2d39;--nt-line:#704451}
+/* Generic dialogs inherit the same surface. Existing custom Chester dialogs retain their layouts. */
+body.theme-misectel #modal_overlay{background:#07172b70;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+body.theme-misectel #modal_overlay>.modal:not([class*="chester-"]):not(.cbi-modal):not(:has(.cbi-map)){
+ width:min(640px,calc(100vw - 32px))!important;max-width:calc(100vw - 32px)!important;box-sizing:border-box;padding:26px!important;border:1px solid #d7e1ed!important;border-radius:24px!important;
+ background:linear-gradient(130deg,#fff,#f8faff)!important;color:#253647!important;box-shadow:0 24px 80px #061b3438!important;font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+}
+body.theme-misectel #modal_overlay>.modal:not([class*="chester-"]):not(.cbi-modal):not(:has(.cbi-map))>h4{border:0!important;background:none!important;padding:0!important;margin:0 0 16px!important;color:inherit!important;font-size:24px!important;font-weight:700!important;letter-spacing:-.03em}
+body.theme-misectel #modal_overlay>.modal:not([class*="chester-"]):not(.cbi-modal):not(:has(.cbi-map)) .btn{min-height:44px!important;height:auto!important;padding:10px 17px!important;border:1px solid #d7e1ed!important;border-radius:11px!important;background:#f0f5fb!important;color:#1675cf!important;box-shadow:none!important;font-size:14px!important;line-height:1.4!important}
+body.theme-misectel #modal_overlay>.modal:not([class*="chester-"]):not(.cbi-modal):not(:has(.cbi-map)) :is(.btn.primary,.cbi-button-action,.cbi-button-apply,.cbi-button-positive){background:#007aff!important;color:#fff!important;border-color:#0070ee!important}
+body.theme-misectel #modal_overlay>.modal:not([class*="chester-"]):not(.cbi-modal):not(:has(.cbi-map)) :is(.cbi-button-remove,.cbi-button-negative,.btn.danger){background:#e44555!important;color:#fff!important;border-color:#d53c4c!important}
+html[data-chester-appearance=night] body.theme-misectel #modal_overlay>.modal:not([class*="chester-"]):not(.cbi-modal):not(:has(.cbi-map)){background:linear-gradient(130deg,#1c3041,#142331)!important;color:#f0f5fb!important;border-color:#3b5268!important;box-shadow:0 24px 80px #0006!important}
+html[data-chester-appearance=night] body.theme-misectel #modal_overlay>.modal:not([class*="chester-"]):not(.cbi-modal):not(:has(.cbi-map)) .btn:not(.primary):not(.cbi-button-action):not(.cbi-button-apply):not(.cbi-button-positive):not(.cbi-button-remove):not(.cbi-button-negative):not(.danger){background:#253e55!important;color:#b8dcff!important;border-color:#41617e!important}
+@keyframes chester-notice-enter{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@keyframes chester-notice-spin{to{transform:rotate(360deg)}}
+@media(max-width:600px){body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message{padding:16px 16px 16px 56px!important;gap:12px!important;border-radius:16px!important;font-size:14px!important}body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message::after{inset:16px auto auto 15px!important;width:26px!important;height:26px!important}body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message>div:last-child:not(:first-child){margin-left:auto!important}body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message :is(.btn,.cbi-button){min-height:44px!important}}
+@media(prefers-reduced-motion:reduce){body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message{animation:none!important;transition:opacity .01ms!important}body.theme-misectel :is(#maincontent,#modal_overlay) .alert-message.spinning::after{animation:none!important}}

@@ -69,4 +69,6 @@ uci -q commit ttyd
 # Retain the frozen boost policy after vendor first-boot service setup.
 /etc/init.d/misectel_modem_boost stop >/dev/null 2>&1 || true
 /etc/init.d/misectel_modem_boost disable >/dev/null 2>&1 || true
+/etc/init.d/chester_traffic enable
+/etc/init.d/chester_traffic start
 exit 0
