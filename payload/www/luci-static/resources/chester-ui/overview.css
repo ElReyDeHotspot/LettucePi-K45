@@ -88,3 +88,11 @@
 .chester-home .ch-control-state{font-size:clamp(14px,1.1vw,18px)!important;line-height:1.15!important}
 @media(min-width:1450px){.chester-home .ch-carrier{margin-bottom:16px!important}.chester-home .ch-band-row{padding-top:4px!important;padding-bottom:4px!important}}
 @media(max-width:650px){.chester-home .ch-port>small{font-size:12px!important}.chester-home .ch-control-state{font-size:14px!important}}
+
+/* Ethernet card settings shortcut. */
+.chester-home .ch-card-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+.chester-home .ch-card-heading h3{margin:0}
+.chester-home .ch-port-settings{display:flex;align-items:center;justify-content:center;flex:0 0 36px;width:36px;height:36px;border-radius:11px;color:var(--ct-accent,#007aff);background:var(--ct-inset,#f3f6fb);text-decoration:none}
+.chester-home .ch-port-settings .st-icon,.chester-home .ch-port-settings svg{display:block;width:20px;height:20px}
+.chester-home .ch-port-settings:hover{background:var(--ct-soft,#e8f2ff)}
+.chester-home .ch-port-settings:focus-visible{outline:2px solid var(--ct-primary,#007aff);outline-offset:3px}

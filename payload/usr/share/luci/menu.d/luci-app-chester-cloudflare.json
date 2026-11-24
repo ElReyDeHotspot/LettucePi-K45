@@ -1,6 +1,6 @@
 {
  "admin/chester/cloudflare": {
-  "title": "Cloudflare",
+  "title": "DNS Setup",
   "order": 85,
   "action": {"type": "view", "path": "chester-cloudflare/index"},
   "depends": {"acl": ["luci-app-chester-cloudflare"]}

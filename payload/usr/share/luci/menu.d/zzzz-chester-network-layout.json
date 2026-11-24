@@ -111,7 +111,12 @@
     }
   },
   "admin/chester/fan": {
-    "hidden": true
+    "hidden": true,
+    "depends": {
+      "acl": [
+        "luci-app-chester-fan"
+      ]
+    }
   },
   "admin/developer/modem-network-monitor": {
     "title": "Network Monitoring",
@@ -195,7 +200,7 @@
     }
   },
   "admin/firewall/protection": {
-    "title": "Block Lists",
+    "title": "Block List",
     "order": 20,
     "action": {
       "type": "view",
@@ -235,7 +240,7 @@
     }
   },
   "admin/firewall/cloudflare": {
-    "title": "Cloudflare",
+    "title": "DNS Setup",
     "order": 40,
     "action": {
       "type": "view",
@@ -483,5 +488,19 @@
   },
   "admin/modem/qmodem": {
     "hidden": true
+  },
+  "admin/network/topology": {
+    "title": "Network Topology",
+    "order": 112,
+    "action": {
+      "type": "view",
+      "path": "lettucepi/topology"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-chester-topology",
+        "luci-app-misectel-device"
+      ]
+    }
   }
 }

@@ -1,0 +1,32 @@
+{
+  "luci-app-chester-topology": {
+    "description": "Discover and map network connections without changing network settings",
+    "read": {
+      "ubus": {
+        "chester.topology": [
+          "read"
+        ],
+        "chester.clients": [
+          "list"
+        ]
+      },
+      "uci": [
+        "dhcp",
+        "misectel",
+        "network",
+        "system"
+      ]
+    },
+    "write": {
+      "ubus": {
+        "chester.topology": [
+          "save"
+        ],
+        "chester.clients": [
+          "save",
+          "address"
+        ]
+      }
+    }
+  }
+}

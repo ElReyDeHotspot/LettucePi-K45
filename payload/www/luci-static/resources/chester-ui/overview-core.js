@@ -544,11 +544,11 @@ return;portNames.push(name);});const ports=await Promise.all(portNames.map(async
  this.modemSelectWrap=E('div',{'class':'ch-modem-select',style:'display:none'},[this.modemSelect]);
  this.loadingNode=E('div',{'class':'ch-loading','aria-live':'polite'},['Collecting device information…']);
  const shortcuts=[['Reboot','power',L.url('admin','system','reboot')],['Update','download',L.url('admin','system','update')],['Speeds','speed',L.url('admin','chester','ookla')],['Failover','arrows',L.url('admin','network','failover')]];
- const portCard=E('section',{'class':'ch-card'},[E('h3',{},['Ethernet Ports']),this.portPanelNode,E('div',{'class':'ch-shortcuts'},shortcuts.map(([label,icon,href])=>E('a',{'class':'ch-shortcut'+(label==='Reboot'?' is-neutral':''),href:href},[homeIcon(icon),E('span',{},[label])])))]);
+ const portCard=E('section',{'class':'ch-card'},[E('div',{'class':'ch-card-heading'},[E('h3',{},['Ethernet Ports']),E('a',{'class':'ch-port-settings',href:NETWORK_SETTINGS_URL,title:'Local LAN','aria-label':'Open Local LAN'},[iconKit.render('system')])]),this.portPanelNode,E('div',{'class':'ch-shortcuts'},shortcuts.map(([label,icon,href])=>E('a',{'class':'ch-shortcut'+(label==='Reboot'?' is-neutral':''),href:href},[homeIcon(icon),E('span',{},[label])])))]);
  const controlCard=E('section',{'class':'ch-card'},[E('h3',{},['Quick Controls']),this.ledToggleWrap]);
  this.wanSection=E('section',{},[E('h4',{},['WAN Status']),this.wanNode]);
  return E('div',{'class':'chester-home'},[
-  E('link',{rel:'stylesheet',href:L.resource('chester-ui/overview.css')+'?v=20261123-mode'}),
+  E('link',{rel:'stylesheet',href:L.resource('chester-ui/overview.css')+'?v=20261124-ports'}),
   E('div',{'class':'ch-head'},[E('div',{},[E('div',{'class':'ch-title-row'},[E('div',{'class':'ch-title',role:'heading','aria-level':'2'},['Overview']),this.onlineBadge]),E('p',{'class':'ch-muted'},['Your Chester K45P, at a glance.'])])]),
   this.securityNode,this.summaryNode,
   E('div',{'class':'ch-layout'},[E('section',{'class':'ch-card ch-cellular-card'},[E('div',{'class':'ch-card-heading'},[E('h3',{},['Cellular']),this.modemSelectWrap]),this.modemNode]),E('div',{'class':'ch-side'},[portCard,controlCard])]),

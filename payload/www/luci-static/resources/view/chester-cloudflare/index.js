@@ -1,5 +1,6 @@
 'use strict';
 'require view';
+'require chester-ui.dns-presets as dnsPresets';
 'require rpc';
 'require poll';
 'require dom';
@@ -25,7 +26,11 @@ return view.extend({
  const mode=select(s.dns||'system',[['system','Automatic · Use Existing DNS'],['cloudflare','Cloudflare · Standard'],['malware','Cloudflare · Block Malware'],['family','Cloudflare · Block Malware and Adult Content'],['manual','Manual DNS Servers']]);
  const ipv4=E('textarea',{rows:2,placeholder:'1.1.1.1\n1.0.0.1',spellcheck:'false'},[(s.ipv4||[]).join('\n')]);
  const ipv6=E('textarea',{rows:2,placeholder:'2606:4700:4700::1111\n2606:4700:4700::1001',spellcheck:'false'},[(s.ipv6||[]).join('\n')]);
- const manual=E('div',{'class':'st-fields'},[kit.field('IPv4 DNS Servers',ipv4,'One address per line. IPv4 and IPv6 can be used together.'),kit.field('IPv6 DNS Servers',ipv6,'Requires a working IPv6 internet connection.')]);const syncDNS=()=>{manual.hidden=mode.value!=='manual';};mode.addEventListener('change',syncDNS);syncDNS();
+ const presetNote=E('p',{'class':'st-muted cf-preset-note',role:'status','aria-live':'polite'}),presetButtons=[];
+ const syncPresets=()=>{const id=dnsPresets.selected(ipv4.value,ipv6.value);presetButtons.forEach(b=>b.setAttribute('aria-pressed',String(b.getAttribute('data-preset')===id)));};
+ dnsPresets.presets.forEach(p=>presetButtons.push(E('button',{type:'button','class':'cf-dns-preset','data-preset':p.id,'aria-pressed':'false',click:()=>{dnsPresets.fill(p.id,ipv4,ipv6);syncPresets();presetNote.textContent=p.name+' addresses filled in. Save & Apply to use them.';}},[E('strong',{},[p.name]),E('small',{},[p.detail])])));
+ const editDNS=()=>{syncPresets();presetNote.textContent='';};ipv4.addEventListener('input',editDNS);ipv6.addEventListener('input',editDNS);syncPresets();
+ const manual=E('div',{'class':'cf-manual-dns'},[E('div',{'class':'cf-dns-shortcuts'},[E('h4',{},['DNS Shortcuts']),E('div',{'class':'cf-dns-presets',role:'group','aria-label':'DNS Shortcuts'},presetButtons),presetNote]),E('div',{'class':'st-fields'},[kit.field('IPv4 DNS Servers',ipv4,'One address per line. IPv4 and IPv6 can be used together.'),kit.field('IPv6 DNS Servers',ipv6,'Requires a working IPv6 internet connection.')])]);const syncDNS=()=>{manual.hidden=mode.value!=='manual';};mode.addEventListener('change',syncDNS);syncDNS();
  const enabled=E('input',{type:'checkbox',checked:s.warp?'checked':null});
  let chosenPlan=s.tier==='plus'?'plus':'free';
  const license=E('input',{type:'password',autocomplete:'new-password',spellcheck:'false',autocapitalize:'off',placeholder:'XXXXXXXX-XXXXXXXX-XXXXXXXX',maxlength:26});
@@ -52,11 +57,11 @@ return view.extend({
  const warpButton=kit.button('Test WARP',ev=>this.action(ev.currentTarget,testWARP,r=>'Cloudflare verified '+(r.tunnel.warp==='plus'?'WARP+':'Free WARP')+' · '+r.tunnel.ip+(r.tunnel.ipv6?' · IPv4 + IPv6':' · IPv4')) ,{'class':'st-button secondary'});
  poll.add(()=>this.update().catch(()=>{}),5);
  return kit.sheet([
-  E('link',{rel:'stylesheet',href:L.resource('chester-ui/cloudflare.css')+'?v=2'}),
-  kit.head('Cloudflare','Private DNS. Your choice of connection.','shield'),this.metrics,this.feedback,
+  E('link',{rel:'stylesheet',href:L.resource('chester-ui/cloudflare.css')+'?v=20261124-3'}),
+  kit.head('DNS Setup','Private DNS. Your choice of connection.','shield'),this.metrics,
   kit.card('DNS','Choose how your devices look up websites. Local device names keep working.',[kit.field('DNS Provider',mode,'Cloudflare presets use encrypted HTTPS. Manual servers use standard DNS.'),manual,E('div',{'class':'cf-actions'},[dnsButton])],'shield'),
   kit.card('WARP','Choose Free WARP or link your WARP+ subscription.',[plans,freePanel,this.terms,plusPanel,kit.toggle('Enable WARP',enabled,'Applies to devices routed through the main LAN. Local management and Tailscale stay reachable.'),E('div',{'class':'st-fields'},[kit.field('Protect',scope),kit.field('If WARP Disconnects',outage)]),clientField,E('div',{'class':'cf-actions'},[this.registerButton,warpButton]),E('p',{'class':'st-muted'},['Each router registers separately. IP Passthrough clients must configure WARP on their downstream router.'])],'network'),
-  kit.footer(apply,'Changes apply immediately. No reboot needed.')
+  E('div',{'class':'cf-save-bar'},[apply,this.feedback])
  ],'st-cloudflare');
  },handleSave:null,handleSaveApply:null,handleReset:null
 });

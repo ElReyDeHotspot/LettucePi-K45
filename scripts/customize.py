@@ -142,7 +142,7 @@ if nc.exists():
 
 for p in root.rglob('*'):
     if p.is_file() and not p.is_symlink() and ('zh-cn' in p.name or 'zh-tw' in p.name or 'zh_cn' in p.name or 'zh_tw' in p.name):p.unlink()
-for folder in ['usr/sbin','usr/libexec','usr/share/rpcd/ucode','etc/init.d','etc/hotplug.d','etc/uci-defaults','lib/preinit','www/cgi-bin']:
+for folder in ['usr/bin','usr/sbin','usr/libexec','usr/share/rpcd/ucode','etc/init.d','etc/hotplug.d','etc/uci-defaults','lib/preinit','www/cgi-bin']:
     for p in (repo/'payload'/folder).rglob('*') if (repo/'payload'/folder).exists() else []:
         if p.is_file():(root/p.relative_to(repo/'payload')).chmod(0o755)
 (root/'usr/share/rpcd/ucode/misectel').chmod(0o755)
@@ -214,3 +214,8 @@ for name in ('www/luci-static/resources/luci.js', 'usr/share/ucode/luci/template
     page=root/name
     text=page.read_text(encoding='utf-8')
     page.write_text(text.replace('Loading view', 'Loading View'),encoding='utf-8')
+
+# A factory image must never carry an enabled customer Block Lists policy.
+policy=root/'etc/chester-traffic/config.json'
+if policy.exists():
+    assert not json.loads(policy.read_text()).get('enabled',False), 'Factory Block Lists must default to Off'

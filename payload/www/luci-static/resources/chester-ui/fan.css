@@ -1,0 +1,33 @@
+#maincontent .fv-card{position:relative;padding:25px;display:flex;flex-direction:column;align-items:center;text-align:center;background:var(--ct-card);border:1px solid var(--ct-border);border-radius:24px;margin:22px 0;overflow:hidden}
+#maincontent .fv-caption{font-size:10px;font-weight:700;letter-spacing:2.5px;color:var(--ct-muted)}
+#maincontent .fv-orbit{position:relative;width:220px;height:220px;margin:20px 0}
+#maincontent .fv-ring{position:absolute;inset:0;border:1px solid var(--ct-border);border-radius:50%;box-shadow:inset 0 0 25px #007aff0d,0 0 0 9px #007aff05}
+#maincontent .fv-ring:after{content:'';position:absolute;inset:11px;border:1px dashed var(--ct-border);border-radius:50%}
+#maincontent .fv-rotor{position:absolute;inset:14px;color:var(--ct-accent);opacity:.35;transform-origin:50% 50%;will-change:transform;pointer-events:none}
+#maincontent .fv-rotor svg{width:100%;height:100%}
+#maincontent .fv-reading{position:absolute;inset:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border-radius:50%;background:var(--ct-card);border:1px solid var(--ct-border);box-shadow:0 4px 18px #071a2910}
+#maincontent .fv-reading strong{font-size:25px;line-height:1.1;font-variant-numeric:tabular-nums;color:var(--ct-text)}
+#maincontent .fv-reading span{font-size:10px;color:var(--ct-muted);font-weight:600}
+#maincontent .fv-detail{font-size:12px;color:var(--ct-muted);margin:0}
+#maincontent .fv-card.is-stopped .fv-rotor{opacity:.15}
+@media(prefers-reduced-motion:reduce){#maincontent .fv-rotor{display:none}#maincontent .fv-ring{border-width:2px}}
+
+#maincontent .fv-presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+#maincontent .fv-preset{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:1px solid var(--ct-border);border-radius:18px;padding:22px 14px;cursor:pointer}
+#maincontent .fv-preset .st-icon{width:28px;height:28px}
+#maincontent .fv-preset svg{width:100%;height:100%}
+#maincontent .fv-preset strong{font-size:16px}
+#maincontent .fv-preset b{font-size:26px;line-height:1.1}
+#maincontent .fv-preset small{font-size:12px}
+#maincontent .fv-preset-choice{font-size:12px;margin:16px 0 0;text-align:center}
+@media(max-width:600px){#maincontent .fv-presets{gap:8px}#maincontent .fv-preset{padding:18px 6px}#maincontent .fv-preset strong{font-size:13px}#maincontent .fv-preset small{font-size:10px}}
+
+#maincontent .st-fan .fv-save-bar{position:sticky;bottom:12px;z-index:10;display:flex;align-items:center;justify-content:center;min-height:74px;margin:20px 0 0;padding:16px 20px;border:1px solid var(--ct-border);border-radius:18px;background:var(--ct-card);box-shadow:0 8px 35px #071a291a;backdrop-filter:blur(16px)}
+#maincontent .st-fan .fv-save-bar>.st-button{width:min(100%,320px);min-height:48px}
+@media(max-width:700px){#maincontent .st-fan .fv-save-bar{bottom:8px;padding:12px}}
+
+#maincontent .st-fan .fv-preset{height:auto!important;min-height:164px!important;padding:20px 14px!important;line-height:1.3!important;white-space:normal!important;box-sizing:border-box}
+#maincontent .st-fan .fv-preset[aria-pressed=true] .st-icon{color:inherit!important}
+@media(max-width:600px){#maincontent .st-fan .fv-preset{min-height:148px!important;padding:16px 6px!important}}
+
+body.theme-misectel #maincontent#maincontent .st-fan .fv-preset[aria-pressed=true] .st-icon{color:var(--ct-on-primary)!important}

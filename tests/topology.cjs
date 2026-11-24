@@ -1,0 +1,16 @@
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const source=fs.readFileSync(__dirname+'/../payload/www/luci-static/resources/chester-ui/topology-model.js','utf8'),m=new Function('baseclass',source)({extend:x=>x});
+const map=m.empty();assert.deepEqual(m.validate(map),map);
+assert.throws(()=>m.validate({...map,nodes:[{id:'custom:a',name:'A',icon:'switch'},{id:'custom:a',name:'B',icon:'switch'}]}));
+assert.throws(()=>m.validate({...map,parents:{'custom:a':'custom:b','custom:b':'custom:a'}}),/loop/);
+assert.throws(()=>m.validate({...map,parents:{router:'lan'}}));assert.throws(()=>m.validate({...map,positions:{router:{x:Infinity,y:0}}}));
+assert.throws(()=>m.validate({...map,positions:{'__proto__x':{x:0,y:0}}}));assert.throws(()=>m.validate({...map,nodes:[{id:'custom:x',name:'Bad\nName',icon:'switch'}]}));
+const device={mac:'02:11:22:33:44:55',hostname:'Laptop',ipaddr:'192.168.100.10',connection:'wired',tone:'online'},runtime={ports:[{device:'lan3',carrier:true,speed:1000,role:'lan'}],fdb:[{mac:device.mac,device:'lan3'}]};
+let g=m.build(runtime,[device],{},map),edge=g.edges.find(e=>e.to==='device:'+device.mac);assert.equal(edge.from,'port:lan3');assert.equal(edge.kind,'learned');assert.match(g.nodes.find(n=>n.mac===device.mac).evidence,/hidden/);
+g=m.build({...runtime,fdb:[...runtime.fdb,{mac:device.mac,device:'lan2'}],ports:[...runtime.ports,{device:'lan2'}]},[device],{},map);assert.equal(g.edges.find(e=>e.to==='device:'+device.mac).from,'lan');
+g=m.build(runtime,[{...device,connection:'wireless',interface:'phy0-ap0',ssid:'Home',band:'5GHz'}],{[device.mac]:{name:'Office',icon:'laptop'}},map);assert.equal(g.edges.find(e=>e.to==='device:'+device.mac).from,'wifi:phy0-ap0');assert.equal(g.nodes.find(n=>n.mac===device.mac).name,'Office');
+const manual={...map,nodes:[{id:'custom:switch',name:'Switch',icon:'switch'}],parents:{['device:'+device.mac]:'custom:switch'}};g=m.build(runtime,[device],{},manual);assert.equal(g.edges.find(e=>e.to==='device:'+device.mac).kind,'manual');const layout=m.layout(g,{router:{x:777,y:123}});assert.deepEqual(layout.router,{x:777,y:123});assert(Object.values(layout).every(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)));
+const offline={...device,interface:'br-lan',ssid:'',band:'',lastSeen:123};delete offline.tone;g=m.build(runtime,[],{},{...map,remembered:[offline]});assert.equal(g.nodes.find(n=>n.mac===device.mac).online,false);assert.equal(g.edges.find(e=>e.to==='device:'+device.mac).from,'lan');
+const view=fs.readFileSync(__dirname+'/../payload/www/luci-static/resources/view/lettucepi/topology.js','utf8');assert.match(view,/document.hidden/);assert.match(view,/poll.add\(\(\)=>this.refresh\(\),20\)/);assert(!/setInterval|network\.reload|uci\.save|\.innerHTML/.test(view));
+const acl=JSON.parse(fs.readFileSync(__dirname+'/../payload/usr/share/rpcd/acl.d/luci-app-chester-topology.json','utf8'))['luci-app-chester-topology'];assert(!acl.write.uci);assert.deepEqual(acl.write.ubus['chester.topology'],['save']);
+console.log('PASS topology: validated maps, bounded state, cyclic uplinks rejected, ambiguous ports remain unknown, wireless associations, remembered clients, shared editing and passive 20-second visible-page polling.');

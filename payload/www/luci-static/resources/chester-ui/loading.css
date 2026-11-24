@@ -4,7 +4,7 @@ body.theme-misectel.logged-in:has(#view) .main > .loading{display:none!important
  --load-bg:rgba(255,255,255,.92);--load-edge:rgba(133,160,182,.24);--load-text:#263647;--load-shadow:0 22px 65px #24456112,0 2px 6px #24456108;
  box-sizing:border-box;position:relative!important;display:flex!important;flex-direction:column;align-items:center;justify-content:flex-start;gap:25px;
  width:min(410px,calc(100% - 32px));min-height:218px;margin:clamp(36px,11vh,110px) auto!important;padding:40px 24px 32px!important;
- border:1px solid var(--load-edge)!important;border-radius:30px!important;background:linear-gradient(145deg,rgba(107,228,174,.07),transparent 70%),var(--load-bg)!important;
+ border:1px solid var(--load-edge)!important;border-radius:30px!important;background:linear-gradient(145deg,rgba(0,122,255,.07),transparent 70%),var(--load-bg)!important;
  color:var(--load-text)!important;box-shadow:var(--load-shadow)!important;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
  text-align:center;font-family:inherit;font-size:16px!important;font-weight:600;line-height:1.45;letter-spacing:.02em;isolation:isolate;
  animation:chester-loader-reveal .18s ease-out .6s both;
@@ -17,7 +17,7 @@ body.theme-misectel.logged-in:has(#view) .main > .loading{display:none!important
 }
 #view > .spinning::after{
  content:"";position:absolute;top:34px;left:50%;width:86px;height:86px;margin-left:-43px;box-sizing:border-box;
- border:2px solid rgba(81,194,150,.12);border-top-color:#47ce98;border-right-color:rgba(70,155,247,.72);border-radius:50%;
+ border:2px solid rgba(81,194,150,.12);border-top-color:var(--ct-primary,#007aff);border-right-color:rgba(70,155,247,.72);border-radius:50%;
  filter:drop-shadow(0 0 4px #5de2ac33);animation:chester-orbit 1.8s linear infinite;pointer-events:none;
 }
 html[data-chester-appearance=night] #view > .spinning{
@@ -26,7 +26,7 @@ html[data-chester-appearance=night] #view > .spinning{
 @keyframes chester-orbit{to{transform:rotate(360deg)}}
 @keyframes chester-leaf-breathe{0%,100%{opacity:.85;transform:scale(.96)}50%{opacity:1;transform:scale(1)}}
 @media(max-width:600px){#view > .spinning{width:calc(100% - 24px);max-width:360px;margin:52px auto!important;border-radius:26px!important}}
-@media(prefers-reduced-motion:reduce){#view > .spinning::before,#view > .spinning::after{animation:none!important}#view > .spinning::after{border-color:rgba(71,206,152,.4);border-top-color:#47ce98}}
+@media(prefers-reduced-motion:reduce){#view > .spinning::before,#view > .spinning::after{animation:none!important}#view > .spinning::after{border-color:rgba(71,206,152,.4);border-top-color:var(--ct-primary,#007aff)}}
 
 /* Fast views skip the loader; animate the complete view once, not its polls. */
 #view:not(:has(> .spinning)){animation:chester-view-enter .24s cubic-bezier(.22,1,.36,1) both}

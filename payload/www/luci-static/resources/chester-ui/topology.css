@@ -1,0 +1,65 @@
+#maincontent .st-topology{max-width:1440px}
+#maincontent .st-topology .nt-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:24px 0}
+#maincontent .nt-toolbar input{flex:1;min-width:190px}
+#maincontent .nt-toolbar select{width:auto}
+#maincontent .nt-workspace{display:grid;grid-template-columns:minmax(0,1fr) 275px;gap:18px;align-items:stretch}
+#maincontent .nt-map-panel,#maincontent .nt-inspector{background:var(--ct-card);border:1px solid var(--ct-border);border-radius:22px;overflow:hidden}
+#maincontent .nt-map-head{display:flex;justify-content:space-between;align-items:center;padding:20px;gap:12px;border-bottom:1px solid var(--ct-border)}
+#maincontent .nt-map-head>div:first-child{display:flex;flex-direction:column;gap:6px}
+#maincontent .nt-map-head small{font-size:11px;color:var(--ct-muted)}
+#maincontent .nt-zoom{display:flex;align-items:center;gap:8px}
+#maincontent .nt-zoom .st-button{padding:6px 10px;min-height:34px}
+#maincontent .nt-zoom>span{font-size:11px;min-width:34px;text-align:center}
+#maincontent .nt-canvas{position:relative;height:560px;overflow:hidden;touch-action:none;cursor:grab;background-color:var(--ct-inset);background-image:radial-gradient(var(--ct-border) 1px,transparent 1px);background-size:22px 22px}
+#maincontent .nt-scene{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+#maincontent .nt-edges{position:absolute;left:-22000px;top:-22000px;width:44000px;height:44000px;overflow:visible;pointer-events:none}
+#maincontent .nt-edges path{transform:translate(22000px,22000px);fill:none;stroke:var(--ct-accent);stroke-width:2;vector-effect:non-scaling-stroke;opacity:.65}
+#maincontent .nt-edges path.learned{stroke-dasharray:4 6;stroke:var(--ct-muted)}
+#maincontent .nt-edges path.manual{stroke-dasharray:8 5;stroke:var(--ct-accent)}
+#maincontent .nt-edges path.logical{stroke:var(--ct-muted)}
+#maincontent .st-topology .nt-node{position:absolute;left:0;top:0;width:205px;min-height:98px;padding:16px;display:flex;align-items:center;gap:12px;text-align:left;background:var(--ct-card);color:var(--ct-text);border:1px solid var(--ct-border);border-radius:18px;box-shadow:0 4px 16px #071a290a;touch-action:none;cursor:grab;user-select:none}
+#maincontent .nt-node.is-selected{border-color:var(--ct-accent);box-shadow:0 0 0 2px var(--ct-accent)}
+#maincontent .nt-node.is-offline{opacity:.62}
+#maincontent .nt-node>.st-icon{flex:0 0 30px;width:30px;height:30px;color:var(--ct-accent)}
+#maincontent .nt-node svg{width:100%;height:100%}
+#maincontent .nt-node-copy{min-width:0;display:flex;flex-direction:column;gap:5px}
+#maincontent .nt-node strong{font-size:13px;line-height:1.3;overflow-wrap:anywhere}
+#maincontent .nt-node small{font-size:11px;overflow-wrap:anywhere;color:var(--ct-muted)}
+#maincontent .nt-node-state{font-size:10px;color:var(--ct-muted)}
+#maincontent .nt-legend{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;padding:14px;font-size:11px;color:var(--ct-muted)}
+#maincontent .nt-inspector{padding:22px;overflow-wrap:anywhere}
+#maincontent .nt-inspector h3{font-size:22px!important;margin:14px 0}
+#maincontent .nt-inspector .st-button{width:100%;margin-top:10px}
+#maincontent .nt-inspector-head>.st-icon{width:42px;height:42px;color:var(--ct-accent)}
+#maincontent .nt-inspector-head svg{width:100%;height:100%}
+#maincontent .nt-evidence{font-size:12px;color:var(--ct-muted);line-height:1.6}
+#maincontent .nt-detail{padding:11px 0;border-bottom:1px solid var(--ct-border);display:flex;flex-direction:column;gap:5px}
+#maincontent .nt-detail span{font-size:11px;color:var(--ct-muted)}
+#maincontent .nt-detail strong{font-size:13px}
+#maincontent .nt-inventory{margin-top:18px}
+#maincontent .nt-inventory summary{cursor:pointer;font-weight:600}
+#maincontent .nt-device-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:18px;max-height:500px;overflow:auto}
+#maincontent .nt-list-device{display:flex;align-items:center;gap:12px;text-align:left;padding:14px;border-radius:12px;border:1px solid var(--ct-border);min-width:0}
+#maincontent .nt-list-device>.st-icon{width:26px;height:26px;flex:0 0 26px}
+#maincontent .nt-list-device svg{width:100%;height:100%}
+#maincontent .nt-list-device>span:nth-child(2){display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
+#maincontent .nt-list-device strong{font-size:12px;overflow-wrap:anywhere}
+#maincontent .nt-list-device small,#maincontent .nt-list-device>span:last-child{font-size:10px;color:var(--ct-muted)}
+#maincontent .nt-form-actions,#maincontent .nt-link-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:18px}
+#maincontent .nt-help{font-size:12px;line-height:1.6;margin:20px 0}
+#maincontent .nt-save-bar{position:sticky;bottom:12px;z-index:10;background:var(--ct-card);border:1px solid var(--ct-border);border-radius:18px;padding:16px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;box-shadow:0 8px 35px #071a291a}
+#maincontent .nt-save-bar>.st-button{width:min(100%,320px);min-height:48px}
+#maincontent .nt-export{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+#maincontent .nt-notice{padding:16px;background:var(--ct-soft);border:1px solid var(--ct-border);border-radius:14px}
+@media(max-width:1050px){#maincontent .nt-workspace{grid-template-columns:1fr}#maincontent .nt-inspector{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}#maincontent .nt-inspector-head,#maincontent .nt-evidence{grid-column:1/-1}#maincontent .nt-device-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){#maincontent .nt-toolbar .st-button{flex:1}#maincontent .nt-toolbar select{width:100%}#maincontent .nt-canvas{height:420px}#maincontent .nt-map-head{padding:14px;flex-wrap:wrap}#maincontent .nt-device-list{grid-template-columns:1fr}#maincontent .nt-save-bar{padding:12px;bottom:8px}#maincontent .nt-export .st-button{padding:8px 12px;font-size:12px}}
+
+body.theme-misectel #maincontent#maincontent .st-topology .nt-node{background:var(--ct-card)!important;border-color:var(--ct-border)!important}
+body.theme-misectel #maincontent#maincontent .st-topology .nt-node.is-selected{border-color:var(--ct-accent)!important;box-shadow:0 0 0 2px var(--ct-accent)!important}
+#maincontent .nt-map-tools{text-align:center;font-size:12px;color:var(--ct-muted)}
+#maincontent .nt-map-tools summary{cursor:pointer}
+#maincontent .nt-map-tools[open] summary{margin-bottom:12px}
+#maincontent .nt-map-panel.nt-expanded{position:fixed;inset:12px;z-index:1005;box-shadow:0 0 0 100vmax #0008}
+#maincontent .nt-expanded .nt-canvas{height:calc(100dvh - 216px)}
+
+#maincontent #view:has(.nt-expanded){transform:none!important}

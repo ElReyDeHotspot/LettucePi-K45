@@ -80,7 +80,7 @@ return view.extend({
         this.orderBox = E('div', {'class':'fo-order','aria-label':'Connection Priority'});
         this.orderNote = E('div', {'class':'fo-order-note','aria-live':'polite'});
         this.wanCard = E('div', {'class':'fo-link-detail'}); this.cellCard = E('div', {'class':'fo-link-detail'});
-        this.events = E('pre', {'class':'fo-log'}); this.message = E('span', {'class':'fo-result','aria-live':'polite'}, ['Changes apply when you save.']);
+        this.events = E('pre', {'class':'fo-log'}); this.message = E('span', {'class':'fo-result','aria-live':'polite'}, []);
         this.modeButtons = [['auto','Automatic'],['balance','Load Balance'],['wan','Primary Only'],['cell','Secondary Only']].map(function(m) {
             return E('button', {type:'button','class':'fo-mode','aria-pressed':String(self.mode.value===m[0]),click:function() { self.mode.value=m[0]; self.refreshMode(); self.markDirty(); }}, [m[1]]);
         });
@@ -89,7 +89,7 @@ return view.extend({
         this.primary.addEventListener('change', function() { if(self.primary.value===self.backup.value) self.backup.value=self.draftOrder[0]; self.drawOrder(); self.markDirty(); });
         this.backup.addEventListener('change', function() { if(self.backup.value===self.primary.value) self.primary.value=self.draftOrder[1]; self.drawOrder(); self.markDirty(); });
         var root = E('div', {'class':'fo-page chester-ios'}, [
-            E('link',{rel:'stylesheet',href:L.resource('chester-ui/ios.css')+'?v=f78b876c6b61'}),
+            E('link',{rel:'stylesheet',href:L.resource('chester-ui/ios.css')+'?v=20261124-4'}),
             E('div', {'class':'fo-heading'}, [E('div', {}, [E('div',{'class':'ios-title',role:'heading','aria-level':'2'},['Failover']),E('div', {'class':'fo-muted'}, ['Choose a backup connection or use both together.'])]),this.badge]),
             E('div', {'class':'fo-card'}, [this.portBox,E('div', {'class':'fo-muted',style:'margin-top:14px'}, ['Tap WAN to switch this socket between internet and LAN.'])]),
             this.wanNotice,
@@ -193,7 +193,7 @@ return view.extend({
         grip.addEventListener('pointercancel',function(e) { finish(e,true); });
         grip.addEventListener('lostpointercapture',function() { if(drag) { drag=null; self.clearDrag(); } });
     },
-    markDirty: function() { this.dirty=true; this.message.className='fo-result'; this.message.textContent='Unsaved changes'; },
+    markDirty: function() { this.dirty=true; this.message.className='fo-result'; this.message.textContent='Unsaved Changes'; },
     refreshMode: function() {
         if(!this.modeButtons)return;
         var self=this;
