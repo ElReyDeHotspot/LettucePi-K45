@@ -60,14 +60,14 @@ createNetworkFields(radios,shared){
  const enabledInput=E('input',{type:'checkbox',checked:radio.enabled?'checked':null,'aria-label':shared?'Wi-Fi Power':radio.bandLabel+' Wi-Fi Power'});
  const ssidInput=E('input',{type:'text',value:radio.ssid||'',maxlength:32,placeholder:'Enter Wi-Fi name'});
  const encryptionSelect=E('select',{},ENCRYPTION_CHOICES.map(c=>E('option',{value:c.value,selected:c.value===radio.encryption?'selected':null},[c.label])));
- const password=this.createPasswordControl(radio.key,'At least 8 characters');password.keyInput.setAttribute('aria-label',shared?'Wi-Fi password':radio.bandLabel+' Wi-Fi password');
- const passwordField=settings.field('Wi-Fi password',password.fieldNode,'Used when connecting a phone, computer or other device.');
+ const password=this.createPasswordControl(radio.key,'At least 8 characters');password.keyInput.setAttribute('aria-label',shared?'Wi-Fi Password':radio.bandLabel+' Wi-Fi password');
+ const passwordField=settings.field('Wi-Fi Password',password.fieldNode,'Used when connecting a phone, computer or other device.');
  this.bindPasswordVisibility(encryptionSelect,passwordField,password.keyInput,password.revealInput,'At least 8 characters');
  const state=E('strong',{'class':'wf-state'},[enabledInput.checked?'On':'Off']);
  enabledInput.addEventListener('change',()=>dom.content(state,[enabledInput.checked?'On':'Off']));
- const node=settings.card(shared?'Your Wi-Fi network':radio.bandLabel+' network',shared?'One name and password for 2.4 GHz and 5 GHz.':'A separate name and password for this band.',[
+ const node=settings.card(shared?'Your Wi-Fi Network':radio.bandLabel+' network',shared?'One name and password for 2.4 GHz and 5 GHz.':'A separate name and password for this band.',[
  E('div',{'class':'wf-power'},[settings.toggle('Wi-Fi Power',enabledInput,shared?'Turn both bands on or off.':'Turn this band on or off.'),state]),
- E('div',{'class':'st-fields wf-basics'},[settings.field('Wi-Fi name',ssidInput,'This is the name devices see in their Wi-Fi list.'),passwordField]),
+ E('div',{'class':'st-fields wf-basics'},[settings.field('Wi-Fi Name',ssidInput,'This is the name devices see in their Wi-Fi list.'),passwordField]),
  this.createSettingsPanel('Security Settings','Choose how devices securely connect.','shield',[settings.field('Encryption',encryptionSelect,'WPA2 works with most devices. WPA3 offers newer protection. Open networks have no password.')]),
  E('div',{'class':'wf-radio-panels'},radios.map(r=>this.createTuningPanel(r,tuning[r.name])))
  ],'router');
@@ -124,7 +124,7 @@ dom.content(this.linkedModeText,[linked?_('Shared'):_('Separate')]);dom.content(
  this.saveButtons=[apply];
  const page=settings.sheet([
  settings.head('Wi-Fi','Your network. Simple to connect. Easy to manage.','router'),
- this.linkedToggle?settings.card('Network setup','Choose how devices connect to your two Wi-Fi bands.',[
+ this.linkedToggle?settings.card('Network Setup','Choose how devices connect to your two Wi-Fi bands.',[
  E('div',{'class':'wf-power'},[settings.toggle('Use one name and password',this.linkedToggle,'Recommended: both bands share the same Wi-Fi name and password.'),this.linkedModeText])
  ]):'',this.modeBody,
  E('div',{'class':'wf-save-bar'},[E('div',{'class':'wf-save-actions'},[apply])])
