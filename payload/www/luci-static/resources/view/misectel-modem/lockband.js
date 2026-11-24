@@ -16,7 +16,7 @@ return view.extend({
   const selected=()=>inputs.filter(i=>i.checked).map(i=>i.value);
   const save=settings.button('Save '+modeName(key),ui.createHandlerFn(this,async ev=>{
    const values=selected();if(busy||sameBands(values,current)||!values.length)return;
-   busy=true;sync();dom.content(result,['Applying band selectionâ€¦']);result.classList.remove('is-error');
+   busy=true;sync();dom.content(result,['Applying band selection…']);result.classList.remove('is-error');
    try{
     const reply=await modemHelper.setLockBand(modemId,{band_class:key,lock_band:bandList(values).join(',')});
     if(reply?.error||reply?.success===false||reply?.result===false)throw new Error(reply.message||'The modem rejected the request.');
@@ -45,7 +45,7 @@ return view.extend({
  },
  async refresh(){
   const modem=this.modems.find(m=>m.id===this.selectedModemId);if(!modem){dom.content(this.content,[E('p',{'class':'st-muted'},['No configurable modem detected.'])]);return;}
-  dom.content(this.content,[E('p',{'class':'st-muted'},['Reading bands from the modemâ€¦'])]);
+  dom.content(this.content,[E('p',{'class':'st-muted'},['Reading bands from the modem…'])]);
   try{
    const [disabled,info]=await Promise.all([modemHelper.getDisabledFeatures(modem.id),modemHelper.getLockBand(modem.id)]);
    if((disabled.disabled_features||[]).includes('LockBand')){dom.content(this.content,[E('p',{'class':'st-muted'},['Band selection is not supported by this modem.'])]);return;}
