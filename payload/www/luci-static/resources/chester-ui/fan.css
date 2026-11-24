@@ -71,3 +71,42 @@ body.theme-misectel #maincontent#maincontent .st-fan .fv-mode[aria-checked=true]
 body.theme-misectel #maincontent#maincontent .st-fan .st-threshold{background:var(--ct-inset)!important;border-color:var(--ct-border)!important;color:var(--ct-text)!important;box-shadow:none!important}
 body.theme-misectel #maincontent#maincontent .st-fan .st-threshold :is(strong,label){color:var(--ct-text)!important}
 body.theme-misectel #maincontent#maincontent .st-fan .st-threshold .st-muted{color:var(--ct-muted)!important}
+
+/* A crisp fan housing, seven sculpted blades and an actual-output gauge. */
+#maincontent .st-fan .fv-orbit{width:212px;height:212px;border-radius:38px;border:1px solid var(--ct-border);background:linear-gradient(145deg,var(--ct-inset),var(--ct-card));box-shadow:inset 0 1px 0 #ffffff12,0 12px 28px #071a2915;margin:18px 0}
+#maincontent .st-fan .fv-ring{inset:8px;border:0;box-shadow:none;border-radius:0}
+#maincontent .st-fan .fv-ring:after{display:none}
+#maincontent .st-fan .fv-ring>svg{display:block;width:100%;height:100%;overflow:visible}
+#maincontent .fv-gauge-track{fill:none;stroke:var(--ct-border);stroke-width:2}
+#maincontent .fv-gauge-level{fill:none;stroke:var(--ct-accent);stroke-width:3;stroke-linecap:round;transform:rotate(-90deg);transform-origin:100px 100px;transition:stroke-dashoffset .7s ease}
+#maincontent .fv-bolt{fill:var(--ct-muted);opacity:.4}
+#maincontent .st-fan .fv-rotor{inset:15px;opacity:.92;filter:drop-shadow(0 2px 3px #071a2920)}
+#maincontent .st-fan .fv-reading{inset:61px;background:linear-gradient(145deg,var(--ct-card),var(--ct-inset));border:1px solid var(--ct-border);box-shadow:0 3px 12px #071a2920,inset 0 1px 0 #ffffff18}
+#maincontent .st-fan .fv-reading strong{font-size:27px;letter-spacing:-1px}
+#maincontent .st-fan .fv-reading span{font-size:9px;letter-spacing:.2px}
+#maincontent .st-fan .fv-detail{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--ct-border);border-radius:99px;background:var(--ct-inset);padding:7px 13px;font-size:11px}
+#maincontent .st-fan .fv-detail:before{content:'';width:5px;height:5px;border-radius:50%;background:var(--ct-accent)}
+#maincontent .st-fan .fv-card.is-stopped .fv-rotor{opacity:.35}
+#maincontent .st-fan .fv-card.is-stopped .fv-detail:before{background:var(--ct-muted)}
+#maincontent .st-fan .fv-card.is-unavailable .fv-rotor{opacity:.2}
+@media(prefers-reduced-motion:reduce){#maincontent .st-fan .fv-rotor{display:block;will-change:auto}#maincontent .fv-gauge-level{transition:none}}
+
+/* Instrument-panel layout: the dial reports live output; controls remain below. */
+#maincontent .st-fan .fv-card{display:grid;grid-template-columns:236px minmax(0,1fr);align-items:center;gap:34px;padding:26px 30px;text-align:left}
+#maincontent .st-fan .fv-orbit{width:230px;height:230px;margin:0;border-radius:46px;border-color:var(--ct-muted);box-shadow:inset 0 1px 0 #ffffff25,inset 0 -2px 4px #071a291a,0 9px 22px #071a2912}
+#maincontent .st-fan .fv-orbit:before{content:'';position:absolute;inset:5px;border-radius:40px;border:1px solid var(--ct-border);pointer-events:none}
+#maincontent .st-fan .fv-ring{inset:9px}
+#maincontent .fv-dial-ticks{stroke:var(--ct-muted);stroke-width:1;opacity:.7}
+#maincontent .st-fan .fv-gauge-level{filter:drop-shadow(0 0 3px #007aff40)}
+#maincontent .st-fan .fv-reading{inset:65px;gap:5px;text-align:center}
+#maincontent .st-fan .fv-reading strong{font-size:30px}
+#maincontent .st-fan .fv-reading span{font-size:9px;letter-spacing:.9px;text-transform:uppercase}
+#maincontent .st-fan .fv-caption{font-size:10px;letter-spacing:2.3px;margin-bottom:9px}
+#maincontent .st-fan .fv-title{font-size:24px!important;line-height:1.2;margin:0 0 13px!important;letter-spacing:-.5px}
+#maincontent .fv-info{min-width:0}
+#maincontent .st-fan .fv-telemetry .st-summary{margin:18px 0 0;gap:12px}
+#maincontent .st-fan .fv-telemetry .st-stat{padding:13px 15px;background:var(--ct-inset);border:1px solid var(--ct-border);border-radius:14px;box-shadow:none}
+#maincontent .st-fan .fv-telemetry .st-stat strong{font-size:20px}
+#maincontent .st-fan .fv-telemetry .st-unit-bar{margin:14px 0 0}
+#maincontent .st-fan .fv-telemetry .st-unit-button{min-height:32px;font-size:11px;padding:5px 10px}
+@media(max-width:760px){#maincontent .st-fan .fv-card{grid-template-columns:1fr;gap:22px;padding:22px;text-align:center}#maincontent .st-fan .fv-orbit{margin:0 auto;width:212px;height:212px}#maincontent .st-fan .fv-reading{inset:60px}#maincontent .st-fan .fv-telemetry .st-unit-bar{justify-content:center}#maincontent .st-fan .fv-telemetry .st-stat{text-align:left}}
