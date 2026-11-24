@@ -27,6 +27,7 @@ function guestPlan(v,radios,wan){
  add('firewall','chester_guest_zone','zone',{name:'chester_guest',network:['chester_guest'],input:'REJECT',output:'ACCEPT',forward:'REJECT'});
  if(wan)add('firewall','chester_guest_internet','forwarding',{src:'chester_guest',dest:wan,enabled:on?'1':'0'});
  add('firewall','chester_guest_dns','rule',{name:'Chester Guest DNS',src:'chester_guest',proto:['tcp','udp'],dest_port:'53',target:'ACCEPT',family:'ipv4'});
+ add('firewall','chester_guest_filtered_dns','rule',{name:'Chester Guest Filtered DNS',src:'chester_guest',proto:['tcp','udp'],dest_port:'5354',target:'ACCEPT',family:'ipv4'});
  add('firewall','chester_guest_dhcp','rule',{name:'Chester Guest DHCP',src:'chester_guest',proto:'udp',dest_port:'67',target:'ACCEPT',family:'ipv4'});
  add('firewall','chester_guest_private','rule',{name:'Chester Guest Private Networks',src:'chester_guest',dest:'*',dest_ip:['0.0.0.0/8','10.0.0.0/8','100.64.0.0/10','127.0.0.0/8','169.254.0.0/16','172.16.0.0/12','192.168.0.0/16'],proto:'all',family:'ipv4',target:'REJECT'});
  add('firewall','chester_guest_ipv6','rule',{name:'Chester Guest IPv6 Isolation',src:'chester_guest',dest:'*',proto:'all',family:'ipv6',target:'REJECT'});

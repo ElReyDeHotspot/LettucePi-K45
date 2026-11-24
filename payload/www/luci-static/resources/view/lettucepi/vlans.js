@@ -59,7 +59,7 @@ return view.extend({
     ...choices.filter(([id])=>Number(id)!==Number(p.native)).map(([id,name])=>{const check=E('input',{type:'checkbox',checked:p.tagged.includes(Number(id))?'checked':null,change:ev=>{p.tagged=ev.target.checked?[...p.tagged,Number(id)]:p.tagged.filter(x=>x!==Number(id));this.markDirty();}});return settings.toggle(name,check,'Tagged VLAN '+id);})
    ])
   ],'port'));
-  if(!this.model.ports.some(p=>p.name==='wan'))ports.push(settings.card('WAN','Reserved for your Internet connection.',[E('p',{'class':'st-muted'},['To use this socket for a VLAN, first switch it to LAN in Failover.']),E('a',{'class':'st-button secondary',href:L.url('admin','chester','failover')},['Open Failover'])],'port'));
+  if(!this.model.ports.some(p=>p.name==='wan'))ports.push(settings.card('WAN','Reserved for your Internet connection.',[E('p',{'class':'st-muted'},['To use this socket for a VLAN, first switch it to LAN in Failover.']),E('a',{'class':'st-button secondary',href:L.url('admin','network','failover')},['Open Failover'])],'port'));
   return ports;
  },
  redraw(){dom.content(this.networkList,this.renderNetworks());dom.content(this.portList,this.renderPorts());this.markDirty();},

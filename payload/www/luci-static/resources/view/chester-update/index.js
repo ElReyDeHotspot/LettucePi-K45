@@ -91,7 +91,7 @@ return view.extend({
   ],'clock');
   const page=settings.sheet([
    E('link',{rel:'stylesheet',href:L.resource('chester-ui/update.css')+'?v=20261123-3'}),
-   settings.head('Software Update','The latest software. The same Chester experience.','shield'),
+   settings.head('System Update','The latest software. The same Chester experience.','shield'),
    E('section',{'class':'st-card up-hero','aria-live':'polite'},[E('div',{'class':'up-hero-copy'},[E('div',{'class':'up-hero-icon'},[E('img',{src:'/luci-static/misectel/green-leaf.svg',alt:'',width:38,height:38})]),E('div',{},[this.pill,this.statusTitle,this.statusCopy])]),E('div',{'class':'up-actions'},[this.checkButton,this.installButton])]),
    this.checkedNode,E('div',{'class':'up-columns'},[installed,latest]),changes,preferenceCard,
    E('details',{'class':'st-advanced up-details'},[E('summary',{},['Firmware details']),this.detailsBody]),

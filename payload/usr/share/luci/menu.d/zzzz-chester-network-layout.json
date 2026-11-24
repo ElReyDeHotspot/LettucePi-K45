@@ -51,23 +51,17 @@
     }
   },
   "admin/chester/update": {
-    "title": "Software Update",
-    "order": 1,
+    "hidden": true,
     "action": {
-      "type": "view",
-      "path": "chester-update/index"
-    },
-    "depends": {
-      "acl": [
-        "luci-app-chester-update"
-      ]
+      "type": "alias",
+      "path": "admin/system/update"
     }
   },
   "admin/dashboard/system-update": {
     "hidden": true,
     "action": {
       "type": "alias",
-      "path": "admin/chester/update"
+      "path": "admin/system/update"
     },
     "depends": {
       "acl": [
@@ -272,5 +266,89 @@
         "luci-app-chester-dmz"
       ]
     }
+  },
+  "admin/network/failover": {
+    "title": "Failover",
+    "order": 108,
+    "hidden": false,
+    "action": {
+      "type": "view",
+      "path": "lettucepi/failover"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-k45p-failover"
+      ]
+    }
+  },
+  "admin/chester/failover": {
+    "hidden": true,
+    "action": {
+      "type": "alias",
+      "path": "admin/network/failover"
+    }
+  },
+  "admin/modem/ttl": {
+    "title": "TTL/HL",
+    "order": 42,
+    "hidden": false,
+    "action": {
+      "type": "view",
+      "path": "misectel-modem/ttl"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-chester-ttl"
+      ]
+    }
+  },
+  "admin/chester/ttl": {
+    "hidden": true,
+    "action": {
+      "type": "alias",
+      "path": "admin/modem/ttl"
+    }
+  },
+  "admin/modem/scan": {
+    "title": "Band / Tower Scan",
+    "order": 43,
+    "hidden": false,
+    "action": {
+      "type": "view",
+      "path": "lettucepi/scan"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-chester-scan"
+      ]
+    }
+  },
+  "admin/chester/scan": {
+    "hidden": true,
+    "action": {
+      "type": "alias",
+      "path": "admin/modem/scan"
+    }
+  },
+  "admin/system/update": {
+    "title": "System Update",
+    "order": 4,
+    "hidden": false,
+    "action": {
+      "type": "view",
+      "path": "chester-update/index"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-chester-update"
+      ]
+    }
+  },
+  "admin/developer": {
+    "title": "Luci Pages"
+  },
+  "admin/system/reboot": {
+    "title": "Reboot",
+    "hidden": true
   }
 }

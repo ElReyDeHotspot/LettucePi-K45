@@ -5,7 +5,7 @@
             "type": "firstchild"
         },
         "order": 90,
-        "title": "Developer"
+        "title": "Luci Pages"
     },
     "admin/developer/dashboard-channel_analysis": {
         "action": {
