@@ -68,7 +68,6 @@ s=menu.read_text()
 for a,b in {'misectel-dashboard':'dashboard','misectel-wireless':'wifi','misectel-network':'settings','misectel-system':'settings','misectel-portmap':'portmap'}.items():s=s.replace(a,b)
 # Chester Mods owns the app navigation; legacy app URLs remain aliases.
 s=s.replace("const DEFAULT_ALWAYS_SHOW=['apps','apps/tailscale','apps/speedtest','apps/sqm','apps/zapret',", "const DEFAULT_ALWAYS_SHOW=[")
-s=s.replace("'system/system',",'').replace(",'system/system'",'')
 menu.write_text(s)
 custom=root/'www/luci-static/misectel/custom.css'
 custom.write_text(custom.read_text().replace('--misectel-shell-sidebar-width: 184px','--misectel-shell-sidebar-width: 232px'))

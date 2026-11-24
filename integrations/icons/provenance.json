@@ -1,0 +1,20 @@
+{
+  "package": "@mdi/svg",
+  "version": "7.4.47",
+  "source": "https://github.com/Templarian/MaterialDesign-SVG",
+  "integrity": "sha512-WQ2gDll12T9WD34fdRFgQVgO8bag3gavrAgJ0frN4phlwdJARpE6gO1YvLEMJR0KKgoc+/Ea/A0Pp11I00xBvw==",
+  "svg_sha256": {
+    "home-outline.svg": "93f2cb3d786f604784493cbb77b3920f3c77e40ba760d495039b361dfdf00398",
+    "lan.svg": "fc6d58dcd4f40198955b02c4ccd56a160644d418539cbffe68aa083966d13328",
+    "shield-lock-outline.svg": "f7f95b80ed80abdcdfc75618c1028492de8a83dc8043ddaaf417995dbcc74083",
+    "crown-outline.svg": "1a9176f440dc70e7e23c37dc675e307b165c6366207815ca8aa3de3f2164565a",
+    "signal-5g.svg": "d11502c4782f799c7dfa0d476d515ddacc07bb4a945ec586aabb95fd84b50bff",
+    "shield-key-outline.svg": "787bf3ddec447b075ab73515b0d871a0e916127c1df9a98c2587b00216953082",
+    "cog-outline.svg": "84da1405553ee82056c44b33decb001fa0ef7ee3272f538239925e32bc13615d",
+    "code-tags.svg": "d8daa51613c76cfe485bd462b1eef733894e3b0c01010447c8b88927c2a53019",
+    "restart.svg": "34fcc1e73b75d5bfb8a9a148bebe0af4d6c0166dd8dfb3f913961e436d93950c",
+    "logout.svg": "d9645ae781b93019882696fa45f24ce5e441665f533e362cb5b77a19c3ff2c5f",
+    "view-grid-outline.svg": "3a5e77a9aee74d1f454eade81f034b80b60b01ca4e1348007d6964c02968cdbf",
+    "transmission-tower.svg": "bd8420bdb5a6e4708fdb6a9f4c6916553734cd29bbf5ac3ccb6342857994d3e2"
+  }
+}

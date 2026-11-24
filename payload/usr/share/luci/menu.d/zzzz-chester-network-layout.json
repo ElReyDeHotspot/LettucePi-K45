@@ -345,7 +345,7 @@
     }
   },
   "admin/developer": {
-    "title": "Luci Pages"
+    "title": "LuCi Pages"
   },
   "admin/system/reboot": {
     "title": "Reboot",

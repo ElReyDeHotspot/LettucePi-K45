@@ -6,9 +6,10 @@ BASE=${1:?Usage: build.sh base.itb [work-directory]}
 WORK=${2:-/var/tmp/k45p-build}
 APK=${APK_TOOLS:-/usr/local/bin/apk3}
 FWTOOL=${FWTOOL:-fwtool}
-BUILD=${BUILD_ID:-202611230004}
-BIN=${BIN_NUMBER:-12}
+BUILD=${BUILD_ID:-202611240001}
+BIN=${BIN_NUMBER:-13}
 VERSION=${VERSION:-1.0.$BIN}
+BUILD_DATE=${BUILD_DATE:-$(date -u +%F)}
 case "$BIN" in ''|*[!0-9]*) echo 'Revision must be numeric' >&2; exit 1 ;; esac
 [ "${VERSION##*.}" = "$BIN" ] || { echo 'Version patch must match the revision (for example, 1.0.12 = Rev. 12)' >&2; exit 1; }
 case "$WORK" in /var/tmp/k45p-*|/tmp/k45p-*) ;; *) echo 'Use a dedicated /var/tmp/k45p-* directory' >&2; exit 1 ;; esac
@@ -37,7 +38,8 @@ sed -i -e '/\/misectel\//d' -e '/\/qmodem\//d' -e '/\/video\//d' "$R/etc/apk/rep
   "$REPO"/integrations/secure-web/packages/*.apk
 (cd "$REPO/integrations/cloudflare"; sha256sum -c SHA256SUMS)
 python3 "$REPO/scripts/customize.py" "$R"
-printf 'version=%s\nbuilt=2026-11-23\nbuild=%s\nbin=%s\nproduct=K45P\n' "$VERSION" "$BUILD" "$BIN" > "$R/etc/chester-version"
+node "$REPO/scripts/check-payload-js.cjs" "$R" "$REPO/payload"
+printf 'version=%s\nbuilt=%s\nbuild=%s\nbin=%s\nproduct=K45P\n' "$VERSION" "$BUILD_DATE" "$BUILD" "$BIN" > "$R/etc/chester-version"
 cp "$WORK/image0" "$WORK/kernel.bin"
 cp "$WORK/image1" "$WORK/k45p.dtb"
 cp "$REPO/scripts/k45p.its" "$WORK/k45p.its"
