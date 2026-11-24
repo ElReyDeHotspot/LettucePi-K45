@@ -46,6 +46,7 @@ done
 node "$REPO/scripts/titlecase-ui.cjs" "$R/usr/share/luci/menu.d" --menus --write
 node "$REPO/scripts/check-payload-js.cjs" "$R" "$REPO/payload"
 printf 'version=%s\nbuilt=%s\nbuild=%s\nbin=%s\nproduct=K45P\n' "$VERSION" "$BUILD_DATE" "$BUILD" "$BIN" > "$R/etc/chester-version"
+python3 "$REPO/scripts/wifi_log_messages.py" "$R"
 python3 "$REPO/scripts/check-wifi-calibration.py" verify "$R" "$WORK/vendor-wifi-calibration.json" "$REPO/payload"
 cp "$WORK/image0" "$WORK/kernel.bin"
 cp "$WORK/image1" "$WORK/k45p.dtb"

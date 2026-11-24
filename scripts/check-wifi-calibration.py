@@ -8,6 +8,7 @@ import hashlib
 import json
 from pathlib import Path
 import sys
+from wifi_log_messages import preservation_digest
 
 
 def inventory(root):
@@ -34,7 +35,10 @@ def inventory(root):
         if path.is_symlink():
             result[relative] = {'symlink': str(path.readlink())}
         else:
-            result[relative] = {'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
+            data = path.read_bytes()
+            # Only the exact reviewed two-string change may differ in this driver.
+            digest = preservation_digest(data) if path.name == 'mt7996e.ko' else hashlib.sha256(data).hexdigest()
+            result[relative] = {'sha256': digest}
     return result
 
 
