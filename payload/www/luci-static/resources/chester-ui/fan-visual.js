@@ -2,7 +2,7 @@
 'require baseclass';
 function reading(s){
  const drive=s?.available&&typeof s.drive_percent==='number'&&Number.isFinite(s.drive_percent)?Math.max(0,Math.min(100,s.drive_percent)):null;
- if(drive!=null)return {value:drive+'%',unit:'Fan Drive',detail:drive===0?'Fan Off':'Live Fan Output',duration:drive===0?0:Math.max(.4,4-drive*.036)};
+ if(drive!=null)return {value:drive+'%',unit:'Fan Drive',detail:s.boost?'Cooling Protection · Full Output':drive===0?(s.mode==='2'?'Automatic · Below Threshold':s.mode==='1'?'Fan Output Not Applied':'Fan Off'):'Live Fan Output',duration:drive===0?0:Math.max(.4,4-drive*.036)};
  return {value:'—',unit:'Fan Drive',detail:'Fan Reading Unavailable',duration:0};
 }
 return baseclass.extend({reading,create(){

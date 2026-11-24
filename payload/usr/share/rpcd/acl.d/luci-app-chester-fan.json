@@ -1,1 +1,1 @@
-{"luci-app-chester-fan":{"description":"Read the live fan drive level","read":{"ubus":{"chester.fan":["status"]}}}}
+{"luci-app-chester-fan":{"description":"Read, apply and verify fan controls","read":{"ubus":{"chester.fan":["status"]}},"write":{"ubus":{"chester.fan":["save"]}}}}
