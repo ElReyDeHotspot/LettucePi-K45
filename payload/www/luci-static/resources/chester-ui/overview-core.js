@@ -533,7 +533,7 @@ return;portNames.push(name);});const ports=await Promise.all(portNames.map(async
  this.videoToggle=control('4K/HD','video',(b)=>this.toggleVideoEngine(b));
  this.ttlToggle=control('TTL/HL','layers',(b)=>this.toggleTtl(b));
  this.ledToggle=control('LED','bulb',(b)=>this.toggleLedPower(b));
- this.fanControl=E('a',{'class':'ch-control',href:L.url('admin','chester','fan'),title:'Fan Settings'},[homeIcon('fan'),E('strong',{},['Fan']),E('small',{'class':'ch-control-state'},['Settings'])]);
+ this.fanControl=E('a',{'class':'ch-control ch-fan-control',href:L.url('admin','chester','fan'),title:'Fan Settings'},[homeIcon('fan'),E('strong',{},['Fan']),E('small',{'class':'ch-control-state'},['Settings'])]);
  this.ledToggleWrap=E('div',{'class':'ch-controls'},[this.videoToggle,this.fanControl,this.ttlToggle,this.ledToggle]);
  this.modemNode=E('div',{'class':'ch-modems'});this.portPanelNode=E('div',{'class':'ch-ports'});
  this.metricsNode=E('div',{'class':'ch-system-bar'});this.systemNode=E('div',{'class':'misectel-dashboard-info-list'});this.wanNode=E('div',{'class':'misectel-dashboard-wan-list'});
@@ -545,7 +545,7 @@ return;portNames.push(name);});const ports=await Promise.all(portNames.map(async
  const controlCard=E('section',{'class':'ch-card'},[E('h3',{},['Quick Controls']),this.ledToggleWrap]);
  this.wanSection=E('section',{},[E('h4',{},['WAN Status']),this.wanNode]);
  return E('div',{'class':'chester-home'},[
-  E('link',{rel:'stylesheet',href:L.resource('chester-ui/overview.css')+'?v=20261124-home-shortcuts5'}),
+  E('link',{rel:'stylesheet',href:L.resource('chester-ui/overview.css')+'?v=20261124-home-shortcuts6'}),
   E('div',{'class':'ch-head'},[E('div',{},[E('div',{'class':'ch-title-row'},[E('div',{'class':'ch-title',role:'heading','aria-level':'2'},['Overview']),this.onlineBadge]),E('p',{'class':'ch-muted'},['Your Chester K45P, at a glance.'])])]),
   this.securityNode,this.summaryNode,
   E('div',{'class':'ch-layout'},[E('section',{'class':'ch-card ch-cellular-card'},[E('div',{'class':'ch-card-heading'},[E('h3',{},['Cellular']),this.modemSelectWrap]),this.modemNode]),E('div',{'class':'ch-side'},[portCard,controlCard])]),
@@ -624,17 +624,25 @@ return[misectel.createEmptyState(_('No interface data available.'))];const heade
   if(typeof data[key]==='boolean'){this[key]=data[key];this[sync](data[key]);this[node].querySelector('.ch-control-state').textContent=data[key]?'On':'Off';}
  }
  if(typeof data.wanToLanOn==='boolean'){this.wanToLanOn=data.wanToLanOn;this.syncWanToLanToggle(data.wanToLanOn);}
- this.fanControl.querySelector('.ch-control-state').textContent=fanState.selection(data.fanStatus);
+ this.syncFanControl(data.fanStatus);
  this.onlineBadge.textContent=data.internetStatus?.online===true?'Online':data.internetStatus?.online===false?'Offline':'Checkingâ€¦';
  this.onlineBadge.className='ch-badge '+(data.internetStatus?.online===true?'is-online':data.internetStatus?.online===false?'is-offline':'');
  this.updateModemSelect(data.modems);this.securityNode.style.display=(!data.setupCompleted||data.passwordUnset)?'':'none';dom.content(this.securityNode,this.renderSetupGuide(data.setupCompleted,data.passwordUnset));
  const modemDetailsOpen=this.modemNode.querySelector('details')?.open===true;dom.content(this.summaryNode,this.renderQuickStatus(data));dom.content(this.modemNode,this.renderModems(data.modems));const modemDetails=this.modemNode.querySelector('details');if(modemDetails)modemDetails.open=modemDetailsOpen;dom.content(this.portPanelNode,this.renderPorts(data.ports));dom.content(this.metricsNode,this.renderRuntimeMetrics(data));dom.content(this.systemNode,this.renderSystemCompact(data));dom.content(this.wanNode,this.renderWanCompact(data.wanInterfaces));this.loadingNode.style.display='none';
 },
+syncFanControl(status){
+ const label=fanState.selection(status),running=fanState.running(status);
+ this.fanControl.querySelector('.ch-control-state').textContent=label;
+ this.fanControl.classList.toggle('is-running',running);
+ this.fanControl.title='Fan: '+label+' · '+(status?.available!==true?'Unavailable':running?'Output On':'Output Off')+' · Open Fan Control';
+ this.fanControl.setAttribute('aria-label',this.fanControl.title);
+},
 async refreshFull(){if(this.fullRefreshing)return;this.fullRefreshing=true;try{this.updateShell(await this.fetchData());}finally{this.fullRefreshing=false;}},
 async refreshLive(){
  if(this.liveRefreshing||!this.latestRawData)return;this.liveRefreshing=true;
  try{
-  const [reply,cpu,ports]=await Promise.all([L.resolveDefault(callHomeSIMStatus(),null),L.resolveDefault(callCPUUsage(),{}),L.resolveDefault(callNetworkDevicesStatusMap(),{})]);const raw=this.latestRawData;
+  const [reply,cpu,ports,fan]=await Promise.all([L.resolveDefault(callHomeSIMStatus(),null),L.resolveDefault(callCPUUsage(),{}),L.resolveDefault(callNetworkDevicesStatusMap(),{}),L.resolveDefault(callHomeFanStatus(),{})]);const raw=this.latestRawData;
+  raw.fanStatus=fan;this.syncFanControl(fan);
   const sim=reply||{cards:{},active:'',running:false,config:raw.simStatus?.config,updated:raw.simStatus?.updated};this.latestLiveSIM=sim;raw.simStatus=sim;
   if(Number.isFinite(cpu.cpu_percent))raw.cpuPercent=cpu.cpu_percent;
   if(cpu.memory?.total>0&&Number.isFinite(cpu.memory.available)){raw.memory=cpu.memory;raw.memoryUsed=cpu.memory.total-cpu.memory.available;raw.memoryPercent=100*raw.memoryUsed/cpu.memory.total;}

@@ -5,3 +5,9 @@ for(const [mode,percent,label] of [['0',40,'Off'],['2',40,'Auto'],['1',20,'Minim
 assert.equal(fn({}),'Unavailable');assert.equal(fn(null),'Unavailable');
 assert(s.includes('fanStatus:homeFan'));assert(s.includes('callHomeFanStatus()'));
 console.log('PASS Overview fan: all six selection labels use current settings, independent of actual stopped output.');
+const running=new Function('baseclass',fs.readFileSync(__dirname+'/../payload/www/luci-static/resources/chester-ui/fan-state.js','utf8'))({extend:x=>x}).running;
+for(const mode of ['0','1','2'])assert.equal(running({available:true,mode,enabled:1,drive_percent:20}),true);
+for(const status of [null,{}, {available:true,enabled:0,drive_percent:20},{available:true,enabled:1,drive_percent:0},{available:true,enabled:1,drive_percent:null},{available:false,enabled:1,drive_percent:20}])assert.equal(running(status),false);
+assert(s.includes("href:L.url('admin','chester','fan')"));
+assert(s.includes('raw.fanStatus=fan;this.syncFanControl(fan)'));
+console.log('PASS Fan activity follows actual output, including Auto idle and safety override; link opens Fan Control.');

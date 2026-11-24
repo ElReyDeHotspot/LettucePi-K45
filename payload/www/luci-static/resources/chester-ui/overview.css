@@ -103,3 +103,10 @@
 .chester-home .ch-shortcut-label{display:flex;align-items:center;justify-content:center;min-height:34px;max-width:100%;white-space:normal;text-wrap:balance;text-align:center;line-height:1.15}
 .chester-home .ch-shortcuts .ch-control strong{font-size:clamp(14px,1.2vw,20px)}
 @media(max-width:650px){.chester-home .ch-shortcuts{gap:7px}.chester-home .ch-shortcuts .ch-control strong{font-size:13px}}
+
+/* Activity follows live PWM output; the control remains a navigation link. */
+#maincontent#maincontent .chester-home .ch-fan-control.is-running{background:var(--ch-blue,#007aff)!important;border-color:var(--ch-blue,#007aff)!important;color:#fff!important}
+#maincontent#maincontent .chester-home .ch-fan-control.is-running :is(.ch-icon,strong,.ch-control-state){color:#fff!important}
+.chester-home .ch-fan-control.is-running .ch-icon{animation:ch-fan-active 2s linear infinite;transform-origin:center}
+@keyframes ch-fan-active{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.chester-home .ch-fan-control.is-running .ch-icon{animation:none}}
