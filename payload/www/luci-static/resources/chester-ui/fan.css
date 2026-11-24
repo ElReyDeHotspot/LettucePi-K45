@@ -1,198 +1,88 @@
-/* Chester Fan Control — approved cooling-console design. */
+/* Chester Fan Control: approved desktop and mobile console. */
 #maincontent .st-fan{max-width:1200px}
-#maincontent .st-fan .fv-card{position:relative;display:grid;grid-template-columns:268px minmax(0,1fr);align-items:center;gap:26px;padding:24px;margin:22px 0;background:var(--ct-card);border:1px solid var(--ct-border);border-radius:23px;text-align:left;overflow:hidden;box-shadow:inset 0 1px 0 #ffffff08}
-#maincontent .st-fan .fv-orbit{position:relative;width:268px;height:268px;margin:0;border-radius:50%;border:1px solid #b0bdc9;background:linear-gradient(140deg,#c4ced8 0%,#647380 19%,#253442 38%,#a9b6c3 67%,#344451 85%,#81919f 100%);box-shadow:0 9px 20px #0004,inset 0 1px 1px #fff9}
-#maincontent .fv-orbit:before{content:'';position:absolute;inset:6px;border:1px solid #5b6c7c;border-radius:50%;background:radial-gradient(circle at 45% 35%,#1d3042,#0b1724 65%,#07111c);box-shadow:inset 0 2px 5px #0009}
-#maincontent .fv-orbit:after{content:'';position:absolute;inset:15px;border:1px solid #4f647744;border-radius:50%;pointer-events:none}
-#maincontent .fv-ring{position:absolute;inset:11px;border-radius:50%;pointer-events:none;z-index:2}
+#maincontent .st-fan .fv-card{--fv-diameter:268px;position:relative;display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);grid-template-rows:44px auto auto;gap:16px 28px;padding:24px;margin:22px 0;background:var(--ct-card);border:1px solid var(--ct-border);border-radius:23px;overflow:hidden;text-align:left;box-shadow:inset 0 1px 0 #ffffff08}
+#maincontent .fv-card:before{content:'';position:absolute;top:24px;bottom:24px;left:52.7%;width:1px;background:var(--ct-border);pointer-events:none}
+#maincontent .fv-info{display:contents}
+#maincontent .fv-fan-column{grid-column:1;grid-row:1/3;display:grid;grid-template-columns:minmax(76px,1fr) var(--fv-diameter);align-items:center;gap:16px;min-width:0}
+#maincontent .fv-side-menu{min-width:0}
+#maincontent .fv-button-grid{display:grid;gap:8px}
+#maincontent .fv-presets,#maincontent .fv-modes{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+#maincontent .fv-preset-section{margin:0;padding:0;border:0}
+#maincontent .fv-preset-section h4,#maincontent .fv-preset-choice{display:none}
+body.theme-misectel #maincontent#maincontent .st-fan :is(.fv-mode,.fv-preset){height:calc((var(--fv-diameter) - 24px)/4)!important;min-height:44px!important;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 3px!important;line-height:1.2!important;white-space:normal!important;border:1px solid var(--ct-border)!important;border-radius:11px;background:linear-gradient(155deg,var(--ct-inset),var(--ct-card))!important;color:var(--ct-text)!important;box-shadow:inset 0 1px 0 #ffffff0c!important;cursor:pointer}
+#maincontent .st-fan :is(.fv-mode,.fv-preset)>.st-icon{display:none}
+#maincontent .st-fan :is(.fv-mode,.fv-preset) strong{font-size:13px;line-height:16px;font-weight:600;text-align:center}
+#maincontent .st-fan :is(.fv-mode,.fv-preset) small{font-size:12px;line-height:14px;font-weight:400;opacity:.85;text-align:center}
+body.theme-misectel #maincontent#maincontent .st-fan :is(.fv-mode[aria-checked=true],.fv-preset[aria-pressed=true]){background:linear-gradient(160deg,#1493ff,#0076fb)!important;border-color:#369fff!important;color:#fff!important;box-shadow:0 3px 10px #007aff16,inset 0 1px 0 #ffffff25!important}
+#maincontent .st-fan button:focus-visible{outline:2px solid var(--ct-accent);outline-offset:3px}
+#maincontent .st-fan .fv-orbit{position:relative;width:var(--fv-diameter);height:var(--fv-diameter);border-radius:50%;filter:drop-shadow(0 6px 10px #0004)}
+#maincontent .fv-frame{position:absolute;inset:0;pointer-events:none}
+#maincontent .fv-rotor{position:absolute;inset:0;clip-path:circle(39% at 50% 50%);transform-origin:50% 50%;will-change:transform;pointer-events:none;z-index:1}
+#maincontent .st-fan .fv-fan-art{position:absolute;display:block;max-width:none!important;width:120.93%!important;height:118.64%!important;left:-9.64%;top:-9.46%;pointer-events:none;user-select:none}
+#maincontent .fv-ring{position:absolute;inset:8.2%;z-index:2;pointer-events:none}
 #maincontent .fv-ring svg{display:block;width:100%;height:100%;overflow:visible}
-#maincontent .fv-dial-ticks{stroke:#d8e3ed;stroke-width:.8;opacity:.8}
 #maincontent .fv-gauge-track{fill:none;stroke:#2a3d50;stroke-width:3}
 #maincontent .fv-gauge-level{fill:none;stroke:#168cff;stroke-width:3.5;stroke-linecap:round;transform:rotate(-90deg);transform-origin:100px 100px;transition:stroke-dashoffset .7s ease;filter:drop-shadow(0 0 2px #007aff55)}
-#maincontent .fv-rotor{position:absolute;inset:23px;transform-origin:50% 50%;will-change:transform;filter:drop-shadow(0 2px 3px #0008);pointer-events:none}
-#maincontent .fv-rotor svg{display:block;width:100%;height:100%}
-#maincontent .fv-reading{position:absolute;inset:32%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border-radius:50%;z-index:3;background:linear-gradient(140deg,#253442 0%,#101a26 50%,#070e17 100%);border:1px solid #708091;box-shadow:0 3px 10px #0009,inset 0 1px 2px #ffffff30;text-align:center}
-body.theme-misectel #maincontent#maincontent .st-fan .fv-reading strong{font-size:31px;line-height:1;letter-spacing:-1.3px;color:#f4f7fc!important;font-variant-numeric:tabular-nums;text-shadow:0 2px 3px #0005}
-body.theme-misectel #maincontent#maincontent .st-fan .fv-reading span{font-size:8px;letter-spacing:.1px;text-transform:uppercase;color:#e0e9f2!important}
-#maincontent .fv-info{min-width:0}
-#maincontent .fv-caption{font-size:10px;font-weight:650;letter-spacing:2.8px;color:var(--ct-muted);margin:0 0 9px}
-#maincontent .st-fan .fv-title{font-size:25px!important;line-height:1.2;letter-spacing:-.5px;margin:0 0 14px!important}
-#maincontent .fv-detail{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid var(--ct-border);border-radius:99px;background:var(--ct-inset);color:var(--ct-muted);font-size:11px;line-height:1.3;margin:0}
-#maincontent .fv-detail:before{content:'';width:6px;height:6px;flex:0 0 6px;border-radius:50%;background:var(--ct-accent)}
-#maincontent .fv-card.is-stopped .fv-rotor{opacity:.4}
-#maincontent .fv-card.is-stopped .fv-detail:before{background:var(--ct-muted)}
-#maincontent .fv-card.is-unavailable .fv-rotor{opacity:.2}
-#maincontent .st-fan .fv-telemetry .st-summary{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:20px 0 0}
-#maincontent .st-fan .fv-telemetry .st-stat{min-width:0;padding:14px 12px;border:1px solid var(--ct-border);border-radius:14px;gap:10px;box-shadow:none}
-#maincontent .fv-telemetry .st-stat>.st-icon{flex:0 0 25px;width:25px;height:25px}
-#maincontent .fv-telemetry .st-stat>div{min-width:0}
-#maincontent .fv-telemetry .st-stat span{font-size:11px;line-height:1.3}
-#maincontent .st-fan .fv-telemetry .st-stat strong{font-size:20px;line-height:1.3;margin-top:3px}
-#maincontent .st-fan .fv-telemetry .st-unit-bar{margin:16px 0 0;justify-content:flex-end}
-#maincontent .st-fan .fv-telemetry .st-unit-button{min-height:33px;font-size:11px;padding:6px 12px}
-#maincontent .st-fan>.st-card{padding:22px 24px;border-radius:21px}
-#maincontent .st-fan>.st-card .st-card-head{margin-bottom:18px}
-#maincontent .st-fan>.st-card h3{font-size:25px!important}
-#maincontent .fv-modes,#maincontent .fv-presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-body.theme-misectel #maincontent#maincontent .st-fan :is(.fv-mode,.fv-preset){height:auto!important;min-height:50px!important;display:flex;align-items:center;justify-content:center;flex-direction:row;gap:12px;padding:12px 15px!important;line-height:1.2!important;white-space:normal!important;border:1px solid var(--ct-border)!important;border-radius:14px;background:linear-gradient(155deg,var(--ct-inset),var(--ct-card))!important;color:var(--ct-text)!important;box-shadow:inset 0 1px 0 #ffffff0c!important;cursor:pointer}
-body.theme-misectel #maincontent#maincontent .st-fan :is(.fv-mode[aria-checked=true],.fv-preset[aria-pressed=true]){background:linear-gradient(160deg,#1493ff,#0076fb)!important;border-color:#369fff!important;color:#fff!important;box-shadow:0 3px 10px #007aff16,inset 0 1px 0 #ffffff25!important}
-#maincontent .st-fan :is(.fv-mode,.fv-preset)>.st-icon{width:23px;height:23px;flex:0 0 23px}
-#maincontent .st-fan :is(.fv-mode,.fv-preset) svg{display:block;width:100%;height:100%}
-#maincontent .st-fan :is(.fv-mode,.fv-preset) strong{font-size:15px;font-weight:600;line-height:1.25}
-body.theme-misectel #maincontent#maincontent .st-fan :is(.fv-mode[aria-checked=true],.fv-preset[aria-pressed=true]) .st-icon{color:#fff!important}
-#maincontent .st-fan .fv-manual{margin:18px 0 0;padding:16px 0 0;background:none;border:0;border-top:1px solid var(--ct-border);border-radius:0}
-#maincontent .st-fan .fv-manual[hidden]{display:none}
-#maincontent .fv-manual-heading{margin:0 0 10px}
-#maincontent .fv-manual-heading strong{font-size:16px;line-height:1.3}
-#maincontent .fv-slider-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:end;gap:18px}
-#maincontent .fv-slider-row>span{font-size:15px;line-height:36px;color:var(--ct-muted)}
-#maincontent .fv-slider-control{position:relative;padding-top:25px;min-width:0}
-body.theme-misectel #maincontent#maincontent .st-fan .fv-slider-bubble{position:absolute;top:0;transform:translateX(-50%);min-width:46px;height:25px;padding:4px 8px;box-sizing:border-box;border:1px solid #399fff;border-radius:8px;background:#007aff;color:#fff!important;text-align:center;font-size:14px;line-height:16px;box-shadow:0 3px 9px #0002;font-variant-numeric:tabular-nums;pointer-events:none}
-#maincontent .fv-slider-bubble:after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#007aff}
-#maincontent .st-fan input[type=range]{appearance:none!important;-webkit-appearance:none!important;display:block;height:36px!important;width:100%!important;padding:0!important;margin:0!important;border:0!important;background:transparent!important;cursor:pointer;touch-action:pan-y}
-#maincontent .st-fan input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:99px;background:linear-gradient(to right,var(--ct-primary) 0%,var(--ct-primary) var(--fv-fill,0%),#526477 var(--fv-fill,0%),#526477 100%);box-shadow:inset 0 1px 2px #0003}
+#maincontent .fv-reading{position:absolute;inset:32%;display:flex;align-items:center;justify-content:center;border-radius:50%;z-index:3;text-align:center}
+body.theme-misectel #maincontent#maincontent .st-fan .fv-reading strong{font-size:33px;line-height:1;letter-spacing:-1.3px;color:#f4f7fc!important;font-variant-numeric:tabular-nums;text-shadow:0 2px 3px #0005}
+#maincontent .fv-card.is-unavailable :is(.fv-frame,.fv-rotor){opacity:.5}
+#maincontent .fv-card>.st-unit-bar{grid-column:2;grid-row:1;display:block;margin:0;width:100%}
+#maincontent .st-fan .st-unit-options{display:flex;width:100%;box-sizing:border-box}
+#maincontent .st-fan .st-unit-button{flex:1;min-width:0;min-height:44px;padding:8px 5px;font-size:12px;text-align:center;white-space:nowrap}
+#maincontent .fv-telemetry{grid-column:2;grid-row:2;min-width:0}
+#maincontent .st-fan .fv-telemetry .st-summary{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin:0}
+#maincontent .st-fan .fv-telemetry .st-stat{min-width:0;min-height:64px;padding:12px 16px;box-sizing:border-box;display:flex;align-items:center;gap:16px;border:1px solid var(--ct-border);border-radius:13px;background:var(--ct-inset);box-shadow:none}
+#maincontent .fv-telemetry .st-stat>.st-icon{width:30px;height:30px;flex:0 0 30px;border-right:1px solid var(--ct-border);padding-right:14px;box-sizing:content-box}
+#maincontent .fv-telemetry .st-stat>div{min-width:0;flex:1}
+#maincontent .st-fan .fv-telemetry .st-stat span{font-size:12px;line-height:16px}
+#maincontent .st-fan .fv-telemetry .st-stat strong{font-size:22px;line-height:26px;margin-top:3px;white-space:nowrap}
+#maincontent .fv-power-slot{grid-column:2;grid-row:3;align-self:end}
+body.theme-misectel #maincontent#maincontent .st-fan .fv-power-button{width:100%;height:50px!important;min-height:50px!important;display:flex;align-items:center;justify-content:center;border-radius:12px}
+#maincontent .st-fan .fv-power-button strong{font-size:20px;line-height:24px}
+#maincontent .fv-under-fan{grid-column:1;grid-row:3;min-width:0;align-self:end}
+#maincontent .fv-output-control{min-width:0}
+#maincontent .fv-manual-heading{display:flex;align-items:baseline;justify-content:center;gap:6px;margin:0 0 12px;text-align:center}
+#maincontent .fv-manual-heading>strong{font-size:16px;line-height:22px}
+body.theme-misectel #maincontent#maincontent .st-fan .fv-slider-bubble{position:static!important;transform:none!important;padding:0;border:0;border-radius:0;box-shadow:none;background:none;color:var(--ct-accent)!important;font-size:18px;line-height:22px;font-variant-numeric:tabular-nums;white-space:nowrap}
+#maincontent .fv-slider-row{position:relative;display:block;padding-bottom:18px}
+#maincontent .fv-slider-row>span{position:absolute;bottom:0;font-size:12px;line-height:16px;color:var(--ct-muted)}
+#maincontent .fv-slider-row>span:first-child{left:0}
+#maincontent .fv-slider-row>span:last-child{right:0}
+#maincontent .fv-slider-control{min-width:0}
+#maincontent .st-fan input[type=range]{appearance:none!important;-webkit-appearance:none!important;display:block;width:100%!important;height:36px!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important;cursor:pointer;touch-action:pan-y}
+#maincontent .st-fan input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:99px;background:linear-gradient(to right,var(--ct-primary) 0%,var(--ct-primary) var(--fv-fill,0%),#526477 var(--fv-fill,0%),#526477 100%)}
 #maincontent .st-fan input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-9px;border:2px solid #007aff;border-radius:50%;background:#f8fbff;box-shadow:0 2px 6px #0004}
 #maincontent .st-fan input[type=range]::-moz-range-track{height:8px;border-radius:99px;background:#526477}
 #maincontent .st-fan input[type=range]::-moz-range-progress{height:8px;border-radius:99px;background:var(--ct-primary)}
-#maincontent .st-fan input[type=range]::-moz-range-thumb{height:22px;width:22px;border:2px solid #007aff;border-radius:50%;background:#f8fbff;box-shadow:0 2px 6px #0004}
-#maincontent .fv-preset-section{margin-top:18px;padding-top:14px;border-top:1px solid var(--ct-border)}
-#maincontent .fv-preset-section h4{font-size:16px;margin:0 0 12px}
-#maincontent .fv-preset-choice{display:none}
-#maincontent .fv-save-state{font-size:11px;color:var(--ct-muted);background:var(--ct-page);border-radius:6px;padding:2px 6px}
-#maincontent .fv-save-state:empty{display:none}
-body.theme-misectel #maincontent#maincontent .st-fan .st-threshold{margin-top:20px;background:var(--ct-inset)!important;color:var(--ct-text)!important;border-color:var(--ct-border)!important;box-shadow:none!important}
-body.theme-misectel #maincontent#maincontent .st-fan .st-threshold :is(strong,label){color:var(--ct-text)!important}
-body.theme-misectel #maincontent#maincontent .st-fan .st-threshold .st-muted{color:var(--ct-muted)!important}
-@media(max-width:1150px) and (min-width:761px){#maincontent .st-fan .fv-card{grid-template-columns:220px minmax(0,1fr);gap:20px}#maincontent .st-fan .fv-orbit{width:220px;height:220px}#maincontent .st-fan .fv-telemetry .st-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#maincontent .fv-telemetry .st-stat:last-child{grid-column:1/-1}}
-@media(max-width:760px){#maincontent .st-fan .fv-card{grid-template-columns:1fr;gap:24px;text-align:center;padding:22px 18px}#maincontent .st-fan .fv-orbit{margin:0 auto;width:240px;height:240px}#maincontent .st-fan .fv-telemetry .st-summary{grid-template-columns:repeat(2,minmax(0,1fr));text-align:left}#maincontent .fv-telemetry .st-stat:last-child{grid-column:1/-1}#maincontent .st-fan .fv-telemetry .st-unit-bar{justify-content:center}#maincontent .st-fan>.st-card{padding:20px 16px}}
-@media(max-width:500px){#maincontent .fv-modes,#maincontent .fv-presets{gap:8px}body.theme-misectel #maincontent#maincontent .st-fan :is(.fv-mode,.fv-preset){flex-direction:column;gap:5px;min-height:68px!important;padding:10px 6px!important}#maincontent .st-fan :is(.fv-mode,.fv-preset) strong{font-size:12px}#maincontent .fv-slider-row{gap:12px}#maincontent .fv-slider-row>span{font-size:12px}#maincontent .st-fan .fv-title{font-size:23px!important}}
+#maincontent .st-fan input[type=range]::-moz-range-thumb{height:22px;width:22px;border:2px solid #007aff;border-radius:50%;background:#f8fbff}
+#maincontent .fv-temperature-control .st-muted{font-size:11px;line-height:16px;text-align:center;margin:8px 0 0}
+#maincontent .fv-save-state{display:block;text-align:center;font-size:11px;color:var(--ct-muted);margin-top:6px}
+#maincontent .fv-save-state.is-error{color:var(--ct-text);padding:8px;border:1px solid var(--ct-border);border-radius:8px}
+#maincontent .fv-detail{grid-column:1/-1;font-size:12px;text-align:center;color:var(--ct-muted);margin:0}
+#maincontent .fv-save-state:empty,#maincontent .fv-detail[hidden],#maincontent .fv-manual[hidden],#maincontent .fv-temperature-control[hidden]{display:none}
+@media(max-width:1150px) and (min-width:761px){#maincontent .st-fan .fv-card{--fv-diameter:220px;gap:14px 22px;padding:20px}#maincontent .fv-fan-column{gap:12px;grid-template-columns:minmax(72px,1fr) var(--fv-diameter)}#maincontent .st-fan :is(.fv-mode,.fv-preset) strong{font-size:11px}#maincontent .st-fan :is(.fv-mode,.fv-preset) small{font-size:11px}}
+@media(max-width:760px){
+ #maincontent .st-fan .fv-card{--fv-diameter:200px;grid-template-columns:minmax(0,1fr);grid-template-rows:auto;gap:14px;padding:14px;margin:16px 0;border-radius:18px}
+ #maincontent .fv-card:before{display:none}
+ #maincontent .fv-card>.st-unit-bar{grid-column:1;grid-row:1}
+ #maincontent .fv-fan-column{grid-column:1;grid-row:2;grid-template-columns:minmax(84px,1fr) var(--fv-diameter);gap:12px}
+ #maincontent .fv-under-fan{grid-column:1;grid-row:3}
+ #maincontent .fv-telemetry{grid-column:1;grid-row:4}
+ #maincontent .fv-power-slot{grid-column:1;grid-row:5}
+ #maincontent .st-fan .fv-telemetry .st-summary{gap:0}
+ #maincontent .st-fan .fv-telemetry .st-stat{display:block;min-height:44px;padding:10px 4px;border:0;border-bottom:1px solid var(--ct-border);border-radius:0;background:none}
+ #maincontent .st-fan .fv-telemetry .st-stat:first-child{border-top:1px solid var(--ct-border)}
+ #maincontent .fv-telemetry .st-stat>.st-icon{display:none}
+ #maincontent .fv-telemetry .st-stat>div{display:flex;justify-content:space-between;align-items:center;gap:8px}
+ #maincontent .st-fan .fv-telemetry .st-stat span{font-size:12px;line-height:20px}
+ #maincontent .st-fan .fv-telemetry .st-stat strong{font-size:16px;line-height:20px;margin:0}
+ #maincontent .st-fan :is(.fv-mode,.fv-preset) strong{font-size:12px;line-height:14px}
+ #maincontent .st-fan :is(.fv-mode,.fv-preset) small{font-size:11px;line-height:12px}
+ #maincontent .fv-save-state{margin-top:4px}
+}
+@media(max-width:400px){#maincontent .st-fan .fv-card{--fv-diameter:188px;padding:12px;gap:12px}#maincontent .fv-fan-column{gap:10px;grid-template-columns:minmax(78px,1fr) var(--fv-diameter)}#maincontent .fv-button-grid,#maincontent .fv-presets,#maincontent .fv-modes{gap:4px}body.theme-misectel #maincontent#maincontent .st-fan :is(.fv-mode,.fv-preset){height:44px!important}#maincontent .fv-fan-column .fv-side-menu{align-self:center}body.theme-misectel #maincontent#maincontent .st-fan .fv-reading strong{font-size:26px}}
 @media(prefers-reduced-motion:reduce){#maincontent .fv-rotor{will-change:auto}#maincontent .fv-gauge-level{transition:none}}
 
-/* Approved sculpted fan art; one cached asset with independently rotating blades. */
-#maincontent .st-fan .fv-orbit{background:none;border:0;box-shadow:none;filter:drop-shadow(0 6px 10px #0004)}
-#maincontent .st-fan .fv-orbit:before,#maincontent .st-fan .fv-orbit:after{display:none}
-#maincontent .fv-frame{position:absolute;inset:0;overflow:visible;pointer-events:none}
-#maincontent .st-fan .fv-rotor{inset:0;clip-path:circle(39% at 50% 50%);filter:none;z-index:1}
-#maincontent .st-fan .fv-fan-art{position:absolute;display:block;max-width:none!important;width:120.93%!important;height:118.64%!important;left:-9.64%;top:-9.46%;pointer-events:none;user-select:none}
-#maincontent .st-fan .fv-ring{inset:22px;z-index:2}
-#maincontent .st-fan .fv-reading{background:none;border:0;box-shadow:none;inset:32%;z-index:3}
-body.theme-misectel #maincontent#maincontent .st-fan .fv-reading strong{font-size:33px}
-#maincontent .st-fan .fv-card.is-stopped .fv-rotor{opacity:1}
-#maincontent .st-fan .fv-card.is-unavailable .fv-frame{opacity:.5}
-#maincontent .st-fan .fv-card.is-unavailable .fv-rotor{opacity:.5}
+@media(max-width:359px){#maincontent .st-fan .fv-card{--fv-diameter:140px;padding:10px}#maincontent .fv-fan-column{grid-template-columns:minmax(64px,1fr) var(--fv-diameter);gap:8px}#maincontent .st-fan :is(.fv-mode,.fv-preset) strong{font-size:10px}#maincontent .st-fan .st-unit-button{font-size:10px}#maincontent .st-fan .fv-telemetry .st-stat span{font-size:11px}#maincontent .st-fan .fv-telemetry .st-stat strong{font-size:14px}}
 
-#maincontent .fv-fan-column{min-width:0}
-#maincontent .fv-under-fan .fv-preset-section{border:0;margin:14px 0 0;padding:0}
-#maincontent .fv-under-fan h4{display:none}
-#maincontent .fv-under-fan .fv-presets{gap:5px}
-body.theme-misectel #maincontent#maincontent .st-fan .fv-under-fan .fv-preset{min-height:34px!important;padding:7px 5px!important;border-radius:9px;gap:0}
-#maincontent .fv-under-fan .fv-preset>.st-icon{display:none}
-#maincontent .st-fan .fv-under-fan .fv-preset strong{font-size:10px;white-space:normal;text-align:center}
-#maincontent .fv-save-state.is-error{max-width:100%;text-align:center}
-@media(max-width:760px){#maincontent .fv-fan-column{width:min(100%,280px);margin:0 auto}}
-
-@media(max-width:760px){body.theme-misectel #maincontent#maincontent .st-fan .fv-under-fan .fv-preset{min-height:40px!important}}
-
-body.theme-misectel #maincontent#maincontent .st-fan .fv-under-fan .fv-preset{flex-direction:column;gap:2px}
-#maincontent .st-fan .fv-under-fan .fv-preset strong{font-size:10.5px}
-#maincontent .st-fan .fv-under-fan .fv-preset small{font-size:10px;opacity:.85}
-
-/* Instant controls: presets above modes, output slider alongside. */
-#maincontent .st-fan .fv-card{padding-top:64px}
-#maincontent .st-fan .fv-card>.st-unit-bar{position:absolute;top:16px;right:20px;margin:0;display:flex;justify-content:flex-end}
-#maincontent .st-fan .fv-card>.st-unit-bar .st-unit-button{min-height:32px;padding:6px 12px;font-size:11px}
-#maincontent .fv-under-fan{grid-column:1/-1;min-width:0}
-#maincontent .fv-controls{display:grid;grid-template-columns:268px minmax(0,1fr);align-items:center;gap:26px;padding-top:18px;border-top:1px solid var(--ct-border)}
-#maincontent .fv-button-grid{display:grid;gap:6px;min-width:0}
-#maincontent .fv-under-fan .fv-preset-section{margin:0}
-#maincontent .fv-button-grid .fv-modes{gap:5px}
-body.theme-misectel #maincontent#maincontent .st-fan .fv-button-grid .fv-mode{min-height:40px!important;padding:8px 5px!important;gap:5px;border-radius:9px;flex-direction:row}
-#maincontent .st-fan .fv-button-grid .fv-mode strong{font-size:11px}
-#maincontent .st-fan .fv-button-grid .fv-mode>.st-icon{width:14px;height:14px;flex:0 0 14px}
-#maincontent .st-fan .fv-output-control .fv-manual{border:0;margin:0;padding:0;text-align:left}
-#maincontent .fv-output-control{min-width:0}
-#maincontent .fv-output-control .fv-save-state{display:block;width:fit-content;margin:8px auto 0}
-#maincontent .fv-output-control .fv-save-state:empty{display:none}
-#maincontent .st-fan>.st-threshold[hidden]{display:none}
-@media(max-width:1150px) and (min-width:761px){#maincontent .fv-controls{grid-template-columns:220px minmax(0,1fr);gap:20px}}
-@media(max-width:760px){#maincontent .fv-controls{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}#maincontent .fv-button-grid .fv-mode>.st-icon{display:none}#maincontent .fv-slider-row{gap:8px}#maincontent .fv-slider-row>span{font-size:11px}}
-@media(max-width:480px){#maincontent .fv-controls{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:14px}#maincontent .fv-slider-row{grid-template-columns:minmax(0,1fr);gap:0}#maincontent .fv-slider-row>span{display:none}#maincontent .fv-manual-heading strong{font-size:12px}#maincontent .st-fan .fv-under-fan .fv-preset strong{font-size:9px}#maincontent .st-fan .fv-button-grid .fv-mode strong{font-size:10px}}
-
-#maincontent .fv-output-control .fv-temperature-control[hidden]{display:none}
-#maincontent .fv-temperature-control .st-muted{font-size:11px;line-height:1.4;margin:8px 0 0;color:var(--ct-muted)}
-#maincontent .fv-temperature-control .fv-slider-bubble{min-width:60px!important;white-space:nowrap}
-#maincontent .st-fan .fv-button-grid .fv-mode[value="2"]>.st-icon{display:none}
-#maincontent .st-fan .fv-button-grid .fv-mode[value="2"] strong{white-space:normal;text-align:center}
-
-/* Five controls: three equal presets above two equal modes. */
-#maincontent .fv-button-grid .fv-modes{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
-#maincontent .fv-button-grid .fv-presets{gap:6px}
-body.theme-misectel #maincontent#maincontent .st-fan .fv-button-grid :is(.fv-mode,.fv-preset){min-height:44px!important;height:44px!important;box-sizing:border-box}
-
-/* Equal-size controls, centered on the fan's axis. */
-#maincontent .fv-button-grid .fv-modes{grid-template-columns:repeat(6,minmax(0,1fr))}
-#maincontent .fv-button-grid .fv-mode{grid-column:span 2}
-#maincontent .fv-button-grid .fv-mode:first-child{grid-column:2 / span 2}
-
-/* Matching two-line button faces and a centered, evenly spaced cluster. */
-#maincontent .fv-button-grid{gap:8px}
-#maincontent .fv-button-grid :is(.fv-modes,.fv-presets){gap:8px}
-body.theme-misectel #maincontent#maincontent .st-fan .fv-button-grid :is(.fv-mode,.fv-preset){height:48px!important;min-height:48px!important;flex-direction:column;gap:3px;padding:6px 3px!important;border-radius:10px}
-#maincontent .st-fan .fv-button-grid :is(.fv-mode,.fv-preset)>.st-icon{display:none}
-#maincontent .st-fan .fv-button-grid :is(.fv-mode,.fv-preset) strong{font-size:10.5px;line-height:13px;font-weight:600;text-align:center}
-#maincontent .st-fan .fv-button-grid :is(.fv-mode,.fv-preset) small{font-size:10px;line-height:12px;font-weight:400;opacity:.85;text-align:center}
-#maincontent .fv-detail[hidden]{display:none}
-
-/* Vertical presets beside the fan; dedicated power control in Cooling Status. */
-#maincontent .st-fan .fv-card{grid-template-columns:370px minmax(0,1fr);gap:24px}
-#maincontent .fv-fan-column{display:flex;align-items:center;gap:18px;width:auto;margin:0}
-#maincontent .fv-side-menu{width:84px;flex:0 0 84px}
-#maincontent .fv-fan-column .fv-orbit{flex:0 0 268px;margin:0}
-#maincontent .fv-side-menu .fv-button-grid{gap:8px}
-#maincontent .fv-side-menu :is(.fv-presets,.fv-modes){grid-template-columns:minmax(0,1fr);gap:8px}
-#maincontent .fv-side-menu .fv-mode,#maincontent .fv-side-menu .fv-mode:first-child{grid-column:auto}
-#maincontent .fv-side-menu .fv-preset-section{border:0;padding:0;margin:0}
-#maincontent .fv-side-menu h4{display:none}
-#maincontent .st-fan .fv-controls{display:block}
-#maincontent .fv-power-slot{margin:0 0 12px}
-body.theme-misectel #maincontent#maincontent .st-fan .fv-power-button{display:flex;width:40px!important;height:40px!important;min-height:40px!important;padding:9px!important;border-radius:50%;align-items:center;justify-content:center;gap:0}
-#maincontent .st-fan .fv-power-button>.st-icon{display:block;width:20px;height:20px;flex:0 0 20px}
-@media(max-width:1150px) and (min-width:761px){#maincontent .st-fan .fv-card{grid-template-columns:310px minmax(0,1fr);gap:20px}#maincontent .fv-fan-column{gap:12px}#maincontent .fv-side-menu{width:78px;flex-basis:78px}#maincontent .fv-fan-column .fv-orbit{flex-basis:220px}}
-@media(max-width:760px){#maincontent .st-fan .fv-card{grid-template-columns:minmax(0,1fr)}#maincontent .fv-fan-column{justify-content:center;width:100%;gap:14px}#maincontent .fv-fan-column .fv-orbit{flex-basis:220px;width:220px;height:220px}#maincontent .fv-side-menu{width:78px;flex-basis:78px}#maincontent .fv-power-slot{display:flex;justify-content:center}}
-@media(max-width:400px){#maincontent .fv-fan-column{gap:10px}#maincontent .fv-side-menu{width:72px;flex-basis:72px}#maincontent .fv-fan-column .fv-orbit{width:180px;height:180px;flex-basis:180px}}
-
-#maincontent .st-fan .fv-telemetry .st-stat:last-child>.st-icon{display:none}
-#maincontent .st-fan .fv-telemetry .st-stat:last-child strong{font-size:18px;white-space:nowrap}
-
-/* The control track shares the fan's width and center at every breakpoint. */
-#maincontent .st-fan .fv-fan-column{display:grid;grid-template-columns:84px 268px;align-items:center;gap:18px}
-#maincontent .fv-side-menu{grid-column:1;grid-row:1}
-#maincontent .fv-fan-column .fv-orbit{grid-column:2;grid-row:1}
-#maincontent .fv-fan-column .fv-under-fan{grid-column:2;grid-row:2;width:100%;min-width:0}
-#maincontent .fv-fan-column .fv-controls{padding:0;border:0}
-#maincontent .fv-fan-column .fv-manual-heading{text-align:center;margin:0 0 8px}
-#maincontent .fv-fan-column .fv-manual-heading strong{font-size:13px}
-#maincontent .fv-fan-column .fv-slider-row{position:relative;display:block;margin:0 0 18px}
-#maincontent .fv-fan-column .fv-slider-row>span{position:absolute;display:block;bottom:-14px;line-height:16px;font-size:10px}
-#maincontent .fv-fan-column .fv-slider-row>span:first-child{left:0}
-#maincontent .fv-fan-column .fv-slider-row>span:last-child{right:0}
-#maincontent .fv-fan-column .fv-temperature-control .st-muted{text-align:center}
-@media(max-width:1150px) and (min-width:761px){#maincontent .st-fan .fv-fan-column{grid-template-columns:78px 220px;gap:12px}}
-@media(max-width:760px){#maincontent .st-fan .fv-fan-column{grid-template-columns:78px 220px;justify-content:center;gap:14px}}
-@media(max-width:400px){#maincontent .st-fan .fv-fan-column{grid-template-columns:72px 180px;gap:10px}}
-
-/* Center status against the fan row, independently of the slider below. */
-#maincontent .st-fan .fv-card{row-gap:18px}
-#maincontent .fv-card>.fv-info{grid-column:2;grid-row:1;align-self:center}
-#maincontent .fv-card>.fv-under-fan{grid-column:1;grid-row:2;width:268px;margin-left:102px}
-#maincontent .fv-card>.fv-under-fan .fv-controls{padding:0;border:0}
-#maincontent .fv-card>.fv-under-fan .fv-manual-heading{text-align:center;margin:0 0 8px}
-#maincontent .fv-card>.fv-under-fan .fv-manual-heading strong{font-size:13px}
-#maincontent .fv-card>.fv-under-fan .fv-slider-row{position:relative;display:block;margin:0 0 18px}
-#maincontent .fv-card>.fv-under-fan .fv-slider-row>span{position:absolute;display:block;bottom:-14px;line-height:16px;font-size:10px}
-#maincontent .fv-card>.fv-under-fan .fv-slider-row>span:first-child{left:0}
-#maincontent .fv-card>.fv-under-fan .fv-slider-row>span:last-child{right:0}
-#maincontent .fv-card>.fv-under-fan .fv-temperature-control .st-muted{text-align:center}
-@media(max-width:1150px) and (min-width:761px){#maincontent .fv-card>.fv-under-fan{width:220px;margin-left:90px}}
-@media(max-width:760px){#maincontent .fv-card>.fv-info{grid-column:1;grid-row:3}#maincontent .fv-card>.fv-under-fan{width:220px;justify-self:center;margin-left:92px}}
-@media(max-width:400px){#maincontent .fv-card>.fv-under-fan{width:180px;margin-left:82px}}
+body.theme-misectel #maincontent#maincontent .st-fan .st-unit-button{height:44px!important;min-height:44px!important}

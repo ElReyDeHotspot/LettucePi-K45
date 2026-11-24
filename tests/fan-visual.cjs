@@ -3,3 +3,5 @@ assert.equal(m.reading({available:true,drive_percent:0}).duration,0);assert.equa
 console.log('PASS fan graphic: live percentage only, zero stops animation, speed follows output, invalid readings stay unavailable.');
 
 assert.match(m.reading({available:true,drive_percent:0,mode:'2'}).detail,/Below Threshold/);assert.match(m.reading({available:true,drive_percent:0,mode:'1'}).detail,/Not Applied/);assert.match(m.reading({available:true,drive_percent:100,boost:true}).detail,/Cooling Protection/);
+
+assert(!source.includes('LIVE COOLING'));assert(!source.includes('Cooling Status'));assert(!source.includes('Live Fan Output'));
