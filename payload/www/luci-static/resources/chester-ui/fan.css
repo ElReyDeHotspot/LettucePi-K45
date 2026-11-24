@@ -128,3 +128,8 @@ body.theme-misectel #maincontent#maincontent .st-fan .fv-button-grid .fv-mode{mi
 #maincontent .fv-button-grid .fv-modes{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
 #maincontent .fv-button-grid .fv-presets{gap:6px}
 body.theme-misectel #maincontent#maincontent .st-fan .fv-button-grid :is(.fv-mode,.fv-preset){min-height:44px!important;height:44px!important;box-sizing:border-box}
+
+/* Equal-size controls, centered on the fan's axis. */
+#maincontent .fv-button-grid .fv-modes{grid-template-columns:repeat(6,minmax(0,1fr))}
+#maincontent .fv-button-grid .fv-mode{grid-column:span 2}
+#maincontent .fv-button-grid .fv-mode:first-child{grid-column:2 / span 2}

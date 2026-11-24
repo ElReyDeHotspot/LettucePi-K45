@@ -52,8 +52,8 @@ while :; do
   PERCENT="$(uci -q get misectel.main.fan_speed_percent)"
   DUTY="$(chester_fan_percent_duty "$PERCENT")" || DUTY=255
   THRESHOLD="$(uci -q get misectel.main.fan_temp_threshold)"
-  case "$THRESHOLD" in ''|*[!0-9]*) THRESHOLD=70 ;; esac
-  [ "$THRESHOLD" -ge 1 ] && [ "$THRESHOLD" -le 150 ] || THRESHOLD=70
+  case "$THRESHOLD" in ''|*[!0-9]*) THRESHOLD=55 ;; esac
+  [ "$THRESHOLD" -ge 1 ] && [ "$THRESHOLD" -le 150 ] || THRESHOLD=55
   AUTO_STATE=0
   RELOAD=0
  fi
