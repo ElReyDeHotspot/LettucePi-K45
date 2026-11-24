@@ -634,7 +634,7 @@ syncFanControl(status){
  const label=fanState.selection(status),running=fanState.running(status);
  this.fanControl.querySelector('.ch-control-state').textContent=label;
  this.fanControl.classList.toggle('is-running',running);
- this.fanControl.title='Fan: '+label+' · '+(status?.available!==true?'Unavailable':running?'Output On':'Output Off')+' · Open Fan Control';
+ this.fanControl.title='Fan: '+label+' | '+(status?.available!==true?'Unavailable':running?'Output On':'Output Off')+' | Open Fan Control';
  this.fanControl.setAttribute('aria-label',this.fanControl.title);
 },
 async refreshFull(){if(this.fullRefreshing)return;this.fullRefreshing=true;try{this.updateShell(await this.fetchData());}finally{this.fullRefreshing=false;}},
