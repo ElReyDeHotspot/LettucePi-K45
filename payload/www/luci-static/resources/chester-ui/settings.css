@@ -117,3 +117,9 @@ body.node-admin-system-system #maincontent .cbi-page-actions .cbi-button{backgro
 .chester-settings .st-reboot-confirm[hidden]{display:none;}
 .chester-settings .st-reboot-confirm>strong{font-size:19px;}
 @media(max-width:600px){.chester-settings .st-reboot-modern{margin:12px auto;padding:28px 20px;}.chester-settings .st-reboot-modern h3{font-size:24px;}.chester-settings .st-reboot-detail{text-align:left;}.chester-settings .st-reboot-modern .st-reboot-actions{gap:10px;}}
+
+#maincontent .st-wifi .wf-save-bar{position:sticky;bottom:12px;z-index:10;display:flex;justify-content:center;padding:16px 20px;border:1px solid var(--st-line);border-radius:18px;background:#f8fbfff0;backdrop-filter:blur(16px);box-shadow:0 8px 35px #071a291a;}
+#maincontent .st-wifi .wf-save-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:min(100%,640px);}
+#maincontent .st-wifi .wf-save-actions>.st-button{width:100%;min-height:48px;justify-content:center;white-space:nowrap;}
+html[data-chester-appearance=night] #maincontent .st-wifi .wf-save-bar{background:#162a3af2;}
+@media(max-width:700px){#maincontent .st-wifi .wf-save-bar{bottom:8px;padding:12px;}#maincontent .st-wifi .wf-save-actions{gap:10px;}}
