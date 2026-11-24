@@ -142,3 +142,24 @@ body.theme-misectel #maincontent#maincontent .st-fan .fv-button-grid :is(.fv-mod
 #maincontent .st-fan .fv-button-grid :is(.fv-mode,.fv-preset) strong{font-size:10.5px;line-height:13px;font-weight:600;text-align:center}
 #maincontent .st-fan .fv-button-grid :is(.fv-mode,.fv-preset) small{font-size:10px;line-height:12px;font-weight:400;opacity:.85;text-align:center}
 #maincontent .fv-detail[hidden]{display:none}
+
+/* Vertical presets beside the fan; dedicated power control in Cooling Status. */
+#maincontent .st-fan .fv-card{grid-template-columns:370px minmax(0,1fr);gap:24px}
+#maincontent .fv-fan-column{display:flex;align-items:center;gap:18px;width:auto;margin:0}
+#maincontent .fv-side-menu{width:84px;flex:0 0 84px}
+#maincontent .fv-fan-column .fv-orbit{flex:0 0 268px;margin:0}
+#maincontent .fv-side-menu .fv-button-grid{gap:8px}
+#maincontent .fv-side-menu :is(.fv-presets,.fv-modes){grid-template-columns:minmax(0,1fr);gap:8px}
+#maincontent .fv-side-menu .fv-mode,#maincontent .fv-side-menu .fv-mode:first-child{grid-column:auto}
+#maincontent .fv-side-menu .fv-preset-section{border:0;padding:0;margin:0}
+#maincontent .fv-side-menu h4{display:none}
+#maincontent .st-fan .fv-controls{display:block}
+#maincontent .fv-power-slot{margin:0 0 12px}
+body.theme-misectel #maincontent#maincontent .st-fan .fv-power-button{display:flex;width:40px!important;height:40px!important;min-height:40px!important;padding:9px!important;border-radius:50%;align-items:center;justify-content:center;gap:0}
+#maincontent .st-fan .fv-power-button>.st-icon{display:block;width:20px;height:20px;flex:0 0 20px}
+@media(max-width:1150px) and (min-width:761px){#maincontent .st-fan .fv-card{grid-template-columns:310px minmax(0,1fr);gap:20px}#maincontent .fv-fan-column{gap:12px}#maincontent .fv-side-menu{width:78px;flex-basis:78px}#maincontent .fv-fan-column .fv-orbit{flex-basis:220px}}
+@media(max-width:760px){#maincontent .st-fan .fv-card{grid-template-columns:minmax(0,1fr)}#maincontent .fv-fan-column{justify-content:center;width:100%;gap:14px}#maincontent .fv-fan-column .fv-orbit{flex-basis:220px;width:220px;height:220px}#maincontent .fv-side-menu{width:78px;flex-basis:78px}#maincontent .fv-power-slot{display:flex;justify-content:center}}
+@media(max-width:400px){#maincontent .fv-fan-column{gap:10px}#maincontent .fv-side-menu{width:72px;flex-basis:72px}#maincontent .fv-fan-column .fv-orbit{width:180px;height:180px;flex-basis:180px}}
+
+#maincontent .st-fan .fv-telemetry .st-stat:last-child>.st-icon{display:none}
+#maincontent .st-fan .fv-telemetry .st-stat:last-child strong{font-size:18px;white-space:nowrap}

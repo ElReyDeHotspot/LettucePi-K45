@@ -9,7 +9,8 @@ for(const speed of ['19','101','37.5','bad']){const count=writes.length;state.fa
 const button={getAttribute:()=> '40',setAttribute(k,v){this[k]=v;}},display={markFanDirty(){},speedInput:{style:{setProperty(){}},setAttribute(k,v){this[k]=v;}},speedValue:{style:{}},presetChoice:{},presetButtons:[button]};
 page.setFanSpeed.call(display,'37');assert.equal(display.fanSpeed,'37');assert.equal(display.speedValue.textContent,'37%');assert.equal(display.speedInput['aria-valuetext'],'37%');assert.equal(button['aria-pressed'],'false');page.setFanSpeed.call(display,'40');assert.equal(button['aria-pressed'],'true');
 assert.match(source,/this.setFanSpeed\(value\);this.setMode\(FAN_MODE_ALWAYS_ON\);this.scheduleFanApply\(0\)/);assert.match(source,/input:ev=>\{this.setFanSpeed\(ev.currentTarget.value\);this.setMode\(FAN_MODE_ALWAYS_ON\);this.scheduleFanApply\(200\)/);assert.match(source,/class':'fv-button-grid'},\[presetCard,choices\]/);assert.match(source,/class':'fv-output-control'},\[this.manualField,this.thresholdField,this.saveState\]/);assert(!source.includes("settings.button('Save Changes'"));assert(source.includes('this.fanGraphic.node.appendChild(units)'));
-console.log('PASS fan controls: validated snapshots, immediate preset/mode actions, slider selects Manual, presets sit beneath the fan, no page reload.');
+assert(source.includes('this.fanGraphic.power.appendChild(offButton)'));assert(source.includes('this.fanGraphic.menu.appendChild'));
+console.log('PASS fan controls: validated snapshots, immediate preset/mode actions, slider selects Manual, vertical presets and separate power control, no page reload.');
 
 const visibility={modeSelect:{value:'2'},thresholdField:{},manualField:{},hysteresisNote:{},syncThreshold(){this.synced=true;}};
 page.updateTemperatureVisibility.call(visibility);assert.equal(visibility.thresholdField.hidden,false);assert.equal(visibility.manualField.hidden,true);assert.equal(visibility.synced,true);
