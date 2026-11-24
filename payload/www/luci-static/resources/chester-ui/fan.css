@@ -31,3 +31,43 @@
 @media(max-width:600px){#maincontent .st-fan .fv-preset{min-height:148px!important;padding:16px 6px!important}}
 
 body.theme-misectel #maincontent#maincontent .st-fan .fv-preset[aria-pressed=true] .st-icon{color:var(--ct-on-primary)!important}
+
+#maincontent .st-fan .fv-manual{margin-top:22px;padding:22px;background:var(--ct-inset);border:1px solid var(--ct-border);border-radius:18px}
+#maincontent .st-fan .fv-manual[hidden]{display:none}
+#maincontent .fv-manual-heading{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:18px}
+#maincontent .fv-manual-heading>strong:last-child{font-size:26px;color:var(--ct-accent);font-variant-numeric:tabular-nums}
+#maincontent .fv-manual input[type=range]{width:100%;height:36px;cursor:pointer;accent-color:var(--ct-primary);margin:0}
+#maincontent .fv-slider-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--ct-muted);margin-top:6px}
+
+/* Clear mode selection and readable controls in Sun and Night. */
+#maincontent .st-fan .fv-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+#maincontent .st-fan .fv-card{padding:20px}
+#maincontent .st-fan .fv-orbit{width:180px;height:180px;margin:16px 0}
+#maincontent .st-fan .fv-reading{inset:49px}
+#maincontent .fv-modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#maincontent .st-fan .fv-mode{height:auto!important;min-height:116px!important;padding:18px 12px!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;line-height:1.3!important;white-space:normal!important;border:1px solid var(--ct-border);border-radius:16px;cursor:pointer}
+#maincontent .fv-mode .st-icon{width:25px;height:25px}
+#maincontent .fv-mode svg{width:100%;height:100%}
+#maincontent .fv-mode strong{font-size:16px}
+#maincontent .fv-mode small{font-size:11px}
+body.theme-misectel #maincontent#maincontent .st-fan .fv-mode[aria-checked=true] .st-icon{color:var(--ct-on-primary)!important}
+#maincontent .st-fan .fv-manual{background:var(--ct-inset);margin-top:20px}
+#maincontent .fv-preset-section{border-top:1px solid var(--ct-border);padding-top:20px;margin-top:20px}
+#maincontent .fv-preset-section h4{margin:0 0 14px;font-size:14px}
+#maincontent .st-fan .fv-preset{min-height:125px!important;padding:16px 10px!important;gap:8px}
+#maincontent .st-fan .fv-preset .st-icon{width:21px;height:21px}
+#maincontent .st-fan .fv-preset b{font-size:22px}
+#maincontent .st-fan input[type=range]{appearance:none!important;-webkit-appearance:none!important;height:36px!important;width:100%!important;padding:0!important;border:0!important;background:transparent!important;cursor:pointer;touch-action:pan-y}
+#maincontent .st-fan input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:99px;background:linear-gradient(to right,var(--ct-primary) 0%,var(--ct-primary) var(--fv-fill,0%),var(--ct-border) var(--fv-fill,0%),var(--ct-border) 100%)}
+#maincontent .st-fan input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-9px;border:4px solid var(--ct-on-primary);border-radius:50%;background:var(--ct-primary);box-shadow:0 2px 9px #071a2940}
+#maincontent .st-fan input[type=range]::-moz-range-track{height:8px;border-radius:99px;background:var(--ct-border)}
+#maincontent .st-fan input[type=range]::-moz-range-progress{height:8px;border-radius:99px;background:var(--ct-primary)}
+#maincontent .st-fan input[type=range]::-moz-range-thumb{height:19px;width:19px;border:4px solid var(--ct-on-primary);border-radius:50%;background:var(--ct-primary);box-shadow:0 2px 9px #071a2940}
+#maincontent .st-fan .fv-save-bar{flex-direction:column;gap:8px}
+#maincontent .fv-save-state{font-size:11px;color:var(--ct-muted)}
+#maincontent .fv-save-state:empty{display:none}
+@media(max-width:600px){#maincontent .fv-modes{gap:8px}#maincontent .st-fan .fv-mode{padding:14px 6px!important;min-height:110px!important}#maincontent .fv-mode strong{font-size:13px}#maincontent .fv-mode small{font-size:10px}#maincontent .st-fan .fv-manual{padding:16px}#maincontent .st-fan .fv-preset{min-height:116px!important;padding:14px 6px!important}}
+
+body.theme-misectel #maincontent#maincontent .st-fan .st-threshold{background:var(--ct-inset)!important;border-color:var(--ct-border)!important;color:var(--ct-text)!important;box-shadow:none!important}
+body.theme-misectel #maincontent#maincontent .st-fan .st-threshold :is(strong,label){color:var(--ct-text)!important}
+body.theme-misectel #maincontent#maincontent .st-fan .st-threshold .st-muted{color:var(--ct-muted)!important}
