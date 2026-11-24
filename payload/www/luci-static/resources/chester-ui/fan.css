@@ -84,5 +84,7 @@ body.theme-misectel #maincontent#maincontent .st-fan .fv-slider-bubble{position:
 @media(prefers-reduced-motion:reduce){#maincontent .fv-rotor{will-change:auto}#maincontent .fv-gauge-level{transition:none}}
 
 @media(max-width:359px){#maincontent .st-fan .fv-card{--fv-diameter:140px;padding:10px}#maincontent .fv-fan-column{grid-template-columns:minmax(64px,1fr) var(--fv-diameter);gap:8px}#maincontent .st-fan :is(.fv-mode,.fv-preset) strong{font-size:10px}#maincontent .st-fan .st-unit-button{font-size:10px}#maincontent .st-fan .fv-telemetry .st-stat span{font-size:11px}#maincontent .st-fan .fv-telemetry .st-stat strong{font-size:14px}}
+#maincontent .st-fan .fv-telemetry .fv-mode-stat strong{font-size:16px;line-height:20px;white-space:normal;text-wrap:balance}
+@media(max-width:400px){#maincontent .st-fan .fv-telemetry .fv-mode-stat strong{font-size:12px;line-height:15px}}
 
 body.theme-misectel #maincontent#maincontent .st-fan .st-unit-button{height:44px!important;min-height:44px!important}
