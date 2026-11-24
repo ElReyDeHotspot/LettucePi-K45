@@ -18,6 +18,7 @@ mkdir -p "$WORK" "$REPO/firmware"
 for i in 0 1 2; do dumpimage -T flat_dt -p "$i" -o "$WORK/image$i" "$BASE" >/dev/null; done
 unsquashfs -d "$WORK/root" "$WORK/image2" >/dev/null
 R=$WORK/root
+python3 "$REPO/scripts/check-wifi-calibration.py" snapshot "$R" "$WORK/vendor-wifi-calibration.json"
 grep -q "r37978-cd0a06bfd3fd" "$R/etc/openwrt_release"
 langs=$("$APK" --root "$R" info 2>/dev/null | grep -E '^luci-i18n-.*-zh-(cn|tw)$' || true)
 [ -z "$langs" ] || "$APK" del --root "$R" --no-scripts $langs
@@ -45,6 +46,7 @@ done
 node "$REPO/scripts/titlecase-ui.cjs" "$R/usr/share/luci/menu.d" --menus --write
 node "$REPO/scripts/check-payload-js.cjs" "$R" "$REPO/payload"
 printf 'version=%s\nbuilt=%s\nbuild=%s\nbin=%s\nproduct=K45P\n' "$VERSION" "$BUILD_DATE" "$BUILD" "$BIN" > "$R/etc/chester-version"
+python3 "$REPO/scripts/check-wifi-calibration.py" verify "$R" "$WORK/vendor-wifi-calibration.json" "$REPO/payload"
 cp "$WORK/image0" "$WORK/kernel.bin"
 cp "$WORK/image1" "$WORK/k45p.dtb"
 cp "$REPO/scripts/k45p.its" "$WORK/k45p.its"
