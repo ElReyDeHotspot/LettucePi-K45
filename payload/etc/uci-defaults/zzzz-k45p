@@ -62,4 +62,7 @@ for section in $(uci -q show ttyd | sed -n 's/^ttyd\.\([^=]*\)=ttyd$/\1/p'); do
  esac
 done
 uci -q commit ttyd
+# Retain the frozen boost policy after vendor first-boot service setup.
+/etc/init.d/misectel_modem_boost stop >/dev/null 2>&1 || true
+/etc/init.d/misectel_modem_boost disable >/dev/null 2>&1 || true
 exit 0

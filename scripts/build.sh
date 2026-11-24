@@ -6,7 +6,7 @@ BASE=${1:?Usage: build.sh base.itb [work-directory]}
 WORK=${2:-/var/tmp/k45p-build}
 APK=${APK_TOOLS:-/usr/local/bin/apk3}
 FWTOOL=${FWTOOL:-fwtool}
-BUILD=${BUILD_ID:-202611230002}
+BUILD=${BUILD_ID:-202611230003}
 BIN=${BIN_NUMBER:-12}
 VERSION=${VERSION:-1.0.$BIN}
 case "$BIN" in ''|*[!0-9]*) echo 'Revision must be numeric' >&2; exit 1 ;; esac
