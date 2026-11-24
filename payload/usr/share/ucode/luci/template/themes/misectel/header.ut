@@ -47,7 +47,7 @@
 <link rel="stylesheet" href="{{ resource }}/chester-ui/notifications.css?v=20261123-3">
 <link rel="stylesheet" href="{{ resource }}/chester-ui/loading.css?v=20261123-2">
 <link rel="stylesheet" href="{{ resource }}/chester-ui/navigation.css?v=20261124-1">
-<link rel="stylesheet" href="{{ resource }}/chester-ui/palette.css?v=20261124-1">
+<link rel="stylesheet" href="{{ resource }}/chester-ui/palette.css?v=20261124-2">
 <link rel="icon" href="{{ media }}/favicon.ico?v=chester-leaf-1" sizes="16x16 32x32 48x48 64x64 128x128 256x256">
 <link rel="icon" href="{{ media }}/green-leaf.svg?v=chester-leaf-1" type="image/svg+xml" sizes="any">
 <link rel="apple-touch-icon" href="{{ media }}/apple-touch-icon.png?v=chester-leaf-1" sizes="180x180">
