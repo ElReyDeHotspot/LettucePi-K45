@@ -11,5 +11,5 @@ return baseclass.extend({
  button(label,handler,extra){return E('button',Object.assign({type:'button','class':'st-button',click:handler},extra||{}),[label]);},
  footer(button,note){return E('div',{'class':'st-footer'},[note?E('span',{'class':'st-muted'},[note]):'',button]);},
  stat(label,value,icon){return E('div',{'class':'st-stat'},[this.icon(icon),E('div',{},[E('span',{},[label]),E('strong',{},[value])])]);},
- sheet(children,extra){return E('div',{'class':'chester-settings '+(extra||'')},[E('link',{rel:'stylesheet',href:L.resource('chester-ui/settings.css')+'?v=20261124-5'}),...children]);}
+ sheet(children,extra){return E('div',{'class':'chester-settings '+(extra||'')},[E('link',{rel:'stylesheet',href:L.resource('chester-ui/settings.css')+'?v=20261124-6'}),...children]);}
 });
