@@ -117,3 +117,9 @@ body.theme-misectel #maincontent#maincontent .st-fan .fv-button-grid .fv-mode{mi
 @media(max-width:1150px) and (min-width:761px){#maincontent .fv-controls{grid-template-columns:220px minmax(0,1fr);gap:20px}}
 @media(max-width:760px){#maincontent .fv-controls{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}#maincontent .fv-button-grid .fv-mode>.st-icon{display:none}#maincontent .fv-slider-row{gap:8px}#maincontent .fv-slider-row>span{font-size:11px}}
 @media(max-width:480px){#maincontent .fv-controls{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:14px}#maincontent .fv-slider-row{grid-template-columns:minmax(0,1fr);gap:0}#maincontent .fv-slider-row>span{display:none}#maincontent .fv-manual-heading strong{font-size:12px}#maincontent .st-fan .fv-under-fan .fv-preset strong{font-size:9px}#maincontent .st-fan .fv-button-grid .fv-mode strong{font-size:10px}}
+
+#maincontent .fv-output-control .fv-temperature-control[hidden]{display:none}
+#maincontent .fv-temperature-control .st-muted{font-size:11px;line-height:1.4;margin:8px 0 0;color:var(--ct-muted)}
+#maincontent .fv-temperature-control .fv-slider-bubble{min-width:60px!important;white-space:nowrap}
+#maincontent .st-fan .fv-button-grid .fv-mode[value="2"]>.st-icon{display:none}
+#maincontent .st-fan .fv-button-grid .fv-mode[value="2"] strong{white-space:normal;text-align:center}
