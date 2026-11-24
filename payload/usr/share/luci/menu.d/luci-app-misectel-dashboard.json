@@ -36,7 +36,7 @@
         }
     },
     "admin/dashboard/system-update": {
-        "title": "System Update",
+        "title": "Software Update",
         "order": 20,
         "action": {
             "type": "view",
