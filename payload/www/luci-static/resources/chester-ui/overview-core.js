@@ -536,24 +536,24 @@ return;portNames.push(name);});const ports=await Promise.all(portNames.map(async
  this.videoToggle=control('4K/HD','video',(b)=>this.toggleVideoEngine(b));
  this.ttlToggle=control('TTL/HL','layers',(b)=>this.toggleTtl(b));
  this.ledToggle=control('LED','bulb',(b)=>this.toggleLedPower(b));
- this.fanControl=E('a',{'class':'ch-control',href:L.url('admin','chester','fan'),title:'Fan settings'},[homeIcon('fan'),E('strong',{},['Fan']),E('small',{'class':'ch-control-state'},['Settings'])]);
+ this.fanControl=E('a',{'class':'ch-control',href:L.url('admin','chester','fan'),title:'Fan Settings'},[homeIcon('fan'),E('strong',{},['Fan']),E('small',{'class':'ch-control-state'},['Settings'])]);
  this.ledToggleWrap=E('div',{'class':'ch-controls'},[this.videoToggle,this.fanControl,this.ttlToggle,this.ledToggle]);
  this.modemNode=E('div',{'class':'ch-modems'});this.portPanelNode=E('div',{'class':'ch-ports'});
  this.metricsNode=E('div',{'class':'ch-system-bar'});this.systemNode=E('div',{'class':'misectel-dashboard-info-list'});this.wanNode=E('div',{'class':'misectel-dashboard-wan-list'});
- this.modemSelect=E('select',{'class':'ch-select','aria-label':'Switch modem',change:(ev)=>{this.selectedModemId=ev.currentTarget.value||null;if(this.latestData)dom.content(this.modemNode,this.renderModems(this.latestData.modems));}});
+ this.modemSelect=E('select',{'class':'ch-select','aria-label':'Switch Modem',change:(ev)=>{this.selectedModemId=ev.currentTarget.value||null;if(this.latestData)dom.content(this.modemNode,this.renderModems(this.latestData.modems));}});
  this.modemSelectWrap=E('div',{'class':'ch-modem-select',style:'display:none'},[this.modemSelect]);
  this.loadingNode=E('div',{'class':'ch-loading','aria-live':'polite'},['Collecting device information…']);
  const shortcuts=[['Reboot','power',L.url('admin','system','reboot')],['Update','download',L.url('admin','system','update')],['Speeds','speed',L.url('admin','chester','ookla')],['Failover','arrows',L.url('admin','network','failover')]];
  const portCard=E('section',{'class':'ch-card'},[E('h3',{},['Ethernet Ports']),this.portPanelNode,E('div',{'class':'ch-shortcuts'},shortcuts.map(([label,icon,href])=>E('a',{'class':'ch-shortcut'+(label==='Reboot'?' is-neutral':''),href:href},[homeIcon(icon),E('span',{},[label])])))]);
  const controlCard=E('section',{'class':'ch-card'},[E('h3',{},['Quick Controls']),this.ledToggleWrap]);
- this.wanSection=E('section',{},[E('h4',{},['WAN status']),this.wanNode]);
+ this.wanSection=E('section',{},[E('h4',{},['WAN Status']),this.wanNode]);
  return E('div',{'class':'chester-home'},[
   E('link',{rel:'stylesheet',href:L.resource('chester-ui/overview.css')+'?v=20261123-mode'}),
   E('div',{'class':'ch-head'},[E('div',{},[E('div',{'class':'ch-title-row'},[E('div',{'class':'ch-title',role:'heading','aria-level':'2'},['Overview']),this.onlineBadge]),E('p',{'class':'ch-muted'},['Your Chester K45P, at a glance.'])])]),
   this.securityNode,this.summaryNode,
   E('div',{'class':'ch-layout'},[E('section',{'class':'ch-card ch-cellular-card'},[E('div',{'class':'ch-card-heading'},[E('h3',{},['Cellular']),this.modemSelectWrap]),this.modemNode]),E('div',{'class':'ch-side'},[portCard,controlCard])]),
   this.metricsNode,
-  E('details',{'class':'ch-details ch-network-details'},[E('summary',{},['System and network details']),E('div',{'class':'ch-detail-columns'},[E('section',{},[E('h4',{},['System']),this.systemNode]),this.wanSection])]),
+  E('details',{'class':'ch-details ch-network-details'},[E('summary',{},['System and Network Details']),E('div',{'class':'ch-detail-columns'},[E('section',{},[E('h4',{},['System']),this.systemNode]),this.wanSection])]),
   this.loadingNode
  ]);
 },
@@ -606,7 +606,7 @@ return options.href?E('a',{'class':className,'href':options.href},children):E('d
    E('strong',{'class':'ch-band-head'},[i?'SCC'+i:'PCC']),
    ...[['Band',c.band],['ARFCN',c.arfcn],['PCI',c.pci],['BW',c.bw]].map(([label,value])=>E('div',{'class':'ch-band-row'},[E('span',{},[label]),E('strong',{},[value||'—'])]))
   ]))):E('p',{'class':'ch-muted'},['Band information is not available.'])]),
-  E('details',{'class':'ch-details ch-modem-details'},[E('summary',{},['Modem details']),E('dl',{'class':'ch-description'},(modem.description||[]).flatMap(d=>[E('dt',{},[d.label]),E('dd',{},[d.value])]))])
+  E('details',{'class':'ch-details ch-modem-details'},[E('summary',{},['Modem Details']),E('dl',{'class':'ch-description'},(modem.description||[]).flatMap(d=>[E('dt',{},[d.label]),E('dd',{},[d.value])]))])
  ])];
 },
 renderPorts(ports){

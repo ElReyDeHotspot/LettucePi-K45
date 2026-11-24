@@ -134,11 +134,11 @@ return view.extend({
   if(this.modems.length<=1){dom.content(this.selectorNode,[]);return;}
   const select=E('select',{},this.modems.map(m=>E('option',{value:m.id,selected:m.id===this.selectedModemId?'selected':null},[m.title||modemHelper.modemLabel(m)])));
   select.addEventListener('change',ev=>{this.selectedModemId=ev.currentTarget.value;if(this.latestSnapshot)this.updateView(this.latestSnapshot);});
-  dom.content(this.selectorNode,[settings.card('Current modem',null,[settings.field('Select modem',select)],'router')]);
+  dom.content(this.selectorNode,[settings.card('Current Modem',null,[settings.field('Select Modem',select)],'router')]);
  },
  renderGroup(title,items){
   const rows=(items||[]).filter(item=>item&&item.label);if(!rows.length)return null;
-  return settings.card(title,null,[E('dl',{'class':'ci-fields'},rows.map(item=>E('div',{'class':'ci-info-row'},[E('dt',{},[item.label==='Connection Status'?'Modem-reported connection':item.label]),E('dd',{'class':item.warning?'is-warning':''},[misectel.text(item.value)])])))],/SIM/i.test(title)?'port':/Network/i.test(title)?'network':'router');
+  return settings.card(title,null,[E('dl',{'class':'ci-fields'},rows.map(item=>E('div',{'class':'ci-info-row'},[E('dt',{},[item.label==='Connection Status'?'Modem-Reported Connection':item.label]),E('dd',{'class':item.warning?'is-warning':''},[misectel.text(item.value)])])))],/SIM/i.test(title)?'port':/Network/i.test(title)?'network':'router');
  },
  async fetchSnapshot(){
   const modems=await modemHelper.loadModems(),interfaces=await L.resolveDefault(callInterfaceDump(),[]);
@@ -171,7 +171,7 @@ return view.extend({
   return settings.card('Cell Info','LTE and 5G readings, organized by radio.',[
    data.common.length?E('dl',{'class':'ci-common-fields'},data.common.map(e=>E('div',{},[E('dt',{},[modemHelper.resolveEntryLabel(e)]),E('dd',{},[ciEntryValue(e)])]))):'',
    E('div',{'class':'ci-serving-grid'},panels),
-   additional.length?E('section',{'class':'ci-additional'},[E('h4',{},['Additional modem readings']),E('dl',{'class':'ci-cell-fields'},additional.map(row=>E('div',{},[E('dt',{},[row.label]),E('dd',{},[misectel.text(row.value)])])))]):'',
+   additional.length?E('section',{'class':'ci-additional'},[E('h4',{},['Additional Modem Readings']),E('dl',{'class':'ci-cell-fields'},additional.map(row=>E('div',{},[E('dt',{},[row.label]),E('dd',{},[misectel.text(row.value)])])))]):'',
    E('p',{'class':'st-muted ci-footnote'},['Live readings refresh every 5 seconds. — means the modem did not report a value.'])
   ],'network');
  },

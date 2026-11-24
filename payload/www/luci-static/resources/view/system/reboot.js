@@ -10,11 +10,11 @@ return view.extend({
  render:function(changes){
   const pending=Object.values(changes||{}).some(v=>Array.isArray(v)&&v.length);
   const confirm=E('div',{'class':'st-reboot-confirm',hidden:true},[
-   E('strong',{},['Reboot now?']),
+   E('strong',{},['Reboot Now?']),
    E('p',{'class':'st-muted'},['Everyone connected will briefly lose internet access.']),
    E('div',{'class':'st-reboot-actions'},[
     settings.button('Cancel',()=>{confirm.hidden=true;actions.hidden=false;},{'class':'st-button secondary'}),
-    settings.button('Reboot now',ui.createHandlerFn(this,'handleReboot'),{'class':'st-button'})
+    settings.button('Reboot Now',ui.createHandlerFn(this,'handleReboot'),{'class':'st-button'})
    ])
   ]);
   const actions=E('div',{'class':'st-reboot-actions'},[

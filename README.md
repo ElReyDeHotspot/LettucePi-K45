@@ -41,7 +41,7 @@ For K45P hardware only (`misectel,m02k45`). Vendor Linux 6.12.94 is retained.
 
 ## Build
 
-Use Linux/WSL with FIT, SquashFS, Node.js, apk-tools 3 and OpenWrt fwtool:
+Use Linux/WSL with FIT, SquashFS, Node.js with Acorn (`node-acorn`), apk-tools 3 and OpenWrt fwtool:
 
 ```sh
 APK_TOOLS=/path/to/apk3 FWTOOL=/path/to/fwtool \

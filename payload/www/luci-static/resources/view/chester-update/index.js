@@ -16,7 +16,7 @@ function releaseNotes(value){
 function versionLabel(info,prefix){const v=info[prefix+'_version'],bin=info[prefix+'_bin'];return v?('Version '+v+(bin?' · Rev. '+bin:'')):'Not reported';}
 function releaseDate(value){if(!value)return 'Not reported';const d=/^\d{4}-\d{2}-\d{2}$/.test(value)?new Date(value+'T00:00:00'):new Date(value);return isNaN(d.getTime())?String(value):d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});}
 function fileSize(value){const n=Number(value);return n>0?(n/1048576).toFixed(1)+' MB':'Not reported';}
-function line(label,value,extra){return E('div',{'class':'up-line'},[E('span',{'class':'st-muted'},[label]),E('strong',{'class':extra||''},[value||'Not reported'])]);}
+function line(label,value,extra){return E('div',{'class':'up-line'},[E('span',{'class':'st-muted'},[label]),E('strong',{'class':extra||''},[value||'Not Reported'])]);}
 function infoCard(title,description,body,icon){return settings.card(title,description,body,icon);}
 
 return view.extend({
@@ -51,42 +51,42 @@ return view.extend({
   const newer=verified&&info.update_available===true;
   this.pill.className='up-pill '+(checking?'is-checking':newer?'is-new':verified?'is-current':'is-unavailable');
   this.pill.textContent=checking?'Checking':newer?'Update available':verified?'Up to date':'Check unavailable';
-  this.statusTitle.textContent=checking?'Checking for updates…':newer?'A fresh update is ready.':verified?'Your software is up to date.':'We couldn’t check for updates.';
+  this.statusTitle.textContent=checking?'Checking for Updates…':newer?'A fresh update is ready.':verified?'Your software is up to date.':'We couldn’t check for updates.';
   this.statusCopy.textContent=checking?'Looking for the latest signed release for your K45P.':newer?versionLabel(info,'latest')+' is available for your router.':verified?'You’re running the latest published K45P release.':info.error||'Check your internet connection and try again.';
   this.installButton.hidden=!newer;this.installButton.disabled=!newer||this.preferencesUnavailable;
   this.checkedNode.textContent=this.checkedAt?(verified?'Last checked ':'Last attempt ')+this.checkedAt.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}):'Updates are checked securely against the published release.';
   dom.content(this.installedBody,[E('div',{'class':'up-version'},[info.installed_version||'Reading details…']),line('Revision',info.installed_bin?'Rev. '+info.installed_bin:'Not reported'),line('Built',releaseDate(info.installed_built)),line('OpenWrt',info.os_version),line('Kernel',info.kernel),line('Device',info.model||'Chester K45P')]);
   const latest=checking?[E('p',{'class':'st-muted up-checking'},['Checking the signed release…'])]:verified?[
    E('div',{'class':'up-version'},[info.latest_version||'Not reported']),
-   line('Revision',info.latest_bin?'Rev. '+info.latest_bin:'Not reported'),line('Released',releaseDate(info.latest_built)),line('Download size',fileSize(info.size)),
-   line('Release signature','Verified','up-good'),line('Compatibility',info.release_board&&info.board&&info.release_board===info.board?'Matches this K45P':'Checked before installation')
+   line('Revision',info.latest_bin?'Rev. '+info.latest_bin:'Not reported'),line('Released',releaseDate(info.latest_built)),line('Download Size',fileSize(info.size)),
+   line('Release Signature','Verified','up-good'),line('Compatibility',info.release_board&&info.board&&info.release_board===info.board?'Matches this K45P':'Checked before installation')
   ]:[E('p',{'class':'st-muted'},['Release details will appear after a successful update check.']),settings.button('Try Again',()=>this.checkForUpdates(),{'class':'st-button secondary'})];
   dom.content(this.latestBody,latest);
   const notes=verified?releaseNotes(info.notes):[];
   this.changesSub.textContent=verified?versionLabel(info,'latest'):'Latest published release';
   dom.content(this.changesBody,checking?[E('p',{'class':'st-muted'},['Release notes are being checked.'])]:notes.length?[E('ul',{},notes.map(note=>E('li',{},[note])))]:[E('p',{'class':'st-muted'},[verified?'No release notes were supplied for this image.':'Check for updates to see what’s changed.'])]);
-  dom.content(this.detailsBody,[line('Device',info.model||'Chester K45P'),line('Board',String(info.board||'').replace(/^misectel,/i,'').toUpperCase()),line('Installed build',info.installed_build),line('Release build',verified?info.latest_build:'Not checked'),line('Release verification',verified?'Signed manifest verified':'Not verified'),line('Image SHA-256',verified?info.latest_sha:'Available after verification','up-hash')]);
+  dom.content(this.detailsBody,[line('Device',info.model||'Chester K45P'),line('Board',String(info.board||'').replace(/^misectel,/i,'').toUpperCase()),line('Installed Build',info.installed_build),line('Release Build',verified?info.latest_build:'Not checked'),line('Release Verification',verified?'Signed manifest verified':'Not verified'),line('Image SHA-256',verified?info.latest_sha:'Available after verification','up-hash')]);
  },
  render(data){
   this.info=data?.[0]||{};const prefs=data?.[1]||{};this.preferencesUnavailable=prefs.unavailable===true;this.zone=prefs.timezone||'UTC';
   this.keepInput=E('input',{type:'checkbox',checked:prefs.keep_settings!==false?'checked':null,disabled:this.preferencesUnavailable?'disabled':null});
   this.autoInput=E('input',{type:'checkbox',checked:prefs.auto===true?'checked':null,disabled:this.preferencesUnavailable?'disabled':null});
-  this.timeInput=E('input',{type:'time',value:prefs.time||'03:00',disabled:this.preferencesUnavailable||prefs.auto!==true?'disabled':null,'aria-label':'Automatic update time'});
+  this.timeInput=E('input',{type:'time',value:prefs.time||'03:00',disabled:this.preferencesUnavailable||prefs.auto!==true?'disabled':null,'aria-label':'Automatic Update Time'});
   this.autoInput.addEventListener('change',()=>{this.timeInput.disabled=!this.autoInput.checked;});
   this.preferenceNote=E('span',{'class':'st-muted','aria-live':'polite'},[this.preferencesUnavailable?'Update options could not be read. Reload to try again.':'Changes apply when you save.']);
   this.pill=E('span',{'class':'up-pill'});
-  this.statusTitle=E('h3',{},['Checking for updates…']);this.statusCopy=E('p',{'class':'st-muted'},[]);
+  this.statusTitle=E('h3',{},['Checking for Updates…']);this.statusCopy=E('p',{'class':'st-muted'},[]);
   this.checkButton=settings.button('Check for Updates',()=>this.checkForUpdates(),{'class':'st-button secondary'});
   this.installButton=settings.button('Update Now',()=>this.handleInstall(this.keepInput.checked),{hidden:true});
   this.checkedNode=E('p',{'class':'st-muted up-checked'},[]);
   this.latestBody=E('div',{'class':'up-info-body'});this.changesBody=E('div',{'class':'up-notes'});this.changesSub=E('p',{'class':'st-muted'});this.detailsBody=E('div',{});
-  this.installedBody=E('div',{});const installed=infoCard('Installed firmware','Currently running on this router.',[this.installedBody],'router');
-  const latest=infoCard('Latest release','Signed firmware for Chester K45P.',[this.latestBody],'shield');
-  const changes=E('section',{'class':'st-card up-changes'},[E('div',{'class':'up-changes-head'},[settings.icon('plus'),E('div',{},[E('h3',{},['What’s changed']),this.changesSub])]),this.changesBody]);
-  const preferenceCard=infoCard('Update options','Choose how updates are installed.',[
-   E('div',{'class':'up-option-grid'},[settings.toggle('Keep my settings',this.keepInput,'Preserve Wi-Fi, APN, passwords and router settings. Turn off for a fresh setup.'),
-   settings.toggle('Automatic updates',this.autoInput,'Install available signed releases daily at the selected time.')]),
-   E('div',{'class':'up-schedule'},[settings.field('Install at',this.timeInput,'Router timezone: '+this.zone)]),
+  this.installedBody=E('div',{});const installed=infoCard('Installed Firmware','Currently running on this router.',[this.installedBody],'router');
+  const latest=infoCard('Latest Release','Signed firmware for Chester K45P.',[this.latestBody],'shield');
+  const changes=E('section',{'class':'st-card up-changes'},[E('div',{'class':'up-changes-head'},[settings.icon('plus'),E('div',{},[E('h3',{},['What’s Changed']),this.changesSub])]),this.changesBody]);
+  const preferenceCard=infoCard('Update Options','Choose how updates are installed.',[
+   E('div',{'class':'up-option-grid'},[settings.toggle('Keep My Settings',this.keepInput,'Preserve Wi-Fi, APN, passwords and router settings. Turn off for a fresh setup.'),
+   settings.toggle('Automatic Updates',this.autoInput,'Install available signed releases daily at the selected time.')]),
+   E('div',{'class':'up-schedule'},[settings.field('Install At',this.timeInput,'Router timezone: '+this.zone)]),
    settings.footer(settings.button('Save Options',async ev=>{const b=ev.currentTarget;b.disabled=true;try{await this.savePreferences();}catch(e){}finally{b.disabled=this.preferencesUnavailable;}},{disabled:this.preferencesUnavailable?'disabled':null}),this.preferenceNote)
   ],'clock');
   const page=settings.sheet([
@@ -94,14 +94,14 @@ return view.extend({
    settings.head('System Update','The latest software. The same Chester experience.','shield'),
    E('section',{'class':'st-card up-hero','aria-live':'polite'},[E('div',{'class':'up-hero-copy'},[E('div',{'class':'up-hero-icon'},[E('img',{src:'/luci-static/misectel/green-leaf.svg',alt:'',width:38,height:38})]),E('div',{},[this.pill,this.statusTitle,this.statusCopy])]),E('div',{'class':'up-actions'},[this.checkButton,this.installButton])]),
    this.checkedNode,E('div',{'class':'up-columns'},[installed,latest]),changes,preferenceCard,
-   E('details',{'class':'st-advanced up-details'},[E('summary',{},['Firmware details']),this.detailsBody]),
+   E('details',{'class':'st-advanced up-details'},[E('summary',{},['Firmware Details']),this.detailsBody]),
    E('p',{'class':'st-muted up-footnote'},['Updates verify the release signature, image size, checksum and device compatibility before installation. The router restarts to finish.'])
   ],'up-page');
   this.paintStatus(this.info,true);Promise.resolve().then(()=>this.checkForUpdates());return page;
  },
 	handleInstall: function (keep) {
 		var self = this;
-		ui.showModal(_('Update firmware'), [
+		ui.showModal(_('Update Firmware'), [
 			E('p', {}, _('The router will download the update, check it, install it and restart.')),
 			E('ul', {}, [
 				keep
@@ -127,7 +127,7 @@ return view.extend({
 						return self.savePreferences().then(function () { installRequested=true;return fs.exec('/usr/sbin/chester-update', [ 'install' ]); }).then(function (res) {
 							var out = (res.stdout || '').trim();
 							if (out.indexOf('OK:') !== 0) {
-								ui.showModal(_('Update failed'), [
+								ui.showModal(_('Update Failed'), [
 									E('p', {}, out || _('The update could not be started.')),
 									E('p', {}, _('The firmware was not installed.')),
 									E('div', { 'class': 'right' }, [
@@ -143,7 +143,7 @@ return view.extend({
 									_('The router is installing the update and will restart. Do not unplug it.'))
 							]);
 							ui.awaitReconnect(window.location.host);
-						}).catch(function(error){ui.showModal(_(installRequested?'Update status unavailable':'Update could not start'),[E('p',{},[installRequested?'The result could not be confirmed. Keep the router powered on and check its status before retrying.':error.message||String(error)]),E('button',{'class':'btn',click:ui.hideModal},[_('Close')])]);});
+						}).catch(function(error){ui.showModal(_(installRequested?'Update Status Unavailable':'Update Could Not Start'),[E('p',{},[installRequested?'The result could not be confirmed. Keep the router powered on and check its status before retrying.':error.message||String(error)]),E('button',{'class':'btn',click:ui.hideModal},[_('Close')])]);});
 					})
 				}, _('Update Now'))
 			])

@@ -223,7 +223,7 @@ return view.extend({
 		var off = s.off || {}, on = s.on || {};
 		var helped = (s.helped === true || s.helped === 'true');
 
-		ui.showModal(_('Streaming Test result'), [
+		ui.showModal(_('Streaming Test Result'), [
 			E('div', { 'class': 'ck-page' }, [
 				helped
 					? banner('ok', _('4K/HD is working.'),
@@ -232,9 +232,9 @@ return view.extend({
 						_('Video measured about the same either way.')),
 				E('div', { 'class': 'ck-card' }, [
 					E('div', { 'class': 'ck-rows' }, [
-						row(_('Video, engine OFF'), mbps(off.video_mbps)),
-						row(_('Video, engine ON'), mbps(on.video_mbps)),
-						row(_('Non-video speed'), mbps(on.control_mbps)),
+						row(_('Video, Engine OFF'), mbps(off.video_mbps)),
+						row(_('Video, Engine ON'), mbps(on.video_mbps)),
+						row(_('Non-Video Speed'), mbps(on.control_mbps)),
 						row(_('Improvement'), s.gain ? (s.gain + 'x') : '-')
 					])
 				]),
@@ -291,7 +291,7 @@ return view.extend({
 			E('button', {
 				'class': 'ck-btn ' + (running ? 'ck-btn--danger' : 'ck-btn--primary'),
 				'click': ui.createHandlerFn(self, 'setEngine', !running)
-			}, running ? _('Turn off') : _('Turn on')),
+			}, running ? _('Turn Off') : _('Turn On')),
 			E('button', {
 				'class': 'ck-btn',
 				'click': ui.createHandlerFn(self, 'runTest')

@@ -373,7 +373,7 @@
     }
   },
   "admin/developer/qmodem/network_config": {
-    "title": "NetworkConfiguration",
+    "title": "Network Configuration",
     "order": 2,
     "action": {
       "type": "view",

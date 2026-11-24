@@ -38,6 +38,11 @@ sed -i -e '/\/misectel\//d' -e '/\/qmodem\//d' -e '/\/video\//d' "$R/etc/apk/rep
   "$REPO"/integrations/secure-web/packages/*.apk
 (cd "$REPO/integrations/cloudflare"; sha256sum -c SHA256SUMS)
 python3 "$REPO/scripts/customize.py" "$R"
+node "$REPO/scripts/titlecase-ui.cjs" "$R/www/luci-static/resources/view" --write
+for scope in protocol tools misectel ui.js form.js; do
+  [ ! -e "$R/www/luci-static/resources/$scope" ] || node "$REPO/scripts/titlecase-ui.cjs" "$R/www/luci-static/resources/$scope" --write
+done
+node "$REPO/scripts/titlecase-ui.cjs" "$R/usr/share/luci/menu.d" --menus --write
 node "$REPO/scripts/check-payload-js.cjs" "$R" "$REPO/payload"
 printf 'version=%s\nbuilt=%s\nbuild=%s\nbin=%s\nproduct=K45P\n' "$VERSION" "$BUILD_DATE" "$BUILD" "$BIN" > "$R/etc/chester-version"
 cp "$WORK/image0" "$WORK/kernel.bin"

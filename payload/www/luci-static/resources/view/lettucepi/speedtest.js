@@ -18,21 +18,21 @@ return view.extend({
   var self=this;this.provider='ookla';this.data=data;this.busy=false;this.fastFrame=null;
   this.tabs=['ookla','mlab','netflix'].map(function(key){return E('button',{type:'button',role:'tab','aria-selected':String(key===self.provider),'aria-controls':'chester-speeds-panel',id:'chester-speeds-'+key,click:function(){self.choose(key);}},[key==='mlab'?'M-Lab':key==='ookla'?'Ookla':'Netflix']);});
   this.heading=E('h3');this.scope=E('div',{'class':'sp-muted'});
-  this.role=E('select',{'aria-label':'Connection to test',change:function(){self.update();}});
+  this.role=E('select',{'aria-label':'Connection to Test',change:function(){self.update();}});
   this.role.append(E('option',{value:'primary'},['Primary']),E('option',{value:'secondary'},['Secondary']));
   this.roleRow=E('label',{'class':'sp-connection'},[E('span',{},['Connection']),this.role]);
-  this.startButton=E('button',{type:'button','class':'sp-start',click:ui.createHandlerFn(this,this.start)},['Run speed test']);
-  this.cancelButton=E('button',{type:'button','class':'sp-cancel',click:ui.createHandlerFn(this,this.cancel)},['Cancel test']);
+  this.startButton=E('button',{type:'button','class':'sp-start',click:ui.createHandlerFn(this,this.start)},['Run Speed Test']);
+  this.cancelButton=E('button',{type:'button','class':'sp-cancel',click:ui.createHandlerFn(this,this.cancel)},['Cancel Test']);
   this.message=E('div',{'class':'sp-message','aria-live':'polite'});
   this.metrics={};this.metricGrid=E('div',{'class':'sp-metrics'});
   [['download','Download','Mbps'],['upload','Upload','Mbps'],['latency','Latency','ms'],['jitter','Jitter','ms']].forEach(function(m){var value=E('strong',{},['—']),node=E('div',{'class':'sp-metric'},[E('span',{},[m[1]]),value,E('small',{},[m[2]])]);self.metrics[m[0]]={value:value,node:node};self.metricGrid.append(node);});
-  this.progressBar=E('div');this.progress=E('div',{'class':'sp-progress',role:'progressbar','aria-label':'Speed test progress','aria-valuemin':'0','aria-valuemax':'100'},[this.progressBar]);
+  this.progressBar=E('div');this.progress=E('div',{'class':'sp-progress',role:'progressbar','aria-label':'Speed Test Progress','aria-valuemin':'0','aria-valuemax':'100'},[this.progressBar]);
   this.detail=E('div',{'class':'sp-details'});this.notice=E('p',{'class':'sp-muted sp-notice'});this.fastHost=E('div',{'class':'sp-fast'});
-  this.history=E('div',{'class':'sp-history'});this.historyCard=E('details',{'class':'sp-history-card'},[E('summary',{},['Recent results']),this.history]);
+  this.history=E('div',{'class':'sp-history'});this.historyCard=E('details',{'class':'sp-history-card'},[E('summary',{},['Recent Results']),this.history]);
   var root=E('div',{'class':'lp-speedtest chester-ios chester-speeds'},[
    E('link',{rel:'stylesheet',href:L.resource('chester-ui/ios.css')+'?v=f78b876c6b61'}),
    E('div',{'class':'sp-head'},[E('div',{'class':'ios-title',role:'heading','aria-level':'2'},['Chester Speeds']),E('p',{'class':'sp-muted'},['One place for your connection tests.'])]),
-   E('div',{'class':'sp-tabs',role:'tablist','aria-label':'Speed test provider'},this.tabs),
+   E('div',{'class':'sp-tabs',role:'tablist','aria-label':'Speed Test Provider'},this.tabs),
    E('section',{id:'chester-speeds-panel',role:'tabpanel','class':'sp-panel'},[
     E('div',{'class':'sp-panel-head'},[E('div',{},[this.heading,this.scope]),E('div',{'class':'sp-actions'},[this.startButton,this.cancelButton])]),
     this.roleRow,this.message,this.progress,this.metricGrid,this.detail,this.fastHost,this.notice
@@ -57,8 +57,8 @@ return view.extend({
   var running=isOokla?!!o.running:isMlab?!!tests.running:false;
   var activeRole=!isMlab||!tests.running||tests.role===this.role.value;
   this.startButton.disabled=this.busy||this.nativeRunning()||(isOokla&&!o.installed)||(isMlab&&!c.primary);
-  this.startButton.textContent=isNetflix?(this.fastFrame?'Restart test':'Run Netflix test'):'Run speed test';
-  this.cancelButton.style.display=running||this.fastFrame?'':'none';this.cancelButton.disabled=this.busy||(!activeRole&&!this.fastFrame);this.cancelButton.textContent=isNetflix?'Close test':'Cancel test';
+  this.startButton.textContent=isNetflix?(this.fastFrame?'Restart Test':'Run Netflix Test'):'Run Speed Test';
+  this.cancelButton.style.display=running||this.fastFrame?'':'none';this.cancelButton.disabled=this.busy||(!activeRole&&!this.fastFrame);this.cancelButton.textContent=isNetflix?'Close Test':'Cancel Test';
   this.metricGrid.style.display=isNetflix?'none':'grid';this.detail.style.display=isNetflix?'none':'grid';this.metrics.jitter.node.style.display=isOokla?'':'none';this.metricGrid.style.gridTemplateColumns=isOokla?'':'repeat(3,minmax(0,1fr))';
   this.metrics.download.value.textContent=format(result.download_mbps);this.metrics.upload.value.textContent=format(result.upload_mbps);this.metrics.latency.value.textContent=format(result.latency_ms);this.metrics.jitter.value.textContent=format(result.jitter_ms);
   var phase=isOokla?o.test_phase:result.phase;
@@ -77,7 +77,7 @@ return view.extend({
  },
  start:async function(){
   if(this.busy||this.nativeRunning())return;this.error='';
-  if(this.provider==='netflix'){this.closeFast();this.fastFrame=E('iframe',{src:'https://fast.com/',title:'Netflix FAST.com speed test',referrerpolicy:'no-referrer'});this.fastHost.replaceChildren(this.fastFrame);this.update();return;}
+  if(this.provider==='netflix'){this.closeFast();this.fastFrame=E('iframe',{src:'https://fast.com/',title:'Netflix FAST.com Speed Test',referrerpolicy:'no-referrer'});this.fastHost.replaceChildren(this.fastFrame);this.update();return;}
   this.busy=true;this.update();try{var r=this.provider==='ookla'?await ooklaStart():await linkStart(this.role.value,'1');if(r.error||r.success===false||r.ok===false)throw new Error(r.error||'Could not start the test.');await this.refresh();}catch(e){this.error=e.message;}finally{this.busy=false;this.update();}
  },
  cancel:async function(){if(this.busy)return;if(this.provider==='netflix'){this.closeFast();this.update();return;}this.busy=true;this.update();try{if(this.provider==='ookla')await ooklaCancel();else await linkCancel();await this.refresh();}catch(e){this.error=e.message;}finally{this.busy=false;this.update();}},

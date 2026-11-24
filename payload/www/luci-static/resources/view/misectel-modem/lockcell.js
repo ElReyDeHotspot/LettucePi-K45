@@ -24,18 +24,18 @@ createFormCard(modem){
  const pciInput=numeric(detail('PCI'),'For example, 120'),arfcnInput=numeric(detail('ARFCN'),'For example, 507870'),bandInput=numeric(detail('Band'),'For example, 41');
  const scs=String(detail('SCS')),scsSelect=buildChoiceSelect(/^(1|30|30khz)$/i.test(scs)?'1':'0',[{value:'0',label:'15 kHz'},{value:'1',label:'30 kHz'}]);
  const bootHookInput=E('input',{type:'checkbox',checked:normalizeBootHookStatus(this.lastLockStatus).enabled?'checked':null});
- const bandField=settings.field('5G band number',bandInput,'Enter the number without N, for example 41.'),scsField=settings.field('Subcarrier spacing (SCS)',scsSelect);
- const applyButton=settings.button('Apply 5G lock',ui.createHandlerFn(this,ev=>this.applyLock(ev.currentTarget))),unlockButton=settings.button('Remove cell locks',ui.createHandlerFn(this,ev=>this.unlockCell(ev.currentTarget)),{'class':'st-button secondary'});
+ const bandField=settings.field('5G Band Number',bandInput,'Enter the number without N, for example 41.'),scsField=settings.field('Subcarrier Spacing (SCS)',scsSelect);
+ const applyButton=settings.button('Apply 5G Lock',ui.createHandlerFn(this,ev=>this.applyLock(ev.currentTarget))),unlockButton=settings.button('Remove Cell Locks',ui.createHandlerFn(this,ev=>this.unlockCell(ev.currentTarget)),{'class':'st-button secondary'});
  this.form={modemId:modem.id,ratSelect,pciInput,arfcnInput,bandInput,scsSelect,bootHookInput,bandField,scsField,applyButton};ratSelect.addEventListener('change',()=>this.updateRatFields());
- const card=settings.card('Lock to a cell','Enter the cell parameters you want the modem to use. Nothing changes until you apply.',[
- E('div',{'class':'st-fields'},[settings.field('Connection type',ratSelect),settings.field('Physical Cell ID (PCI)',pciInput),settings.field('Frequency channel (ARFCN)',arfcnInput),bandField,scsField]),
- E('details',{'class':'cl-advanced'},[E('summary',{},['After a reboot']),settings.toggle('Reapply this lock after reboot',bootHookInput,'Use only when you want this cell selection to persist.')]),
+ const card=settings.card('Lock to a Cell','Enter the cell parameters you want the modem to use. Nothing changes until you apply.',[
+ E('div',{'class':'st-fields'},[settings.field('Connection Type',ratSelect),settings.field('Physical Cell ID (PCI)',pciInput),settings.field('Frequency Channel (ARFCN)',arfcnInput),bandField,scsField]),
+ E('details',{'class':'cl-advanced'},[E('summary',{},['After a Reboot']),settings.toggle('Reapply This Lock After Reboot',bootHookInput,'Use only when you want this cell selection to persist.')]),
  E('div',{'class':'st-footer cl-actions'},[E('span',{'class':'st-muted'},['Applying or removing a lock may briefly reconnect cellular data.']),E('div',{'class':'cl-buttons'},[unlockButton,applyButton])])
  ],'network');this.updateRatFields();return card;
 },
 createStatusCard(info){
  const locks=normalizeLockStatus(info),status=info?.neighborcell?.lockcell_status||info?.lockcell_status;
- return settings.card('Current cell locks','Live status reported by the modem. 5G is shown first.',[
+ return settings.card('Current Cell Locks','Live status reported by the modem. 5G is shown first.',[
  E('div',{'class':'cl-status-grid'},['NR','LTE'].map(rat=>{const lock=locks.find(l=>l.rat===rat);return E('section',{'class':'cl-status'},[
  E('div',{'class':'cl-status-head'},[E('strong',{},[rat==='NR'?'5G':'4G LTE']),E('span',{'class':'cl-pill '+(lock?'is-locked':'')},[!status?'Unavailable':lock?'Locked':'Unlocked'])]),
  lock?E('dl',{'class':'ci-fields'},lock.details.flatMap(d=>[E('dt',{},[d.label]),E('dd',{},[d.value])])):E('p',{'class':'st-muted'},[!status?'The modem has not reported its lock status.':'The modem is free to choose a cell.'])

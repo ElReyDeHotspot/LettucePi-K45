@@ -16,7 +16,7 @@ choices.unshift({value:selected,label:selected});return choices;}
 function firstApSection(radioName,radioData){const configured=uci.sections('wireless','wifi-iface').find((section)=>section.device===radioName&&section.mode==='ap');if(configured)
 return configured['.name'];const runtime=misectel.ensureArray(radioData?.interfaces).find((entry)=>entry?.config?.mode==='ap'&&entry.section);return runtime?.section||null;}
 function firstApDevice(radioData){const runtime=misectel.ensureArray(radioData?.interfaces).find((entry)=>entry?.config?.mode==='ap'&&entry.ifname);return runtime?.ifname||null;}
-function radioBandLabel(radioData){const band=radioData?.config?.band||radioData?.iwinfo?.channel||'';switch(band){case'2g':return _('2.4 GHz');case'5g':return _('5.8 GHz');case'6g':return _('6 GHz');default:return misectel.text(band,_('Unknown Band'));}}
+function radioBandLabel(radioData){const band=radioData?.config?.band||radioData?.iwinfo?.channel||'';switch(band){case'2g':return _('2.4 GHz');case'5g':return _('5 GHz');case'6g':return _('6 GHz');default:return misectel.text(band,_('Unknown Band'));}}
 function radioBandKey(radioData){const band=String(radioData?.config?.band||'').toLowerCase();if(band==='2g'||band==='5g'||band==='6g')
 return band;return'';}
 function normalizeChannelValue(value){const raw=String(value||'').trim().toLowerCase();if(!raw||raw==='auto')
@@ -46,7 +46,7 @@ return current?[current]:['HT20'];if(current&&modes.indexOf(current)===-1)
 modes.unshift(current);return modes;}
 return view.extend({async load(){misectel.ensureBaseStyle();await uci.load(['wireless','misectel']);const wireless=await L.resolveDefault(callWirelessStatus(),{});const configuredRadios=uci.sections('wireless','wifi-device').map((section)=>section['.name']);const radioNames=Object.keys(L.isObject(wireless)?wireless:{}).concat(configuredRadios).filter((name,index,list)=>{return list.indexOf(name)===index;}).sort();const iwinfo={};const countryLists={};const freqLists={};const radioDevices={};await Promise.all(radioNames.map(async(radioName)=>{const runtimeRadio=wireless?.[radioName];const phyInfo=await L.resolveDefault(callIwinfoPhyname(radioName),{});const device=firstApDevice(runtimeRadio)||phyInfo?.phyname;if(!device)
 return;radioDevices[radioName]=device;iwinfo[radioName]=await L.resolveDefault(callIwinfoInfo(device),{});countryLists[radioName]=misectel.ensureArray((await L.resolveDefault(callIwinfoCountrylist(device),{}))?.results);freqLists[radioName]=misectel.ensureArray((await L.resolveDefault(callIwinfoFreqlist(device),{}))?.results);}));return{wireless,iwinfo,countryLists,freqLists,radioDevices};},buildRadioState(data){const runtimeWireless=L.isObject(data.wireless)?data.wireless:{};const configuredRadios=uci.sections('wireless','wifi-device').map((section)=>section['.name']);const radioNames=Object.keys(runtimeWireless).concat(configuredRadios).filter((name,index,list)=>{return list.indexOf(name)===index;}).sort();return radioNames.map((radioName)=>{const runtimeRadio=runtimeWireless[radioName]||{};const radio=Object.assign({},runtimeRadio,{config:{band:runtimeRadio?.config?.band||uci.get('wireless',radioName,'band')||'',channel:runtimeRadio?.config?.channel||uci.get('wireless',radioName,'channel')||'',htmode:runtimeRadio?.config?.htmode||uci.get('wireless',radioName,'htmode')||'',country:runtimeRadio?.config?.country||uci.get('wireless',radioName,'country')||''},iwinfo:data.iwinfo?.[radioName]||runtimeRadio?.iwinfo||{htmodes:[],country:'',hwmodes:[]}});const ifaceSection=firstApSection(radioName,radio);const widthChoices=makeWidthChoices(Object.assign({},radio,{section:radioName}));const currentWidth=uci.get('wireless',radioName,'htmode')||radio?.config?.htmode||radio?.iwinfo?.htmode||'';const currentCountry=normalizeCountryCode(uci.get('wireless',radioName,'country')||radio?.config?.country||radio?.iwinfo?.country||'');const bandKey=radioBandKey(radio);const currentChannel=normalizeChannelValue(uci.get('wireless',radioName,'channel')||radio?.config?.channel||'');return{name:radioName,bandLabel:radioBandLabel(radio),bandKey:bandKey,device:data.radioDevices?.[radioName]||'',channel:currentChannel,width:misectel.text(currentWidth,''),widthChoices,modeChoices:makeModeChoices(widthChoices,currentWidth),mode:wifiModeFamily(currentWidth),country:currentCountry,countryChoices:makeCountryChoices(data.countryLists?.[radioName],currentCountry),freqChoices:misectel.ensureArray(data.freqLists?.[radioName]),section:ifaceSection,ssid:misectel.text(ifaceSection?uci.get('wireless',ifaceSection,'ssid'):'',''),encryption:normalizeEncryption(ifaceSection?uci.get('wireless',ifaceSection,'encryption'):'psk2'),key:misectel.text(ifaceSection?uci.get('wireless',ifaceSection,'key'):'',''),enabled:uci.get('wireless',radioName,'disabled')!=='1'&&(ifaceSection?uci.get('wireless',ifaceSection,'disabled'):'0')!=='1'};}).filter((radio)=>!!radio.section);},createPasswordControl(value,placeholder){const keyInput=E('input',{'class':'misectel-input','type':'password','value':value||'','placeholder':placeholder});const revealInput=E('input',{'type':'checkbox'});const fieldNode=E('div',{'class':'misectel-stack'},[keyInput,E('label',{'class':'misectel-inline-check'},[revealInput,E('span',{},[_('Show Password')])])]);revealInput.addEventListener('change',()=>{keyInput.type=revealInput.checked?'text':'password';});return{fieldNode,keyInput,revealInput};},createCountryInput(radio){const choices=radio.countryChoices?.length?radio.countryChoices:[{value:radio.country||'00',label:radio.country||'00'}];return E('select',{'class':'misectel-select'},choices.map((choice)=>E('option',{'value':choice.value,'selected':choice.value===radio.country?'selected':null},[choice.label])));},createTuningControls(radio){const modeChoices=radio.modeChoices?.length?radio.modeChoices:[{value:wifiModeFamily(radio.width),label:wifiModeLabel(wifiModeFamily(radio.width)),modes:radio.widthChoices?.length?radio.widthChoices:['HT20']}];const modeSelect=E('select',{'class':'misectel-select'},modeChoices.map((choice)=>E('option',{'value':choice.value,'selected':choice.value===radio.mode?'selected':null},[choice.label])));const widthSelect=E('select',{'class':'misectel-select'});const channelSelect=E('select',{'class':'misectel-select'});const countryInput=this.createCountryInput(radio);const syncWidths=(modeValue,preferredWidth)=>{const activeChoice=modeChoices.find((choice)=>choice.value===modeValue)||modeChoices[0];const widths=activeChoice?.modes?.length?activeChoice.modes:[radio.width||'HT20'];const selectedWidth=widths.indexOf(preferredWidth)>=0?preferredWidth:(widths.indexOf(widthSelect.value)>=0?widthSelect.value:widths[0]);dom.content(widthSelect,widths.map((mode)=>E('option',{'value':mode,'selected':mode===selectedWidth?'selected':null},[mode])));widthSelect.value=selectedWidth;modeSelect.value=activeChoice.value;};const syncChannels=(preferredChannel)=>{const nextValue=normalizeChannelValue(preferredChannel||channelSelect.value||radio.channel);const choices=makeChannelChoices(radio.freqChoices,nextValue,radio.bandKey,countryInput.value);const selected=choices.find((choice)=>choice.value===nextValue)?nextValue:'auto';dom.content(channelSelect,choices.map((choice)=>E('option',{'value':choice.value,'selected':choice.value===selected?'selected':null},[choice.label])));channelSelect.value=selected;};modeSelect.addEventListener('change',()=>syncWidths(modeSelect.value,null));countryInput.addEventListener('change',()=>syncChannels(channelSelect.value));syncWidths(radio.mode,radio.width);syncChannels(radio.channel);const power=String(uci.get('wireless',radio.name,'txpower')||''),max=radio.bandKey==='2g'?25:28;const values=Array.from({length:max+1},(_,i)=>String(max-i));if(power&&!values.includes(power))values.unshift(power);const powerSelect=E('select',{},[E('option',{value:'',selected:!power?'selected':null},['Auto (driver default)']),...values.map(v=>E('option',{value:v,selected:v===power?'selected':null},[v+' dBm']))]);return{channelSelect,modeSelect,widthSelect,countryInput,powerSelect};},bindPasswordVisibility(encryptionSelect,passwordField,keyInput,revealInput,placeholder){const syncVisibility=()=>{const open=isOpenEncryption(encryptionSelect.value);if(open){keyInput.value='';keyInput.disabled=true;keyInput.type='password';revealInput.checked=false;passwordField.hidden=true;return;}
-keyInput.disabled=false;keyInput.placeholder=placeholder;passwordField.hidden=false;};encryptionSelect.addEventListener('change',syncVisibility);syncVisibility();},createPowerControl(input){input.setAttribute('aria-label',_('Wi-Fi Power'));const state=E('span',{},[input.checked?_('On'):_('Off')]);input.addEventListener('change',()=>dom.content(state,[input.checked?_('On'):_('Off')]));return E('label',{'class':'misectel-inline-check'},[input,state]);},createSettingsPanel(title,description,icon,children){return E('details',{'class':'wf-advanced wf-settings-panel'},[
+keyInput.disabled=false;keyInput.placeholder=placeholder;passwordField.hidden=false;};encryptionSelect.addEventListener('change',syncVisibility);syncVisibility();},createSettingsPanel(title,description,icon,children){return E('details',{'class':'wf-advanced wf-settings-panel'},[
  E('summary',{},[E('span',{'class':'wf-panel-icon'},[settings.icon(icon)]),E('span',{'class':'wf-panel-heading'},[E('strong',{},[title]),E('small',{},[description])]),E('span',{'class':'wf-chevron','aria-hidden':'true'})]),
  E('div',{'class':'wf-panel-body'},children)
 ]);},
@@ -55,26 +55,30 @@ createTuningPanel(radio,controls){return this.createSettingsPanel('Advanced Radi
  settings.field('Channel',controls.channelSelect),settings.field('Channel Width',controls.widthSelect),
  settings.field('Wi-Fi Standard',controls.modeSelect),settings.field('Country / Region',controls.countryInput),settings.field('Transmit Power',controls.powerSelect,'Auto uses the driver default. Regulatory limits always apply.')
  ])]);},
+createEnableControl(input,label){
+ const choices=[['Enable',true],['Disable',false]];
+ const buttons=choices.map(([title,enabled])=>E('button',{type:'button','aria-pressed':String(input.checked===enabled),click:()=>{input.checked=enabled;sync();}},[title]));
+ const sync=()=>buttons.forEach((button,i)=>button.setAttribute('aria-pressed',String(input.checked===choices[i][1])));
+ return E('div',{'class':'wf-setup-row'},[E('div',{'class':'wf-setup-label'},[settings.icon('wifi'),E('strong',{},[label])]),E('div',{'class':'wf-segment',role:'group','aria-label':label},buttons)]);
+},
 createNetworkFields(radios,shared){
  const radio=radios[0],tuning={};radios.forEach(r=>tuning[r.name]=this.createTuningControls(r));
- const enabledInput=E('input',{type:'checkbox',checked:radio.enabled?'checked':null,'aria-label':shared?'Wi-Fi Power':radio.bandLabel+' Wi-Fi Power'});
+ const enabledInput=E('input',{type:'checkbox',checked:(shared?radios.some(r=>r.enabled):radio.enabled)?'checked':null,'aria-label':shared?'Wi-Fi Enabled':radio.bandLabel+' Wi-Fi Enabled'});
  const ssidInput=E('input',{type:'text',value:radio.ssid||'',maxlength:32,placeholder:'Enter Wi-Fi name'});
  const encryptionSelect=E('select',{},ENCRYPTION_CHOICES.map(c=>E('option',{value:c.value,selected:c.value===radio.encryption?'selected':null},[c.label])));
- const password=this.createPasswordControl(radio.key,'At least 8 characters');password.keyInput.setAttribute('aria-label',shared?'Wi-Fi Password':radio.bandLabel+' Wi-Fi password');
+ const password=this.createPasswordControl(radio.key,'At least 8 characters');password.keyInput.setAttribute('aria-label',shared?'Wi-Fi Password':radio.bandLabel+' Wi-Fi Password');
  const passwordField=settings.field('Wi-Fi Password',password.fieldNode,'Used when connecting a phone, computer or other device.');
  this.bindPasswordVisibility(encryptionSelect,passwordField,password.keyInput,password.revealInput,'At least 8 characters');
- const state=E('strong',{'class':'wf-state'},[enabledInput.checked?'On':'Off']);
- enabledInput.addEventListener('change',()=>dom.content(state,[enabledInput.checked?'On':'Off']));
- const node=settings.card(shared?'Your Wi-Fi Network':radio.bandLabel+' network',shared?'One name and password for 2.4 GHz and 5 GHz.':'A separate name and password for this band.',[
- E('div',{'class':'wf-power'},[settings.toggle('Wi-Fi Power',enabledInput,shared?'Turn both bands on or off.':'Turn this band on or off.'),state]),
+ const enableUI=this.createEnableControl(enabledInput,shared?'Wi-Fi':radio.bandLabel.replace('5.8','5')+' Wi-Fi');
+ const node=settings.card(shared?'Your Wi-Fi Network':radio.bandLabel+' Network',shared?'One name and password for 2.4 GHz and 5 GHz.':'A separate name and password for this band.',[
  E('div',{'class':'st-fields wf-basics'},[settings.field('Wi-Fi Name',ssidInput,'This is the name devices see in their Wi-Fi list.'),passwordField]),
  this.createSettingsPanel('Security Settings','Choose how devices securely connect.','shield',[settings.field('Encryption',encryptionSelect,'WPA2 works with most devices. WPA3 offers newer protection. Open networks have no password.')]),
  E('div',{'class':'wf-radio-panels'},radios.map(r=>this.createTuningPanel(r,tuning[r.name])))
  ],'router');
- return {node,controls:shared?{enabledInput,ssidInput,encryptionSelect,keyInput:password.keyInput,tuning}:Object.assign({enabledInput,ssidInput,encryptionSelect,keyInput:password.keyInput},tuning[radio.name])};
+ return {node,enableUI,controls:shared?{enabledInput,ssidInput,encryptionSelect,keyInput:password.keyInput,tuning}:Object.assign({enabledInput,ssidInput,encryptionSelect,keyInput:password.keyInput},tuning[radio.name])};
 },
 renderLinkedSection(radios){return this.createNetworkFields(radios,true);},
-renderSeparateSection(radios){const controls={};return {node:E('div',{'class':'wf-networks'},radios.map(r=>{const result=this.createNetworkFields([r],false);controls[r.name]=result.controls;return result.node;})),controls};},
+renderSeparateSection(radios){const controls={},enableNodes=[];return {node:E('div',{'class':'wf-networks'},radios.map(r=>{const result=this.createNetworkFields([r],false);controls[r.name]=result.controls;enableNodes.push(result.enableUI);return result.node;})),controls,enableNodes};},
 async saveChanges(button){
  if(this.saving)return;this.saving=true;
  const buttons=this.saveButtons||[button];buttons.forEach(b=>misectel.setButtonBusy(b,true));
@@ -110,23 +114,27 @@ async saveChanges(button){
   window.setTimeout(()=>window.location.reload(),300);
  }catch(err){misectel.notify(_('Failed to save Wi-Fi settings: %s').format(err.message||err),'error');}
  finally{this.saving=false;buttons.forEach(b=>misectel.setButtonBusy(b,false));}
-},switchMode(linked){this.linkedMode=linked;if(this.linkedToggle)
-this.linkedToggle.checked=linked;if(this.linkedModeText)
-dom.content(this.linkedModeText,[linked?_('Shared'):_('Separate')]);dom.content(this.modeBody,linked?this.linkedNode:this.separateNode);},render(data){
+},switchMode(linked){
+ this.linkedMode=linked;
+ if(this.modeButtons)this.modeButtons.forEach((b,i)=>b.setAttribute('aria-pressed',String(linked===(i===0))));
+ dom.content(this.modeBody,linked?this.linkedNode:this.separateNode);
+ if(this.enableBody)dom.content(this.enableBody,linked?[this.linkedEnable]:this.separateEnables);
+},render(data){
  this.radioState=this.buildRadioState(data);this.linkedMode=this.radioState.length>1&&uci.get('misectel','wifi_defaults','linked_bands')!=='0';
  if(!this.radioState.length)return settings.sheet([settings.head('Wi-Fi','No configurable wireless network is available.','router')],'st-wifi');
  const separate=this.renderSeparateSection(this.radioState),linked=this.radioState.length>1?this.renderLinkedSection(this.radioState):null;
  this.separateControls=separate.controls;this.linkedControls=linked?.controls;this.separateNode=separate.node;this.linkedNode=linked?.node;
- this.modeBody=E('div');this.linkedToggle=this.radioState.length>1?E('input',{type:'checkbox',checked:this.linkedMode?'checked':null,'aria-label':'Use one name and password'}):null;
- this.linkedModeText=E('span',{'class':'wf-state'},[this.linkedMode?'Shared':'Separate']);
- if(this.linkedToggle)this.linkedToggle.addEventListener('change',()=>this.switchMode(this.linkedToggle.checked));
+ this.modeBody=E('div');this.enableBody=E('div',{'class':'wf-enable-controls'});this.linkedEnable=linked?.enableUI;this.separateEnables=separate.enableNodes;
+ this.modeButtons=this.radioState.length>1?[['Shared',true],['Separate',false]].map(([label,value])=>E('button',{type:'button','aria-pressed':String(this.linkedMode===value),click:()=>this.switchMode(value)},[label])):null;
  const apply=settings.button('Save & Apply',ui.createHandlerFn(this,ev=>this.saveChanges(ev.currentTarget)));
  this.saveButtons=[apply];
  const page=settings.sheet([
  settings.head('Wi-Fi','Your network. Simple to connect. Easy to manage.','router'),
- this.linkedToggle?settings.card('Network Setup','Choose how devices connect to your two Wi-Fi bands.',[
- E('div',{'class':'wf-power'},[settings.toggle('Use one name and password',this.linkedToggle,'Recommended: both bands share the same Wi-Fi name and password.'),this.linkedModeText])
- ]):'',this.modeBody,
+ settings.card('Network Setup','Enable Wi-Fi and choose how your bands are named.',[
+ this.enableBody,
+ this.modeButtons?E('div',{'class':'wf-setup-row'},[E('div',{'class':'wf-setup-label'},[settings.icon('network'),E('strong',{},['Network Names'])]),E('div',{'class':'wf-segment',role:'group','aria-label':'Network Names'},this.modeButtons)]):'',
+ this.modeButtons?E('p',{'class':'st-muted wf-setup-help'},['Shared uses one name and password for both bands. Separate lets you customize each band.']):''
+ ],'wifi'),this.modeBody,
  E('div',{'class':'wf-save-bar'},[E('div',{'class':'wf-save-actions'},[apply])])
  ],'st-wifi');
  this.switchMode(!!linked&&this.linkedMode);return page;

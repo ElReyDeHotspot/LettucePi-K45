@@ -134,9 +134,9 @@
 
 		if (submitButton) {
 			if ('value' in submitButton)
-				submitButton.value = '{{ entityencode(_("Log in"), true) }}';
+				submitButton.value = '{{ entityencode(_("Log In"), true) }}';
 			if (submitButton.tagName === 'BUTTON')
-				submitButton.textContent = '{{ entityencode(_("Log in"), true) }}';
+				submitButton.textContent = '{{ entityencode(_("Log In"), true) }}';
 			submitButton.classList.add('login-submit-button');
 		}
 

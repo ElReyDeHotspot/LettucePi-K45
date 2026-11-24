@@ -105,7 +105,7 @@ return view.extend({
  render:function(info){
   var self=this;
   var link=E('link',{rel:'stylesheet',href:L.resource('chester-ui/tailscale.css')+'?v=20261122-2'});
-  if(!info||info.ok!==true)return settings.sheet([link,settings.head('Tailscale','Your router. Connected, wherever you are.','network'),settings.card('Unable to read status','Your connection settings have not been changed.',[settings.button('Try again',function(){return self.refresh();})],'network')],'st-tailscale');
+  if(!info||info.ok!==true)return settings.sheet([link,settings.head('Tailscale','Your router. Connected, wherever you are.','network'),settings.card('Unable to Read Status','Your connection settings have not been changed.',[settings.button('Try Again',function(){return self.refresh();})],'network')],'st-tailscale');
   var present=info.present===true||info.present==='true',running=info.running===true||info.running==='true',connected=info.backend==='Running';
   var ssh=info.ssh===true||info.ssh==='true',dns=info.dns===true||info.dns==='true';
   var status=connected?'Connected':!present?'Not installed':!running?'Service stopped':info.backend==='NeedsLogin'?'Sign-in needed':info.backend==='Stopped'?'Disconnected':'Ready to connect';
@@ -114,11 +114,11 @@ return view.extend({
   else{
    if(!connected)actions.push(btn('Connect Tailscale','',ui.createHandlerFn(self,'run','connect','Starting sign-in…')));
    else actions.push(E('a',{'class':'st-button secondary',href:'https://login.tailscale.com/admin/machines',target:'_blank',rel:'noopener noreferrer'},['Manage devices ↗']));
-   actions.push(btn('Refresh status','secondary',ui.createHandlerFn(self,'refresh')));
-   management.push(E('div',{'class':'ts-setting'},[E('div',{},[E('strong',{},['Tailnet DNS']),E('p',{'class':'st-muted'},['Off keeps the router using its current DNS settings.'])]),btn(dns?'Turn off':'Turn on','secondary',ui.createHandlerFn(self,'run',dns?'dns-off':'dns-on','Applying DNS preference…'))]));
+   actions.push(btn('Refresh Status','secondary',ui.createHandlerFn(self,'refresh')));
+   management.push(E('div',{'class':'ts-setting'},[E('div',{},[E('strong',{},['Tailnet DNS']),E('p',{'class':'st-muted'},['Off keeps the router using its current DNS settings.'])]),btn(dns?'Turn Off':'Turn On','secondary',ui.createHandlerFn(self,'run',dns?'dns-off':'dns-on','Applying DNS preference…'))]));
    if(!connected)management.push(E('div',{'class':'ts-setting'},[E('div',{},[E('strong',{},['Connect with Tailscale SSH']),E('p',{'class':'st-muted'},['Also enables SSH access through your tailnet.'])]),btn('Connect + SSH','secondary',ui.createHandlerFn(self,'run','connect-ssh','Starting sign-in…'))]));
-   management.push(E('div',{'class':'ts-setting'},[E('div',{},[E('strong',{},['App updates']),E('p',{'class':'st-muted'},['Check the configured package feed for a newer version.'])]),btn('Check for updates','secondary',ui.createHandlerFn(self,'run','update','Checking for a newer version…'))]));
-   if(connected||info.state==='present')management.push(E('div',{'class':'ts-setting'},[E('div',{},[E('strong',{},['Sign out of this router']),E('p',{'class':'st-muted'},['Forgets its Tailscale identity. The app stays installed.'])]),btn('Sign out','secondary',function(){self.confirmThen('Sign out of Tailscale','This router leaves the tailnet and forgets its identity. Tailscale stays installed.','logout','Signing out…');})]));
+   management.push(E('div',{'class':'ts-setting'},[E('div',{},[E('strong',{},['App Updates']),E('p',{'class':'st-muted'},['Check the configured package feed for a newer version.'])]),btn('Check for Updates','secondary',ui.createHandlerFn(self,'run','update','Checking for a newer version…'))]));
+   if(connected||info.state==='present')management.push(E('div',{'class':'ts-setting'},[E('div',{},[E('strong',{},['Sign Out of This Router']),E('p',{'class':'st-muted'},['Forgets its Tailscale identity. The app stays installed.'])]),btn('Sign Out','secondary',function(){self.confirmThen('Sign Out of Tailscale','This router leaves the tailnet and forgets its identity. Tailscale stays installed.','logout','Signing out…');})]));
    management.push(E('div',{'class':'ts-setting'},[E('div',{},[E('strong',{},['Remove Tailscale']),E('p',{'class':'st-muted'},['Uninstalls the app and removes its saved identity.'])]),btn('Uninstall','secondary ts-remove',function(){self.confirmThen('Uninstall Tailscale','Tailscale is removed and this router forgets its identity. It can be installed again later.','uninstall','Removing Tailscale…');})]));
   }
   var root=settings.sheet([link,
@@ -128,15 +128,15 @@ return view.extend({
     E('h2',{},[connected?'Your private network is ready.':'A secure way back home.']),
     E('p',{'class':'ts-lead'},[connected?'This router is connected to your tailnet. Use its Tailscale address from your other connected devices.':'Connect your Chester router to your private Tailscale network for access when you’re away.']),
     E('div',{'class':'ts-actions'},actions),
-    E('div',{'class':'ts-journey','aria-label':'Connection progress'},[['1','Install app',present],['2','Sign in',connected],['3','Stay connected',connected]].map(function(step){return E('div',{'class':'ts-step'+(step[2]?' is-complete':'')},[E('span',{},[step[2]?'✓':step[0]]),E('strong',{},[step[1]])]);}))
+    E('div',{'class':'ts-journey','aria-label':'Connection Progress'},[['1','Install app',present],['2','Sign in',connected],['3','Stay connected',connected]].map(function(step){return E('div',{'class':'ts-step'+(step[2]?' is-complete':'')},[E('span',{},[step[2]?'✓':step[0]]),E('strong',{},[step[1]])]);}))
    ]),
-   present?E('div',{'class':'st-summary'},[settings.stat('Tailscale address',info.ip||'Not assigned','network'),settings.stat('Tailnet DNS',dns?'Enabled':'Off','router'),settings.stat('Tailscale SSH',ssh?'Enabled':'Off','terminal')]):'',
-   info.authurl&&!connected?settings.card('Finish connecting','Sign in to link this router to your tailnet.',[E('a',{'class':'st-button',href:info.authurl,target:'_blank',rel:'noopener noreferrer'},['Continue sign-in ↗'])],'lock'):'',
+   present?E('div',{'class':'st-summary'},[settings.stat('Tailscale Address',info.ip||'Not assigned','network'),settings.stat('Tailnet DNS',dns?'Enabled':'Off','router'),settings.stat('Tailscale SSH',ssh?'Enabled':'Off','terminal')]):'',
+   info.authurl&&!connected?settings.card('Finish Connecting','Sign in to link this router to your tailnet.',[E('a',{'class':'st-button',href:info.authurl,target:'_blank',rel:'noopener noreferrer'},['Continue sign-in ↗'])],'lock'):'',
    E('div',{'class':'ts-columns'},[
-    settings.card('Connection details','Status reported by this router.',[E('div',{'class':'ts-details'},[row('Connection',status),row('Version',present?info.version:'Not installed'),row('Account',info.user||'Not reported'),row('Tailscale address',info.ip||'Not assigned')])],'port'),
-    settings.card('Private by design','Simple access to the devices you trust.',[E('div',{'class':'ts-feature'},[settings.icon('lock'),E('div',{},[E('strong',{},['Encrypted connections']),E('p',{'class':'st-muted'},['Tailscale connects your devices over an encrypted private network.'])])]),E('div',{'class':'ts-feature'},[settings.icon('shield'),E('div',{},[E('strong',{},['You control access']),E('p',{'class':'st-muted'},['Manage who can connect in your Tailscale account.'])])]),E('div',{'class':'ts-feature'},[settings.icon('router'),E('div',{},[E('strong',{},['Keep your local DNS']),E('p',{'class':'st-muted'},['Tailnet DNS is optional and stays off until you enable it.'])])])],'shield')
+    settings.card('Connection Details','Status reported by this router.',[E('div',{'class':'ts-details'},[row('Connection',status),row('Version',present?info.version:'Not installed'),row('Account',info.user||'Not reported'),row('Tailscale Address',info.ip||'Not assigned')])],'port'),
+    settings.card('Private by Design','Simple access to the devices you trust.',[E('div',{'class':'ts-feature'},[settings.icon('lock'),E('div',{},[E('strong',{},['Encrypted Connections']),E('p',{'class':'st-muted'},['Tailscale connects your devices over an encrypted private network.'])])]),E('div',{'class':'ts-feature'},[settings.icon('shield'),E('div',{},[E('strong',{},['You Control Access']),E('p',{'class':'st-muted'},['Manage who can connect in your Tailscale account.'])])]),E('div',{'class':'ts-feature'},[settings.icon('router'),E('div',{},[E('strong',{},['Keep Your Local DNS']),E('p',{'class':'st-muted'},['Tailnet DNS is optional and stays off until you enable it.'])])])],'shield')
    ]),
-   present?E('details',{'class':'st-card ts-options'},[E('summary',{},['App settings & maintenance']),E('div',{},management)]):E('p',{'class':'st-muted ts-install-note'},['Installation downloads the app from the configured package feed. Your router needs internet access.'])
+   present?E('details',{'class':'st-card ts-options'},[E('summary',{},['App Settings & Maintenance']),E('div',{},management)]):E('p',{'class':'st-muted ts-install-note'},['Installation downloads the app from the configured package feed. Your router needs internet access.'])
   ],'st-tailscale');
   return root;
  },

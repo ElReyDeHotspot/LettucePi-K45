@@ -1242,7 +1242,7 @@ return view.extend({
 		// by the full applyData() (initial load / manual Refresh) and the 5s
 		// poll so the live strip never diverges. textContent/display only —
 		// never touches any form or button DOM.
-		this.statusBadge.textContent = info.running ? 'On' : (state.className === 'z2-error' ? 'Needs attention' : 'Off');
+		this.statusBadge.textContent = info.running ? 'On' : (state.className === 'z2-error' ? 'Needs Attention' : 'Off');
 		this.statusBadge.className = 'z2-badge ' + state.className;
 		this.instancesValue.textContent = info.totalCount ? String(info.runningCount) + ' / ' + String(info.totalCount) : '0';
 		this.pidsValue.textContent = info.pids.length ? info.pids.join(', ') : '—';
@@ -1345,11 +1345,11 @@ return view.extend({
 			'click': ui.createHandlerFn(this, function() { return self.setModeTab('masq'); })
 		}, tr('Traffic masquerade', 'Маскировка трафика'));
 		this.sliderVo = E('input', {
-			'type': 'checkbox', 'class': 'z2-switch-input', 'aria-label': 'Use streaming sites only',
+			'type': 'checkbox', 'class': 'z2-switch-input', 'aria-label': 'Use Streaming Sites Only',
 			'change': ui.createHandlerFn(this, function(ev) { return self.handleModeToggle('video', ev.currentTarget.checked); })
 		});
 		this.sliderMasq = E('input', {
-			'type': 'checkbox', 'class': 'z2-switch-input', 'aria-label': 'Use all traffic',
+			'type': 'checkbox', 'class': 'z2-switch-input', 'aria-label': 'Use All Traffic',
 			'change': ui.createHandlerFn(this, function(ev) { return self.handleModeToggle('masq', ev.currentTarget.checked); })
 		});
 		function makeSwitch(input) {
@@ -1378,9 +1378,9 @@ return view.extend({
 		this.btnSpeedRun = E('button', {
 			'class': 'btn cbi-button-action important',
 			'click': ui.createHandlerFn(this, function(ev) { return self.handleSpeedRun(ev); })
-		}, 'Test streaming');
+		}, 'Test Streaming');
 		this.btnSpeedRun.disabled = true;
-		this.speedIfaceSelect = E('select', { 'class': 'cbi-input-select', 'aria-label': 'Connection to test' });
+		this.speedIfaceSelect = E('select', { 'class': 'cbi-input-select', 'aria-label': 'Connection to Test' });
 		// Picking an interface must flip RUN COMPARISON on. Without a
 		// change listener the enabled state is only recomputed on render
 		// (empty -> disabled), interface-checkbox clicks, and status polls,
@@ -1479,7 +1479,7 @@ return view.extend({
 
 
 		this.masterToggle = E('input', {
-			'type': 'checkbox', 'class': 'z2-switch-input', 'aria-label': '4K/HD streaming',
+			'type': 'checkbox', 'class': 'z2-switch-input', 'aria-label': '4K/HD Streaming',
 			'change': ui.createHandlerFn(this, function(ev) {
 				var checked = ev.currentTarget.checked;
 				self.masterToggle.disabled = true;
@@ -1498,8 +1498,8 @@ return view.extend({
 			E('div', { 'class': 'z2-switch-row' }, [ E('span', 'Optimize all traffic'), this.sliderMasqSwitch ]),
 			E('p', { 'class': 'cz-muted' }, 'Applies the bypass to all sites, including sites outside your list.')
 		]);
-		this.tabVideo.textContent = 'Streaming sites';
-		this.tabMasq.textContent = 'All traffic';
+		this.tabVideo.textContent = 'Streaming Sites';
+		this.tabMasq.textContent = 'All Traffic';
 		function resultCard(title, value, spin, extra) {
 			return E('div', { 'class': 'cz-result' }, [
 				E('span', { 'class': 'cz-result-label' }, title),
@@ -1551,25 +1551,25 @@ return view.extend({
             E('div',{'class':'cz-page-head'},[E('div',{'class':'ios-title',role:'heading','aria-level':'2'},['Zapret2']),E('p',{'class':'cz-muted'},['4K/HD streaming optimization.'])]),
 			E('section', { 'class': 'cz-card cz-hero' }, [
 				E('div', { 'class': 'cz-heading' }, [
-					E('h3', {}, 'Streaming optimization'),
+					E('h3', {}, 'Streaming Optimization'),
 					E('div', { 'class': 'cz-power' }, [this.statusBadge, makeSwitch(this.masterToggle)])
 				]),
 				this.friendlyStatus,
 				E('p', { 'class': 'cz-muted' }, 'Try this if streaming is slower than your normal connection.')
 			]),
 			E('section', { 'class': 'cz-card' }, [
-				E('div', { 'class': 'cz-test-heading' }, [E('h3', {}, 'Does it help?'), this.speedBadge]),
+				E('div', { 'class': 'cz-test-heading' }, [E('h3', {}, 'Does It Help?'), this.speedBadge]),
 				E('p', { 'class': 'cz-muted' }, 'Compare streaming speeds with the optimizer on and off. Results are in Mbps.'),
 				E('div', { 'class': 'cz-test-controls' }, [this.speedIfaceSelect, this.btnSpeedRun]),
 				E('div', { 'class': 'cz-results' }, [
-					resultCard('Normal connection', this.speedRefValue, this.speedRefSpin, this.speedRefSource),
-					resultCard('Streaming · optimizer on', this.speedWithValue, this.speedWithSpin),
-					resultCard('Streaming · optimizer off', this.speedWithoutValue, this.speedWithoutSpin)
+					resultCard('Normal Connection', this.speedRefValue, this.speedRefSpin, this.speedRefSource),
+					resultCard('Streaming · Optimizer On', this.speedWithValue, this.speedWithSpin),
+					resultCard('Streaming · Optimizer Off', this.speedWithoutValue, this.speedWithoutSpin)
 				]),
 				this.speedWarn, this.speedMessage
 			]),
 			E('details', { 'class': 'cz-card' }, [
-				E('summary', {}, 'Streaming sites'),
+				E('summary', {}, 'Streaming Sites'),
 				E('div', { 'class': 'cz-details-body' }, [
 					E('p', { 'class': 'cz-muted' }, 'Your streaming services are already included. Add a domain only if you need another service.'),
 					this.hostListBox,
@@ -1577,20 +1577,20 @@ return view.extend({
 				])
 			]),
 			E('details', { 'class': 'cz-card' }, [
-				E('summary', {}, 'Advanced settings'),
+				E('summary', {}, 'Advanced Settings'),
 				E('div', { 'class': 'cz-details-body' }, [
 					E('p', { 'class': 'cz-muted' }, 'The current settings are ready to use. Change these only when needed.'),
-					E('div', { 'class': 'cz-setting-group' }, [E('h3', {}, 'What to optimize'),
+					E('div', { 'class': 'cz-setting-group' }, [E('h3', {}, 'What to Optimize'),
 						E('div', { 'class': 'z2-tabbar' }, [this.tabVideo, this.tabMasq]), this.panelVideo, this.panelMasq]),
-					E('div', { 'class': 'cz-setting-group' }, [E('h3', {}, 'Connection settings'), this.ifaceBox]),
-					E('div', { 'class': 'cz-setting-group' }, [E('h3', {}, 'Bypass methods'), this.strategyBox]),
+					E('div', { 'class': 'cz-setting-group' }, [E('h3', {}, 'Connection Settings'), this.ifaceBox]),
+					E('div', { 'class': 'cz-setting-group' }, [E('h3', {}, 'Bypass Methods'), this.strategyBox]),
 					E('div', { 'class': 'cz-actions' }, [this.btnSaveApply]),
 					E('details', { 'class': 'z2-advanced' }, [E('summary', {}, 'Diagnostics'),
-						E('div', { 'class': 'z2-grid' }, [makeMetaCard('Instances', this.instancesValue), makeMetaCard('Process ID', this.pidsValue), makeMetaCard('Engine version', this.versionValue), makeMetaCard('Profiles', this.profileCountValue), makeMetaCard('Packets processed', this.packetsValue)]),
+						E('div', { 'class': 'z2-grid' }, [makeMetaCard('Instances', this.instancesValue), makeMetaCard('Process ID', this.pidsValue), makeMetaCard('Engine Version', this.versionValue), makeMetaCard('Profiles', this.profileCountValue), makeMetaCard('Packets Processed', this.packetsValue)]),
 						this.btnRefresh,
-						makeTextSection('Active command', '', this.commandArea, 'command', this),
-						makeTextSection('Queue rules', '', this.rulesArea, 'rules', this),
-						makeTextSection('Runtime configuration', '', this.configArea, 'config', this)
+						makeTextSection('Active Command', '', this.commandArea, 'command', this),
+						makeTextSection('Queue Rules', '', this.rulesArea, 'rules', this),
+						makeTextSection('Runtime Configuration', '', this.configArea, 'config', this)
 					])
 				])
 			])

@@ -15,7 +15,7 @@ const methods=new Function('view','rpc','fs','dom','settings','ui','E','L','_',c
  await instance.savePreferences();assert.deepEqual(saved.at(-1),['0','03:00','0']);
  // An explicit install confirmation still cannot flash when options fail to save.
  saveFails=true;instance.handleInstall(false);const confirmation=modals.at(-1).nodes.at(-1).children.at(-1);await confirmation.attrs.click();
- assert(!commands.includes('install'));assert.equal(modals.at(-1).title,'Update could not start');
+ assert(!commands.includes('install'));assert.equal(modals.at(-1).title,'Update Could Not Start');
  const start=code.indexOf('function releaseNotes('),end=code.indexOf('function versionLabel(',start);
  const notes=new Function(code.slice(start,end)+';return releaseNotes;')();
  assert.deepEqual(notes('Bin 11: New controls. Signed OTA retained.'),['Rev. 11: New controls','Signed OTA retained.']);

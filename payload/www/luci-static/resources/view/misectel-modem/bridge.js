@@ -35,8 +35,8 @@ return view.extend({async load(){misectel.ensureBaseStyle();await Promise.all([u
  const assignment=this.assignment(this.selectedModemId),enabled=modemHelper.boolValue(assignment?.enabled,false),pending=!!this.managerConfig?.pending_token;
  const status=(this.managerStatus?.qmodem||[]).find(item=>item.instance===this.selectedModemId);
  return E('div',{'class':'st-summary pt-summary'},[
-  settings.stat('Current mode',pending?'Pending change':enabled?'IP Passthrough':'Router mode','router'),
-  settings.stat('Cellular handoff',pending?'Awaiting confirmation':enabled?(status?.endpoint_attached?'Modem attached':'Waiting for modem'):'Normal routing','network'),
+  settings.stat('Current Mode',pending?'Pending change':enabled?'IP Passthrough':'Router mode','router'),
+  settings.stat('Cellular Handoff',pending?'Awaiting confirmation':enabled?(status?.endpoint_attached?'Modem attached':'Waiting for modem'):'Normal routing','network'),
   settings.stat('Cellular IPv4',status?.cellular_ipv4||'Waiting for address','network')
  ]);
 },renderCard(modem){
@@ -45,21 +45,21 @@ return view.extend({async load(){misectel.ensureBaseStyle();await Promise.all([u
  const bridgeWifi=buildWifiSelect(normalizeList(assignment?.desired_wifi)[0]||'',this.wifiDevices,this.managerStatus?.ownership,`qmodem_passthrough:${modem.id}`);
  const managementIp=E('input',{type:'text',value:assignment?.management_cidr||uci.get('qmodem',modem.id,'bridge_management_ip')||defaultManagementCidr(),placeholder:'192.168.101.1/24',inputmode:'text',autocomplete:'off'});
  this.form={modemId:modem.id,bridgeMode,bridgePorts,bridgeWifi,managementIp};
- const selected=E('strong',{},['Choose a port']);
+ const selected=E('strong',{},['Choose a Port']);
  this.mapAddress=E('span');this.mapHandoff=E('p',{'class':'pt-address-note',role:'status'});
  const sync=()=>{const ports=bridgePorts.inputs.filter(i=>i.checked).map(i=>portLabel(i.value));selected.textContent=ports.join(', ')||(bridgeWifi.value?'Wi-Fi AP':'Choose a port');};
  bridgePorts.inputs.forEach(input=>input.addEventListener('change',()=>{if(input.checked){bridgePorts.inputs.forEach(other=>{if(other!==input)other.checked=false;});bridgeWifi.value='';}sync();}));bridgeWifi.addEventListener('change',()=>{if(bridgeWifi.value)bridgePorts.inputs.forEach(input=>{input.checked=false;});sync();});sync();this.refreshMap();
  const path=E('div',{'class':'pt-path'},[
   E('div',{},[settings.icon('network'),E('strong',{},['Cellular']),this.mapAddress]),E('i',{'class':'pt-arrow','aria-hidden':'true'},['→']),
   E('div',{},[settings.icon('port'),selected,E('span',{},['Dedicated handoff'])]),E('i',{'class':'pt-arrow','aria-hidden':'true'},['→']),
-  E('div',{},[settings.icon('router'),E('strong',{},['Your router']),E('span',{},['One downstream client'])])
+  E('div',{},[settings.icon('router'),E('strong',{},['Your Router']),E('span',{},['One downstream client'])])
  ]);
  return E('div',{},[
   settings.card('Your router. Your connection.','Pass the cellular address to a router or firewall connected behind your Chester.',[path,this.mapHandoff,settings.toggle('Enable IP Passthrough',bridgeMode,'Changes take effect after Apply safely and confirmation.')],'network'),
-  settings.card('Choose the handoff port','Select a dedicated Ethernet port. It will leave the normal LAN while passthrough is on.',[bridgePorts.node,this.lanDevices.some(p=>p.device==='wan'&&(p.role==='wan'||p.assignable===false))?E('p',{'class':'pt-wan-note'},['WAN is currently your Ethernet internet uplink. ',E('a',{href:L.url('admin','network','failover'),target:'_blank',rel:'noopener'},['Switch it to LAN mode in Failover']),', then refresh this page to use it for passthrough.']):'',E('p',{'class':'st-muted pt-note'},['Connect one downstream router and set its internet / WAN connection to Automatic (DHCP). Other LAN ports stay available for normal management.'])],'port'),
-  settings.card('Keep management within reach','Use an unselected LAN port or your normal Wi-Fi to manage Chester.',[
-   settings.field('Passthrough management address',managementIp,'On a passthrough port, this address requires a static client address in the same subnet. It is separate from the address your carrier assigns.'),
-   E('details',{'class':'st-advanced pt-wifi'},[E('summary',{},['Optional Wi-Fi handoff']),settings.field('Wi-Fi access point',bridgeWifi,'Use one access point instead of an Ethernet port. Keep another management connection available. A disabled access point stays disabled.')])
+  settings.card('Choose the Handoff Port','Select a dedicated Ethernet port. It will leave the normal LAN while passthrough is on.',[bridgePorts.node,this.lanDevices.some(p=>p.device==='wan'&&(p.role==='wan'||p.assignable===false))?E('p',{'class':'pt-wan-note'},['WAN is currently your Ethernet internet uplink. ',E('a',{href:L.url('admin','network','failover'),target:'_blank',rel:'noopener'},['Switch it to LAN mode in Failover']),', then refresh this page to use it for passthrough.']):'',E('p',{'class':'st-muted pt-note'},['Connect one downstream router and set its internet / WAN connection to Automatic (DHCP). Other LAN ports stay available for normal management.'])],'port'),
+  settings.card('Keep Management Within Reach','Use an unselected LAN port or your normal Wi-Fi to manage Chester.',[
+   settings.field('Passthrough Management Address',managementIp,'On a passthrough port, this address requires a static client address in the same subnet. It is separate from the address your carrier assigns.'),
+   E('details',{'class':'st-advanced pt-wifi'},[E('summary',{},['Optional Wi-Fi Handoff']),settings.field('Wi-Fi Access Point',bridgeWifi,'Use one access point instead of an Ethernet port. Keep another management connection available. A disabled access point stays disabled.')])
   ],'lock')
  ]);
 },async save(button,force=false){return misectel.withLongRpcTimeout(()=>this.saveAssignment(button,force));},async saveAssignment(button,force=false){if(this.feedbackNode)this.feedbackNode.hidden=true;misectel.setButtonBusy(button,true);let prepared=false;let writeAttempted=false;try{if(force&&!this.managerConfig?.force_save_supported)
@@ -94,38 +94,38 @@ catch(err){this.notify(_('Confirmation could not be verified. Refresh the page t
 await L.resolveDefault(this.refreshTransaction(),null);},async cancelPending(){const token=this.managerConfig?.transaction?.token;if(!token)return;const result=await L.resolveDefault(callRollback(token),null);if(!result?.result)
 this.notify(_('The interface rollback could not be confirmed. Reload the page and check the current configuration before retrying.'),'warning');await L.resolveDefault(this.refreshTransaction(),null);},renderTransaction(){
  const state=this.managerConfig?.transaction;
- if(state?.force)return[settings.card('Applying without rollback','The advanced apply is in progress. Keep your management connection available.',[],'clock')];
+ if(state?.force)return[settings.card('Applying without Rollback','The advanced apply is in progress. Keep your management connection available.',[],'clock')];
  if(!state){
   const outcome=this.managerConfig?.force_result;
-  if(outcome&&outcome.instance===this.selectedModemId&&outcome.revision===Number(this.managerConfig?.config?.global?.revision)&&!outcome.result)return[settings.card('Apply needs attention',outcome.error||'The settings were saved, but the network change did not finish.',[],'shield')];
+  if(outcome&&outcome.instance===this.selectedModemId&&outcome.revision===Number(this.managerConfig?.config?.global?.revision)&&!outcome.result)return[settings.card('Apply Needs Attention',outcome.error||'The settings were saved, but the network change did not finish.',[],'shield')];
   const status=(this.managerStatus?.qmodem||[]).find(item=>item.instance===this.selectedModemId);
-  return status?.requires_apply?[settings.card('Finish setting up passthrough','Apply safely and confirm the port assignment to activate these existing settings.',[],'network')]:[];
+  return status?.requires_apply?[settings.card('Finish Setting Up Passthrough','Apply safely and confirm the port assignment to activate these existing settings.',[],'network')]:[];
  }
  const enabled=modemHelper.boolValue(this.assignment(state.instance)?.enabled,false),address=parseCidr(this.assignment(state.instance)?.management_cidr||'')?.address;
- const keep=settings.button(enabled?'Keep settings & connect':'Keep router mode',()=>this.confirmPending());keep.disabled=!state.ready||state.remaining<=0;
- return [settings.card('Check access, then keep settings','This is a temporary network change until you confirm it.',[
-  E('div',{'class':'pt-confirm'},[E('div',{'class':'pt-countdown',role:'timer','aria-label':state.remaining+' seconds remaining'},[E('strong',{},[String(state.remaining)]),E('span',{},['seconds'])]),E('div',{},[
-   E('strong',{},[state.ready?'Port changes are ready':'Applying port changes…']),
+ const keep=settings.button(enabled?'Keep Settings & Connect':'Keep Router Mode',()=>this.confirmPending());keep.disabled=!state.ready||state.remaining<=0;
+ return [settings.card('Check Access, Then Keep Settings','This is a temporary network change until you confirm it.',[
+  E('div',{'class':'pt-confirm'},[E('div',{'class':'pt-countdown',role:'timer','aria-label':state.remaining+' Seconds Remaining'},[E('strong',{},[String(state.remaining)]),E('span',{},['seconds'])]),E('div',{},[
+   E('strong',{},[state.ready?'Port Changes Are Ready':'Applying Port Changes…']),
    E('p',{'class':'st-muted'},[enabled?'Keep this page open through another LAN port or normal Wi-Fi. Confirming starts the modem in passthrough mode.':'The selected ports are returning to normal LAN service. Confirm to restart normal cellular routing.'])
   ])]),
   address&&enabled?E('p',{'class':'pt-address-note'},['Static-IP management on the passthrough port: ',E('a',{href:'http://'+address+window.location.pathname,target:'_blank',rel:'noopener'},[address])]):'',
-  E('div',{'class':'pt-confirm-actions'},[settings.button('Revert changes',()=>this.cancelPending(),{'class':'st-button secondary'}),keep]),
+  E('div',{'class':'pt-confirm-actions'},[settings.button('Revert Changes',()=>this.cancelPending(),{'class':'st-button secondary'}),keep]),
   E('p',{'class':'st-muted pt-note'},['If you lose access or do not confirm, the previous settings return automatically. Reconnect the cable or renew DHCP after switching modes.'])
  ],'shield')];
 },render(data){
  this.modems=data.modems||[];this.lanDevices=data.lanDevices||[];this.wifiDevices=data.wifiDevices||[];this.managerConfig=data.managerConfig||{};this.managerStatus=data.managerStatus||{};this.capabilities=data.capabilities||{};
  this.selectedModemId=modemHelper.ensureSelected(this.selectedModemId,this.modems);this.cardNode=E('div');this.statusNode=E('div');this.transactionNode=E('div',{'class':'pt-transaction'});this.feedbackNode=E('div',{'class':'pt-feedback',role:'status','aria-live':'polite',hidden:true});
  poll.add(()=>this.refreshTransaction().catch(()=>{}),2);
- if(!this.modems.length)return settings.sheet([settings.head('IP Passthrough','A direct connection to your own router.','network'),settings.card('No modem detected','Connect a modem before configuring passthrough.',[],'router')],'st-passthrough');
+ if(!this.modems.length)return settings.sheet([settings.head('IP Passthrough','A direct connection to your own router.','network'),settings.card('No Modem Detected','Connect a modem before configuring passthrough.',[],'router')],'st-passthrough');
  const selector=buildSelect(this.selectedModemId,this.modems);this.modemSelector=selector;
  const redraw=()=>{dom.content(this.cardNode,[this.renderCard(this.modems.find(m=>m.id===this.selectedModemId))]);dom.content(this.statusNode,[this.renderConnectionState()]);dom.content(this.transactionNode,this.renderTransaction());};
  selector.addEventListener('change',()=>{this.selectedModemId=selector.value;redraw();});redraw();
- const save=settings.button('Apply safely',ui.createHandlerFn(this,ev=>this.save(ev.currentTarget)));this.applyButton=save;const force=settings.button('Apply without rollback',ui.createHandlerFn(this,ev=>this.save(ev.currentTarget,true)),{'class':'st-button secondary'});this.forceButton=force;
- const advanced=E('details',{'class':'st-card pt-advanced'},[E('summary',{},['Advanced apply']),E('p',{'class':'st-muted'},['Apply without automatic rollback only when you have a separate management connection. Incorrect settings can leave the router unreachable.']),force]);this.syncControls();
+ const save=settings.button('Apply Safely',ui.createHandlerFn(this,ev=>this.save(ev.currentTarget)));this.applyButton=save;const force=settings.button('Apply without Rollback',ui.createHandlerFn(this,ev=>this.save(ev.currentTarget,true)),{'class':'st-button secondary'});this.forceButton=force;
+ const advanced=E('details',{'class':'st-card pt-advanced'},[E('summary',{},['Advanced Apply']),E('p',{'class':'st-muted'},['Apply without automatic rollback only when you have a separate management connection. Incorrect settings can leave the router unreachable.']),force]);this.syncControls();
  return settings.sheet([
   E('link',{rel:'stylesheet',href:L.resource('chester-ui/passthrough.css')+'?v=20261122-4'}),
   settings.head('IP Passthrough','A direct connection to your own router.','network'),this.statusNode,this.feedbackNode,
-  this.modems.length>1?settings.card('Current modem',null,[settings.field('Select modem',selector)],'router'):null,
+  this.modems.length>1?settings.card('Current Modem',null,[settings.field('Select Modem',selector)],'router'):null,
   this.transactionNode,this.cardNode,settings.footer(save,'Apply → check management access → keep settings.'),advanced
  ].filter(Boolean),'st-passthrough');
 },handleSave:null,handleSaveApply:null,handleReset:null});

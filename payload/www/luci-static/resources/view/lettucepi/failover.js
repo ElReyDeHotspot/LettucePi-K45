@@ -59,7 +59,7 @@ return view.extend({
         function number(value,min,max) { return E('input', {type:'number',value:String(value),min:min,max:max,inputmode:'numeric'}); }
         this.wanIsLan = !!(data[4] || {}).enabled;
         this.portBusy = false; this.saving = false; this.dirty = false;
-        this.portBox = E('div', {'class':'misectel-dashboard-port-panel fo-ports','aria-label':'Ethernet ports'});
+        this.portBox = E('div', {'class':'misectel-dashboard-port-panel fo-ports','aria-label':'Ethernet Ports'});
         var labels = {}, rawLabels = uci.get('misectel','clients','port_labels') || '';
         String(Array.isArray(rawLabels) ? rawLabels.join(' ') : rawLabels).split(/[\s,]+/).forEach(function(pair) { var kv=pair.split('='); if(kv.length===2) labels[kv[0].toLowerCase()]=kv[1]; });
         this.portEntries = (data[2] || []).filter(function(p) { return /^lan[123]$|^wan$/.test(p.device); }).sort(function(a,b) { return (a.device==='wan'?99:-Number(a.device.replace('lan','')))-(b.device==='wan'?99:-Number(b.device.replace('lan',''))); }).map(function(p) {
@@ -70,22 +70,22 @@ return view.extend({
         this.wanNotice = E('div', {'class':'fo-help'}, ['The WAN socket is in LAN mode. Tap its icon above to use it for internet.']);
         this.enable = E('input', {type:'checkbox',role:'switch','aria-label':'Enable Failover'}); this.enable.checked = !!c.enabled;
         this.enableNote = E('div', {'class':'fo-muted'});
-        this.mode = select(c.mode || 'auto', [['auto','Automatic'],['balance','Load Balance'],['wan','Primary only'],['cell','Secondary only']]);
+        this.mode = select(c.mode || 'auto', [['auto','Automatic'],['balance','Load Balance'],['wan','Primary Only'],['cell','Secondary Only']]);
         var opts = names.map(function(n) { return [n,self.connectionName(n)+' ('+n+')']; });
         this.primary = select(c.primary || 'wan',opts); this.backup = select(c.backup || 'pcie0',opts);
         this.draftOrder = [this.primary.value,this.backup.value];
         this.targets = E('input', {type:'text',value:(c.targets||[]).join(', '),inputmode:'decimal'});
         this.interval = number(c.interval||2,2,300); this.fail = number(c.fail_count||1,1,60); this.recover = number(c.recover_count||3,1,120); this.probeTimeout = number(c.timeout||1,1,5);
         this.headline = E('div', {'class':'fo-state'}); this.description = E('div', {'class':'fo-muted'}); this.badge = E('span', {'class':'fo-pill'});
-        this.orderBox = E('div', {'class':'fo-order','aria-label':'Connection priority'});
+        this.orderBox = E('div', {'class':'fo-order','aria-label':'Connection Priority'});
         this.orderNote = E('div', {'class':'fo-order-note','aria-live':'polite'});
         this.wanCard = E('div', {'class':'fo-link-detail'}); this.cellCard = E('div', {'class':'fo-link-detail'});
         this.events = E('pre', {'class':'fo-log'}); this.message = E('span', {'class':'fo-result','aria-live':'polite'}, ['Changes apply when you save.']);
-        this.modeButtons = [['auto','Automatic'],['balance','Load Balance'],['wan','Primary only'],['cell','Secondary only']].map(function(m) {
+        this.modeButtons = [['auto','Automatic'],['balance','Load Balance'],['wan','Primary Only'],['cell','Secondary Only']].map(function(m) {
             return E('button', {type:'button','class':'fo-mode','aria-pressed':String(self.mode.value===m[0]),click:function() { self.mode.value=m[0]; self.refreshMode(); self.markDirty(); }}, [m[1]]);
         });
         this.modeNote = E('div', {'class':'fo-muted fo-mode-note'});
-        this.saveButton = E('button', {'class':'fo-save',type:'button',click:ui.createHandlerFn(this,this.saveSettings)}, ['Save changes']);
+        this.saveButton = E('button', {'class':'fo-save',type:'button',click:ui.createHandlerFn(this,this.saveSettings)}, ['Save Changes']);
         this.primary.addEventListener('change', function() { if(self.primary.value===self.backup.value) self.backup.value=self.draftOrder[0]; self.drawOrder(); self.markDirty(); });
         this.backup.addEventListener('change', function() { if(self.backup.value===self.primary.value) self.primary.value=self.draftOrder[1]; self.drawOrder(); self.markDirty(); });
         var root = E('div', {'class':'fo-page chester-ios'}, [
@@ -93,23 +93,23 @@ return view.extend({
             E('div', {'class':'fo-heading'}, [E('div', {}, [E('div',{'class':'ios-title',role:'heading','aria-level':'2'},['Failover']),E('div', {'class':'fo-muted'}, ['Choose a backup connection or use both together.'])]),this.badge]),
             E('div', {'class':'fo-card'}, [this.portBox,E('div', {'class':'fo-muted',style:'margin-top:14px'}, ['Tap WAN to switch this socket between internet and LAN.'])]),
             this.wanNotice,
-            E('section', {'class':'fo-card fo-order-card','aria-label':'Set connection priority'}, [
-                E('div', {'class':'fo-order-heading'}, [E('h3', {}, ['Your connection order']),E('p', {'class':'fo-muted'}, ['Drag a handle to change priority, or use the button on either card.'])]),
+            E('section', {'class':'fo-card fo-order-card','aria-label':'Set Connection Priority'}, [
+                E('div', {'class':'fo-order-heading'}, [E('h3', {}, ['Your Connection Order']),E('p', {'class':'fo-muted'}, ['Drag a handle to change priority, or use the button on either card.'])]),
                 E('div',{'class':'fo-muted fo-test-notice'},['Test each link with M-Lab NDT. Tests use data and may slow other traffic. M-Lab publishes results and your public IP address. ',E('a',{href:'https://www.measurementlab.net/privacy/',target:'_blank',rel:'noopener noreferrer'},['Privacy policy'])]),this.orderBox,this.orderNote
             ]),
             E('div', {'class':'fo-card'}, [
                 E('label', {'class':'fo-enable misectel-inline-check'}, [this.enable,E('div', {}, [E('strong', {}, ['Failover']),this.enableNote])]),
                 E('div', {style:'border-top:1px solid #e8edf3;margin-top:16px;padding-top:18px'}, [this.headline,this.description])
             ]),
-            E('section', {'class':'fo-card'}, [E('h3', {}, ['How should it connect?']),E('div', {'class':'fo-modes','aria-label':'Operating mode'}, this.modeButtons),this.modeNote]),
-            E('details', {'class':'fo-card fo-details'}, [E('summary', {}, ['Advanced settings']),E('div', {'class':'fo-details-body'}, [
-                E('div', {'class':'fo-grid'}, [field('Primary interface',this.primary),field('Secondary interface',this.backup)]),
-                field('Ping targets',this.targets),
-                E('div', {'class':'fo-grid'}, [field('Seconds between checks',this.interval),field('Probe timeout (seconds)',this.probeTimeout),field('Failed checks before switching',this.fail),field('Healthy checks before returning to Primary',this.recover)]),
+            E('section', {'class':'fo-card'}, [E('h3', {}, ['How Should It Connect?']),E('div', {'class':'fo-modes','aria-label':'Operating Mode'}, this.modeButtons),this.modeNote]),
+            E('details', {'class':'fo-card fo-details'}, [E('summary', {}, ['Advanced Settings']),E('div', {'class':'fo-details-body'}, [
+                E('div', {'class':'fo-grid'}, [field('Primary Interface',this.primary),field('Secondary Interface',this.backup)]),
+                field('Ping Targets',this.targets),
+                E('div', {'class':'fo-grid'}, [field('Seconds Between Checks',this.interval),field('Probe Timeout (Seconds)',this.probeTimeout),field('Failed Checks Before Switching',this.fail),field('Healthy Checks Before Returning to Primary',this.recover)]),
                 E('div', {'class':'fo-muted'}, ['Use one to six IPv4 addresses, separated by commas. Load Balance applies to devices on this LAN and shares connections, not individual packets or one download. Existing sessions may reconnect if their uplink fails. These modes manage IPv4; IPv6 keeps its existing settings.'])
             ])]),
-            E('details', {'class':'fo-card fo-details'}, [E('summary', {}, ['Connection details']),E('div', {'class':'fo-details-body fo-grid'}, [this.wanCard,this.cellCard])]),
-            E('details', {'class':'fo-card fo-details'}, [E('summary', {}, ['Recent events']),E('div', {'class':'fo-details-body'}, [this.events])]),
+            E('details', {'class':'fo-card fo-details'}, [E('summary', {}, ['Connection Details']),E('div', {'class':'fo-details-body fo-grid'}, [this.wanCard,this.cellCard])]),
+            E('details', {'class':'fo-card fo-details'}, [E('summary', {}, ['Recent Events']),E('div', {'class':'fo-details-body'}, [this.events])]),
             E('div', {'class':'fo-actions'}, [this.message,this.saveButton])
         ]);
         root.addEventListener('input',function() { self.refreshMode(); self.markDirty(); });
@@ -132,14 +132,14 @@ return view.extend({
         this.orderBox.replaceChildren.apply(this.orderBox,this.draftOrder.map(function(name,index) {
             var slot=E('div', {'class':'fo-slot','data-priority-slot':String(index)});
             var title=self.connectionName(name), card=E('div', {'class':'fo-uplink','data-interface':name,draggable:'true'});
-            var grip=E('button', {type:'button','class':'fo-grip','aria-label':'Drag '+title+' to change priority',title:'Drag to the other side'});
+            var grip=E('button', {type:'button','class':'fo-grip','aria-label':'Drag '+title+' to Change Priority',title:'Drag to the Other Side'});
             grip.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>';
             var health=E('span', {'class':'fo-pill fo-uplink-status'}), detail=E('div', {'class':'fo-uplink-detail'}), active=E('div', {'class':'fo-in-use'}, ['Currently in use']);
             var testResult=E('div',{'class':'fo-test-result','aria-live':'polite'});
             var testButton=E('button',{type:'button','class':'fo-test-button',click:ui.createHandlerFn(self,function(){return self.runLinkTest(index);})},[index?'Test Secondary':'Test Primary']);
-            var lanAction=E('button', {type:'button','class':'fo-pill fo-uplink-status fo-lan-action','aria-label':'Switch Ethernet socket from LAN to WAN',title:'Tap to use this socket for internet',click:ui.createHandlerFn(self,function() { return self.toggleWanPort(); })}, ['LAN mode',E('span',{'aria-hidden':'true'},['↗'])]);
+            var lanAction=E('button', {type:'button','class':'fo-pill fo-uplink-status fo-lan-action','aria-label':'Switch Ethernet Socket from LAN to WAN',title:'Tap to Use This Socket for Internet',click:ui.createHandlerFn(self,function() { return self.toggleWanPort(); })}, ['LAN Mode',E('span',{'aria-hidden':'true'},['↗'])]);
             card.append(E('div', {'class':'fo-uplink-top'}, [icon(self.connectionKind(name)),grip]),E('h4', {}, [title]),health,lanAction,active,detail,testButton,testResult,
-                E('button', {type:'button','class':'fo-uplink-action','aria-label':'Make '+title+' '+(index?'primary':'secondary'),click:function() { self.swapOrder(); }}, [index?'Make primary':'Make secondary']));
+                E('button', {type:'button','class':'fo-uplink-action','aria-label':'Make '+title+' '+(index?'Primary':'Secondary'),click:function() { self.swapOrder(); }}, [index?'Make Primary':'Make Secondary']));
             slot.append(E('div', {'class':'fo-role'}, [E('span', {'class':'fo-role-number'}, [String(index+1)]),E('span', {}, [index?'Secondary':'Primary'])]),card);
             self.priorityRefs.push({name:name,card:card,health:health,lanAction:lanAction,detail:detail,active:active,slot:slot,testButton:testButton,testResult:testResult,index:index});
             self.bindDrag(card,grip,index);
@@ -238,7 +238,7 @@ return view.extend({
             var tests=s.link_tests||{},result=(tests.results||[]).filter(function(t){return t.iface===r.name;}).sort(function(a,b){return b.timestamp-a.timestamp;})[0];
             var activeTest=!!tests.running && result && result.role===tests.role;
             r.testButton.disabled=!!self.testRequest || !!self.portBusy || lanMode || (!!tests.running && !activeTest) || (!activeTest && (self.primary.value!==c.primary || self.backup.value!==c.backup || !v.up));
-            r.testButton.textContent=activeTest?'Cancel test':r.index?'Test Secondary':'Test Primary';
+            r.testButton.textContent=activeTest?'Cancel Test':r.index?'Test Secondary':'Test Primary';
             linkResult.render(r.testResult,result?.phase==='completed'?{timestamp:result.timestamp,download:result.download_mbps,upload:result.upload_mbps,latency:result.latency_ms,server:result.server}:null,
                 result&&result.phase!=='completed'?{message:result.phase==='failed'?result.error:result.phase==='cancelled'?'Test cancelled':result.phase==='download'?'Testing download…':result.phase==='upload'?'Testing upload…':'Finding an M-Lab server…',error:result.phase==='failed'}:null);
             r.health.style.display=lanMode?'none':'';
@@ -259,7 +259,7 @@ return view.extend({
             p.label.textContent=p.isWan?(role.enabled?'LAN':'WAN'):p.name;
             p.speed.textContent=on?(rate>=1000?((rate/1000)%1?(rate/1000).toFixed(1):rate/1000)+'Gbps':rate?rate+'Mbps':'Connected'):'';
             p.node.title=p.isWan?(role.enabled?'This socket is LAN. Tap to make it WAN.':'This socket is WAN. Tap to make it LAN.'):(on?'Connected':'Not connected');
-            if(p.isWan) { p.node.disabled=this.portBusy; p.node.setAttribute('aria-label',role.enabled?'Switch LAN socket to WAN':'Switch WAN socket to LAN'); }
+            if(p.isWan) { p.node.disabled=this.portBusy; p.node.setAttribute('aria-label',role.enabled?'Switch LAN Socket to WAN':'Switch WAN Socket to LAN'); }
         },this);
         this.wanNotice.style.display=role.enabled?'':'none';
         this.updatePriorityVitals();
@@ -278,7 +278,7 @@ return view.extend({
             if(!r.success)throw new Error(r.message||'Could not change the socket role.');
             this.wanIsLan=!!r.enabled;
             if(this.lastStatus)this.lastStatus.wan_is_lan=!!r.enabled;
-            this.portEntries.forEach(function(p) { if(p.isWan) { p.label.textContent=r.enabled?'LAN':'WAN'; p.node.setAttribute('aria-label',r.enabled?'Switch LAN socket to WAN':'Switch WAN socket to LAN'); } });
+            this.portEntries.forEach(function(p) { if(p.isWan) { p.label.textContent=r.enabled?'LAN':'WAN'; p.node.setAttribute('aria-label',r.enabled?'Switch LAN Socket to WAN':'Switch WAN Socket to LAN'); } });
             this.wanNotice.style.display=r.enabled?'':'none';
         } catch(e) { ui.addNotification(null,E('p',{},[e.message])); }
         finally { this.portBusy=false; this.portEntries.forEach(function(p) { if(p.isWan)p.node.disabled=false; }); this.updatePriorityVitals(); }

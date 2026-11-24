@@ -13,7 +13,7 @@
             "type": "alias"
         },
         "order": 61,
-        "title": "Channel Analysis (dashboard)"
+        "title": "Channel Analysis (Dashboard)"
     },
     "admin/developer/dashboard-realtime": {
         "action": {
@@ -21,7 +21,7 @@
             "type": "alias"
         },
         "order": 60,
-        "title": "Realtime Graphs (dashboard)"
+        "title": "Realtime Graphs (Dashboard)"
     },
     "admin/developer/modem-advanced": {
         "action": {
@@ -130,7 +130,7 @@
             "type": "alias"
         },
         "order": 31,
-        "title": "Wireless (stock)"
+        "title": "Wireless (Stock)"
     },
     "admin/developer/setup": {
         "action": {

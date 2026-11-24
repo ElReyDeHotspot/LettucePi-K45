@@ -58,3 +58,25 @@ html[data-chester-appearance=night] #maincontent .ct-direction.inbound{color:#83
 .ct-connection-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}
 .ct-connection-actions button{min-height:46px;white-space:normal}
 @media(max-width:500px){.ct-connection-actions,.ct-connection-grid{grid-template-columns:1fr}}
+
+/* Resolution-independent activity chart; measured samples, bounded curves. */
+#maincontent .ct-chart{height:240px;border:0;margin-top:20px;}
+#maincontent .ct-chart svg{display:block;shape-rendering:geometricPrecision;overflow:visible;}
+#maincontent .ct-chart .ct-grid{stroke:var(--st-line);stroke-width:1;stroke-dasharray:0;opacity:.65;}
+#maincontent .ct-chart .ct-grid-vertical{opacity:.22;}
+#maincontent .ct-chart .ct-down{stroke:#349cff;stroke-width:2.5;}
+#maincontent .ct-chart .ct-up{stroke:#26cda3;stroke-width:2.5;}
+#maincontent .ct-chart .ct-area{stroke:none;}
+#maincontent .ct-chart .ct-area-down{fill:url(#ct-download-fill);}
+#maincontent .ct-chart .ct-area-up{fill:url(#ct-upload-fill);}
+#maincontent .ct-chart .ct-dot{stroke:var(--ap-card,#fff);stroke-width:2;vector-effect:non-scaling-stroke;}
+#maincontent .ct-chart .ct-dot-down{fill:#349cff;}
+#maincontent .ct-chart .ct-dot-up{fill:#26cda3;}
+#maincontent .ct-chart .ct-axis-label{fill:var(--st-muted);font:12px ui-sans-serif,system-ui,sans-serif;font-variant-numeric:tabular-nums;}
+#maincontent .ct-chart .ct-chart-empty{fill:var(--st-muted);font:14px ui-sans-serif,system-ui,sans-serif;}
+#maincontent .ct-chart-labels>span:last-child{display:flex;gap:20px;align-items:center;}
+#maincontent :is(.ct-legend-down,.ct-legend-up){display:inline-flex;align-items:center;gap:7px;color:var(--st-muted);}
+#maincontent :is(.ct-legend-down,.ct-legend-up)::before{content:'';width:8px;height:8px;border-radius:50%;background:#349cff;}
+#maincontent .ct-legend-up::before{background:#26cda3;}
+#maincontent .ct-chart-footer{padding:0 12px 0 68px;}
+@media(max-width:700px){#maincontent .ct-chart{height:190px;}#maincontent .ct-chart-labels{gap:8px;flex-wrap:wrap;}}

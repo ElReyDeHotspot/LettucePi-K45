@@ -4,7 +4,7 @@ const source=fs.readFileSync(root+'view/lettucepi/traffic.js','utf8');
 const helpers=new Function(source.slice(source.indexOf('function amount('),source.indexOf('return view.extend('))+';return {amount,service,application,matches};')();
 assert.equal(helpers.amount(null),'\u2014');assert.equal(helpers.amount(1000000),'1 MB');
 assert.equal(helpers.application({destination_port:'443'})[0],'Unknown');
-assert.equal(helpers.application({destination_port:'53'})[1],'Port hint');
+assert.equal(helpers.application({destination_port:'53'})[1],'Port Hint');
 assert(helpers.matches({source:'192.168.1.2',destination:'1.1.1.1',protocol:'tcp',direction:'Outbound'},'framework','Outbound','tcp',{name:'FrameWorkPC'}));
 assert(!helpers.matches({protocol:'udp',direction:'Inbound'},'','Outbound','udp',{}));
 const icons=new Function('baseclass',fs.readFileSync(root+'chester-ui/devices.js','utf8'))({extend:x=>x});

@@ -38,8 +38,8 @@ return view.extend({
    return E('label',{'class':'bl-band'},[input,E('span',{},[bandName(key,id)])]);
   }));
   const select=(values)=>{if(busy)return;inputs.forEach(i=>i.checked=values.includes(i.value));dom.content(result,[]);sync();};
-  const all=settings.button('Select all',()=>select(ids),{'class':'st-button secondary'}),clear=settings.button('Clear',()=>select([]),{'class':'st-button secondary'}),restore=settings.button('Restore current',()=>select(current),{'class':'st-button secondary'});
-  sync();return settings.card(modeName(key)+' bands',key==='LTE'?'LTE bands are also used as the anchor for 5G NSA.':key==='NR'?'Standalone 5G bands.':key==='UMTS'?'Legacy 3G bands, where available.':'Non-standalone 5G bands used alongside LTE.',[
+  const all=settings.button('Select All',()=>select(ids),{'class':'st-button secondary'}),clear=settings.button('Clear',()=>select([]),{'class':'st-button secondary'}),restore=settings.button('Restore Current',()=>select(current),{'class':'st-button secondary'});
+  sync();return settings.card(modeName(key)+' Bands',key==='LTE'?'LTE bands are also used as the anchor for 5G NSA.':key==='NR'?'Standalone 5G bands.':key==='UMTS'?'Legacy 3G bands, where available.':'Non-standalone 5G bands used alongside LTE.',[
    E('div',{'class':'bl-tools'},[count,E('div',{'class':'bl-actions'},[all,clear,restore])]),grid,notice,result,settings.footer(save)
   ],'network');
  },
@@ -53,7 +53,7 @@ return view.extend({
    const hidden=bandList(uci.get('misectel','modem_cfg_main','hidden_lockband')).map(v=>v.toUpperCase());
    const keys=Object.keys(info.lockband).filter(k=>!hidden.includes(k.toUpperCase())&&((info.lockband[k].available_band||[]).length||(info.lockband[k].lock_band||[]).length));
    const order={LTE:1,NR_NSA:2,NR_NAS:2,NR:3,UMTS:99};keys.sort((a,b)=>(order[a]||10)-(order[b]||10));
-   const tabs=E('div',{'class':'bl-tabs',role:'tablist','aria-label':'Radio bands'}),panels=E('div');
+   const tabs=E('div',{'class':'bl-tabs',role:'tablist','aria-label':'Radio Bands'}),panels=E('div');
    keys.forEach((key,i)=>{
     const button=E('button',{type:'button',role:'tab',id:'bl-tab-'+i,'aria-selected':i===0?'true':'false','aria-controls':'bl-panel-'+i,tabindex:i===0?'0':'-1'},[modeName(key)]);
     const panel=E('section',{role:'tabpanel',id:'bl-panel-'+i,'aria-labelledby':'bl-tab-'+i,hidden:i===0?null:true},[this.makeCard(modem.id,key,info.lockband[key])]);
@@ -62,7 +62,7 @@ return view.extend({
     tabs.appendChild(button);panels.appendChild(panel);
    });
    dom.content(this.content,keys.length?[tabs,panels]:[E('p',{'class':'st-muted'},['No selectable bands are available.'])]);
-  }catch(error){dom.content(this.content,[settings.card('Could not read bands',error.message||'Try refreshing the page.',[settings.button('Try again',()=>this.refresh())])]);}
+  }catch(error){dom.content(this.content,[settings.card('Could Not Read Bands',error.message||'Try refreshing the page.',[settings.button('Try Again',()=>this.refresh())])]);}
  },
  render(data){
   this.modems=Array.isArray(data)&&Array.isArray(data[0])?data[0]:[];this.selectedModemId=modemHelper.ensureSelected(this.selectedModemId,this.modems);this.content=E('div');

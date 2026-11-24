@@ -8,7 +8,7 @@ function findSystemSection(){try{return uci.sections('system','system')[0]||null
 catch(err){return null;}}
 function normalizeFlag(value,fallback){if(value==null||value==='')
 return fallback===true;return value!=='0'&&value!=='false'&&value!=='off';}
-function parseLanguageChoices(){const choices=[{value:'auto',label:_('auto')}];const known={auto:true};const languages=Object.assign({en:'English'},uci.get('luci','languages')||{});const keys=Object.keys(languages).sort((left,right)=>L.naturalCompare(left,right));keys.forEach((key)=>{if(!key||key.charAt(0)==='.'||known[key])
+function parseLanguageChoices(){const choices=[{value:'auto',label:_('Auto')}];const known={auto:true};const languages=Object.assign({en:'English'},uci.get('luci','languages')||{});const keys=Object.keys(languages).sort((left,right)=>L.naturalCompare(left,right));keys.forEach((key)=>{if(!key||key.charAt(0)==='.'||known[key])
 return;known[key]=true;choices.push({value:key,label:languages[key]||key});});return choices;}
 function parseTimezoneChoices(timezones,currentZone){const map=timezones||{};const seen={};const choices=[];Object.keys(map).sort((left,right)=>L.naturalCompare(left,right)).forEach((zone)=>{if(!zone||seen[zone])
 return;seen[zone]=true;choices.push({value:zone,label:zone});});if(currentZone&&!seen[currentZone])
@@ -44,18 +44,18 @@ finally{misectel.setButtonBusy(button,false);}},render(data){const section=findD
  const toggle=(label,input,help)=>settings.toggle(label,input,help);
  const details=(label,nodes)=>E('details',{'class':'st-advanced'},[E('summary',{},[label]),...nodes]);
  this.passwordInput.autocomplete='new-password';this.passwordConfirmInput.autocomplete='new-password';this.hostnameInput.autocomplete='off';this.sshPort.inputMode='numeric';
- const system=settings.card('System & time','Give your router a name and keep its clock in sync.',[
- field('Router hostname',this.hostnameInput),E('div',{'class':'st-fields'},[field('Timezone',this.timezoneSelect),field('Language',this.languageSelect)]),toggle('Set time automatically',this.autoTimeSync,'Use network time servers to keep the clock accurate.'),
- details('Time servers & manual clock',[field('Time servers',this.ntpServerInput,'Separate addresses with commas or spaces.'),field('Set date & time',this.manualTimeInput),settings.button('Set clock',(ev)=>this.saveManualTime(ev.currentTarget),{'class':'st-button secondary'})]),
+ const system=settings.card('System & Time','Give your router a name and keep its clock in sync.',[
+ field('Router Hostname',this.hostnameInput),E('div',{'class':'st-fields'},[field('Timezone',this.timezoneSelect),field('Language',this.languageSelect)]),toggle('Set Time Automatically',this.autoTimeSync,'Use network time servers to keep the clock accurate.'),
+ details('Time Servers & Manual Clock',[field('Time Servers',this.ntpServerInput,'Separate addresses with commas or spaces.'),field('Set Date & Time',this.manualTimeInput),settings.button('Set Clock',(ev)=>this.saveManualTime(ev.currentTarget),{'class':'st-button secondary'})]),
  settings.footer(saveSystemButton,'Applies only the system settings in this card.')],'router');
- const password=settings.card('Administrator password','One password for the root Web and SSH account.',[
- field('New password',this.passwordInput),field('Confirm new password',this.passwordConfirmInput),E('p',{'class':'st-muted'},['Use your new password the next time you sign in.']),settings.footer(savePasswordButton,'Leave these fields blank to keep your password.')],'lock');
- const ssh=settings.card('SSH access','Manage terminal access to your router.',[
- toggle('Enable SSH',this.sshEnabled,'Allow secure terminal connections.'),toggle('Start on boot',this.sshStartup),field('SSH port',this.sshPort),toggle('Password login',this.passwordAuth),
- details('Advanced SSH options',[toggle('Root password login',this.rootPasswordAuth),toggle('Gateway ports',this.gatewayPorts,'Allow remote SSH forwarding to listen beyond localhost.')]),settings.footer(saveSshButton,'Changing SSH access may disconnect a terminal session.')],'terminal');
- const web=settings.card('Web access','Choose whether to allow HTTP alongside HTTPS.',[
+ const password=settings.card('Administrator Password','One password for the root Web and SSH account.',[
+ field('New Password',this.passwordInput),field('Confirm New Password',this.passwordConfirmInput),E('p',{'class':'st-muted'},['Use your new password the next time you sign in.']),settings.footer(savePasswordButton,'Leave these fields blank to keep your password.')],'lock');
+ const ssh=settings.card('SSH Access','Manage terminal access to your router.',[
+ toggle('Enable SSH',this.sshEnabled,'Allow secure terminal connections.'),toggle('Start on Boot',this.sshStartup),field('SSH Port',this.sshPort),toggle('Password Login',this.passwordAuth),
+ details('Advanced SSH Options',[toggle('Root Password Login',this.rootPasswordAuth),toggle('Gateway Ports',this.gatewayPorts,'Allow remote SSH forwarding to listen beyond localhost.')]),settings.footer(saveSshButton,'Changing SSH access may disconnect a terminal session.')],'terminal');
+ const web=settings.card('Web Access','Choose whether to allow HTTP alongside HTTPS.',[
  toggle('Allow HTTP',this.allowHttp,'HTTP connections are unencrypted. HTTPS remains available.'),settings.footer(saveWebAccessButton,'Applies only the Web access setting.')],'shield');
  // Preserve the original buttons and their save handlers, with shared visual classes.
  for(const button of [saveSystemButton,saveSshButton,savePasswordButton,saveWebAccessButton,applyTimeButton])button.className='st-button';
- saveSystemButton.textContent='Save system settings';saveSshButton.textContent='Save SSH settings';savePasswordButton.textContent='Update password';saveWebAccessButton.textContent='Save Web access';
+ saveSystemButton.textContent='Save System Settings';saveSshButton.textContent='Save SSH Settings';savePasswordButton.textContent='Update Password';saveWebAccessButton.textContent='Save Web Access';
  return settings.sheet([settings.head('Administration','Your router. Your settings.','shield'),E('div',{'class':'st-summary'},[settings.stat('Router',hostname||'—','router'),settings.stat('Timezone',currentTimezone.replace(/_/g,' '),'clock'),settings.stat('SSH',this.sshEnabled.checked?'Enabled · Port '+this.sshPort.value:'Disabled','terminal')]),E('div',{'class':'st-columns'},[E('div',{},[system,web]),E('div',{},[password,ssh])])],'st-admin');},handleSave:null,handleSaveApply:null,handleReset:null});
