@@ -11,12 +11,12 @@ return view.extend({
  makeCard(modemId,key,info){
   let current=bandList(info.lock_band),busy=false;
   const available=(info.available_band||[]).slice().sort((a,b)=>bandNumber(a.band_id)-bandNumber(b.band_id));
-  const ids=bandList(available.map(b=>b.band_id).concat(current.filter(id=>id!=='0'))),known=new Set(available.map(b=>String(b.band_id)));
+  const ids=bandList(available.map(b=>b.band_id).concat(current.filter(id=>id!=='0')));
   const inputs=[],count=E('span',{'class':'bl-count'}),notice=E('p',{'class':'st-muted bl-notice','aria-live':'polite'}),result=E('div',{'class':'bl-result',role:'status','aria-live':'polite'});
   const selected=()=>inputs.filter(i=>i.checked).map(i=>i.value);
   const save=settings.button('Save '+modeName(key),ui.createHandlerFn(this,async ev=>{
    const values=selected();if(busy||sameBands(values,current)||!values.length)return;
-   busy=true;sync();dom.content(result,['Applying band selection…']);result.classList.remove('is-error');
+   busy=true;sync();dom.content(result,['Applying band selectionâ€¦']);result.classList.remove('is-error');
    try{
     const reply=await modemHelper.setLockBand(modemId,{band_class:key,lock_band:bandList(values).join(',')});
     if(reply?.error||reply?.success===false||reply?.result===false)throw new Error(reply.message||'The modem rejected the request.');
@@ -35,7 +35,7 @@ return view.extend({
   }
   const grid=E('div',{'class':'bl-grid'},ids.map(id=>{
    const input=E('input',{type:'checkbox',value:id,checked:current.includes(id)?'checked':null,'aria-label':modeName(key)+' '+bandName(key,id)});inputs.push(input);input.addEventListener('change',()=>{dom.content(result,[]);sync();});
-   return E('label',{'class':'bl-band'},[input,E('span',{},[bandName(key,id)]),known.has(id)?'':E('small',{},['Current'])]);
+   return E('label',{'class':'bl-band'},[input,E('span',{},[bandName(key,id)])]);
   }));
   const select=(values)=>{if(busy)return;inputs.forEach(i=>i.checked=values.includes(i.value));dom.content(result,[]);sync();};
   const all=settings.button('Select all',()=>select(ids),{'class':'st-button secondary'}),clear=settings.button('Clear',()=>select([]),{'class':'st-button secondary'}),restore=settings.button('Restore current',()=>select(current),{'class':'st-button secondary'});
@@ -45,7 +45,7 @@ return view.extend({
  },
  async refresh(){
   const modem=this.modems.find(m=>m.id===this.selectedModemId);if(!modem){dom.content(this.content,[E('p',{'class':'st-muted'},['No configurable modem detected.'])]);return;}
-  dom.content(this.content,[E('p',{'class':'st-muted'},['Reading bands from the modem…'])]);
+  dom.content(this.content,[E('p',{'class':'st-muted'},['Reading bands from the modemâ€¦'])]);
   try{
    const [disabled,info]=await Promise.all([modemHelper.getDisabledFeatures(modem.id),modemHelper.getLockBand(modem.id)]);
    if((disabled.disabled_features||[]).includes('LockBand')){dom.content(this.content,[E('p',{'class':'st-muted'},['Band selection is not supported by this modem.'])]);return;}
