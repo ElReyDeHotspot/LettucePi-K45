@@ -10,7 +10,7 @@ function status(){
   let name=trim(readfile(node+'/name')||'');if(name!='pwmfan'&&name!='pwm-fan')continue;
   let pwm=number(node+'/pwm1'),enabled=number(node+'/pwm1_enable');
   if(pwm!=null&&(pwm<0||pwm>255))pwm=null;
-  return {available:true,pwm:pwm,enabled:enabled,drive_percent:pwm==null||enabled==null?null:enabled==0?0:int(pwm*100/255.0+0.5),mode:mode,threshold:int(u.get('misectel','main','fan_temp_threshold')||55),controller:run.ready==true&&time()-int(run.updated||0)<15,boost:run.boost==1};
+  return {available:true,pwm:pwm,enabled:enabled,drive_percent:pwm==null||enabled==null?null:enabled==0?0:int(pwm*100/255.0+0.5),mode:mode,configured_percent:int(u.get('misectel','main','fan_speed_percent')||0),threshold:int(u.get('misectel','main','fan_temp_threshold')||55),controller:run.ready==true&&time()-int(run.updated||0)<15,boost:run.boost==1};
  }
  return {available:false,drive_percent:null,mode:mode};
 }
