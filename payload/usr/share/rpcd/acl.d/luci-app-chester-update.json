@@ -1,15 +1,22 @@
 {
-	"luci-app-chester-update": {
-		"description": "Check for and install LettucePi firmware updates",
-		"read": {
-			"file": {
-				"/usr/sbin/chester-update status": [ "exec" ]
-			}
-		},
-		"write": {
-			"file": {
-				"/usr/sbin/chester-update install": [ "exec" ]
-			}
-		}
-	}
+  "luci-app-chester-update": {
+    "description": "Check for and install LettucePi firmware updates",
+    "read": {
+      "file": {
+        "/usr/sbin/chester-update status": [
+          "exec"
+        ],
+        "/usr/sbin/chester-update status-local": [
+          "exec"
+        ]
+      }
+    },
+    "write": {
+      "file": {
+        "/usr/sbin/chester-update install": [
+          "exec"
+        ]
+      }
+    }
+  }
 }

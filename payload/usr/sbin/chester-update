@@ -7,6 +7,13 @@ REF_URL=https://api.github.com/repos/ElReyDeHotspot/LettucePi-K45/git/ref/heads/
 VERSION_FILE=/etc/chester-version
 LOG=/tmp/chester-update.log
 field() { sed -n "s/^$1=//p" "$VERSION_FILE" 2>/dev/null | head -1; }
+local_status() {
+    os_version=$(sed -n 's/^VERSION_ID=//p' /etc/os-release 2>/dev/null | tr -d '\"')
+    jq -n --arg iv "$(field version)" --arg ib "$(field build)" --arg id "$(field built)" --arg iN "$(field bin)" \
+      --arg board "$(cat /tmp/sysinfo/board_name 2>/dev/null || true)" --arg model "$(cat /tmp/sysinfo/model 2>/dev/null || true)" \
+      --arg kernel "$(uname -r)" --arg os "$os_version" \
+      '{ok:true,local_only:true,installed_version:$iv,installed_build:$ib,installed_built:$id,installed_bin:$iN,board:$board,model:$model,kernel:$kernel,os_version:$os}'
+}
 fetch_manifest() {
     # Resolve once, then keep manifest and image on that immutable commit.
     head_json=$(curl -fsSL --connect-timeout 10 --max-time 30 "$REF_URL?cb=$(date +%s)") || return 1
@@ -18,14 +25,20 @@ fetch_manifest() {
     /usr/libexec/chester-verify-manifest "$1" "$1.sig" >/dev/null || return 1
 }
 case "${1:-status}" in
+status-local)
+    local_status
+    ;;
 status)
     t=$(mktemp /tmp/k45p-manifest.XXXXXX); trap 'rm -f "$t" "$t.sig"' EXIT
     if ! fetch_manifest "$t"; then
-        jq -n --arg v "$(field version)" '{ok:false,error:"offline, untrusted, or obsolete K45P manifest",installed_version:$v}'
+        local_status | jq '. + {ok:false,local_only:false,error:"Could not reach or verify the signed K45P release. Please try again."}'
         exit 0
     fi
-    jq --arg iv "$(field version)" --arg ib "$(field build)" --arg id "$(field built)" --arg iN "$(field bin)" \
-      '{ok:true,installed_version:$iv,installed_build:$ib,installed_built:$id,installed_bin:$iN,latest_version:.version,latest_built:.built,latest_sha:.sha256,size:.size,latest_bin:.bin,notes:.notes,update_available:(.build > $ib)}' "$t"
+    local_status | jq --slurpfile release "$t" '
+      . as $installed | . + ($release[0] |
+      {ok:true,local_only:false,release_verified:true,installed_version:$installed.installed_version,
+       latest_version:.version,latest_build:.build,latest_built:.built,latest_sha:.sha256,size:.size,
+       latest_bin:.bin,release_board:.board,notes:.notes,update_available:(.build > $installed.installed_build)})'
     ;;
 install)
     [ "$(cat /tmp/sysinfo/board_name)" = 'misectel,m02k45' ] || { echo 'FAIL: unsupported board'; exit 1; }
@@ -58,5 +71,5 @@ auto-run)
     "$0" status | jq -e '.ok and .update_available' >/dev/null || exit 0
     "$0" install
     ;;
-*) echo 'usage: chester-update status|install|auto-run' >&2; exit 2 ;;
+*) echo 'usage: chester-update status-local|status|install|auto-run' >&2; exit 2 ;;
 esac

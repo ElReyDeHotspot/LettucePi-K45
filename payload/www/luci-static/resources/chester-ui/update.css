@@ -1,0 +1,45 @@
+/* Software Update uses the shared Chester settings palette and spacing. */
+.up-page{max-width:1140px}
+.up-page .up-hero{display:flex;align-items:center;justify-content:space-between;gap:24px;background:linear-gradient(125deg,#f4fbff,#fff 70%);padding:26px}
+.up-hero-copy{display:flex;gap:20px;align-items:center;min-width:0}
+.up-hero-icon{display:grid;place-items:center;flex:0 0 74px;width:74px;height:74px;border:1px solid #b6e4d3;border-radius:23px;background:linear-gradient(135deg,#e5fff1,#e9f6ff);box-shadow:0 7px 24px #1b997314}
+.up-hero-icon img{display:block;width:38px;height:38px}
+.up-page .up-hero h3{font-size:25px!important;margin:9px 0 6px!important}
+.up-pill{display:inline-flex;align-items:center;gap:6px;max-width:100%;border-radius:99px;padding:4px 10px;font-size:12px;line-height:1.5;font-weight:650;background:#edf2f8;color:#68778d}
+.up-pill:before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.up-pill.is-current{color:#17734b;background:#e7f8ef}.up-pill.is-new{color:#0769d6;background:#e7f1ff}.up-pill.is-unavailable{color:#956314;background:#fff5de}.up-pill.is-checking{color:#55708c;background:#edf2f8}
+.up-actions{display:flex;flex-direction:column;gap:10px;min-width:170px;flex-shrink:0}
+.up-page .up-checked{margin:-5px 4px 20px;font-size:12px}
+.up-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+.up-version{font-size:38px;font-weight:750;letter-spacing:-.04em;margin:0 0 12px;line-height:1.2}
+.up-line{display:flex;justify-content:space-between;gap:20px;padding:13px 0;border-top:1px solid var(--st-line);font-size:14px;line-height:1.45}
+.up-line>.st-muted{font-size:14px;flex-shrink:0}.up-line>strong{text-align:right;font-weight:600;overflow-wrap:anywhere}
+.up-line .up-good{color:#18804f}.up-line .up-hash{font:12px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;word-break:break-all}
+.up-page .up-changes{padding:18px 20px;background:#f8faff}
+.up-changes-head{display:flex;gap:9px;align-items:flex-start;margin-bottom:12px}.up-changes-head>.st-icon{width:22px;height:22px;margin-top:1px}.up-page .up-changes h3{font-size:18px!important;letter-spacing:-.02em}.up-changes-head p{font-size:12px;margin-top:4px}
+.up-notes{max-height:170px;overflow:auto;scrollbar-width:thin;font-size:13px;line-height:1.65;padding-right:5px}.up-notes ul{list-style:disc;margin:0;padding-left:19px}.up-notes li+li{margin-top:7px}.up-notes p{margin:0;font-size:13px}
+.up-schedule{max-width:390px;margin-top:18px}.up-schedule>.st-field{margin-bottom:0}
+.up-page .st-footer .st-muted{max-width:75%}.up-details{margin-bottom:18px}.up-footnote{font-size:12px!important;line-height:1.6!important;margin:12px 2px 0}
+html[data-chester-appearance=night] .up-page .up-hero{background:linear-gradient(125deg,#1b3444,#192938 75%)!important}
+html[data-chester-appearance=night] .up-hero-icon{border-color:#3c625d;background:linear-gradient(135deg,#244b42,#233b50);box-shadow:0 8px 24px #0002}
+html[data-chester-appearance=night] .up-page .up-changes{background:var(--ap-inset)!important}
+html[data-chester-appearance=night] .up-pill.is-current{background:#1c4739;color:#84e9ad}
+html[data-chester-appearance=night] .up-pill.is-new{background:#20436a;color:#94caff}
+html[data-chester-appearance=night] .up-pill.is-unavailable{background:#473d24;color:#f2d58c}
+html[data-chester-appearance=night] .up-pill.is-checking{background:#2b3f52;color:#bfd3e9}
+html[data-chester-appearance=night] .up-line .up-good{color:#84e9ad}
+@media(max-width:760px){.up-columns{grid-template-columns:minmax(0,1fr)}.up-page .up-hero{align-items:stretch;flex-direction:column;padding:20px}.up-hero-copy{align-items:flex-start;gap:14px}.up-hero-icon{width:56px;height:56px;flex-basis:56px;border-radius:18px}.up-page .up-hero h3{font-size:22px!important}.up-actions{flex-direction:row;flex-wrap:wrap;min-width:0}.up-actions button{flex:1 1 160px}.up-page .st-footer{align-items:stretch;flex-direction:column}.up-page .st-footer .st-muted{max-width:100%}.up-page .st-footer button{width:100%}}
+@media(prefers-reduced-motion:reduce){.up-page *{transition:none!important;animation:none!important}}
+
+/* Balanced information cards; release notes form one compact, full-width row. */
+.up-columns{align-items:stretch;margin-bottom:18px}
+.up-columns>.st-card{height:100%;margin-bottom:0}
+.up-option-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.up-option-grid .st-toggle{align-items:flex-start!important;min-height:100px!important}
+.up-option-grid .st-switch{flex-shrink:0;margin-top:3px!important}
+.up-page .up-notes{max-height:110px}
+@media(max-width:760px){.up-option-grid{grid-template-columns:minmax(0,1fr);gap:0}.up-option-grid .st-toggle{min-height:0!important}}
+
+.up-page details.up-details{border:1px solid var(--st-line);border-radius:18px;padding:18px 20px;background:#fff}
+.up-page details.up-details>summary{color:var(--st-muted)!important;font-size:14px;font-weight:600}
+html[data-chester-appearance=night] .up-page details.up-details{background:var(--ap-card)!important}
