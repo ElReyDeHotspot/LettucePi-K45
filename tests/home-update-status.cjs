@@ -1,0 +1,15 @@
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const source=fs.readFileSync(__dirname+'/../payload/www/luci-static/resources/chester-ui/update-status.js','utf8');
+const helper=new Function('baseclass',source)({extend:x=>x});
+let view=helper.describe({release_verified:true,update_available:true,latest_rev:'16'});
+assert.equal(view.label,'Update Available');assert.equal(view.detail,'Rev. 16');assert(view.available);
+assert.equal(helper.describe({release_verified:true,update_available:false}).label,'Up to Date');
+assert.equal(helper.describe({release_verified:false,update_available:true}).available,false);
+assert.equal(helper.describe({checking:true}).label,'Checking…');
+assert.equal(helper.describe({}).label,'Check Unavailable');
+assert.equal(helper.describe({release_verified:true,update_available:true,latest_rev:'<script>'}).detail,'New Release');
+const home=fs.readFileSync(__dirname+'/../payload/www/luci-static/resources/chester-ui/overview-core.js','utf8');
+assert(home.includes("object:'chester.update',method:'status',expect:{},nobatch:true"));
+assert(home.includes('this.refreshUpdateStatus();poll.add('));
+assert(!/Promise\.all\([^;]*callHomeUpdateStatus/.test(home));
+console.log('PASS Home updates: available, current, checking, unavailable and unverified states; background RPC is separate from page loading.');

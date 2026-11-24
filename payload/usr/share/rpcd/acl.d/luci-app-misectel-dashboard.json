@@ -67,6 +67,9 @@
                 ],
                 "chester.overview": [
                     "modem"
+                ],
+                "chester.update": [
+                    "status"
                 ]
             },
             "uci": [

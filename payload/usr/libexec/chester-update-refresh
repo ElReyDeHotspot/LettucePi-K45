@@ -1,0 +1,22 @@
+#!/bin/sh
+# Successful checks are cached 15 minutes; failures retry after one minute.
+set -eu
+cache=/tmp/chester-update-summary.json
+lock=/tmp/chester-update-refresh.flock
+exec 9>"$lock"
+flock -n 9 || exit 0
+now=$(date +%s)
+tmp=$(mktemp /tmp/chester-update-summary.XXXXXX)
+trap 'rm -f "$tmp" "$tmp.valid"' EXIT
+trap 'exit 0' INT TERM
+last=$(jq -r '.checked_at // 0' "$cache" 2>/dev/null || echo 0)
+case "$last" in ''|*[!0-9]*) last=0 ;; esac
+age=$((now-last))
+ttl=60
+if jq -e '.ok == true and .release_verified == true' "$cache" >/dev/null 2>&1; then ttl=900; fi
+[ "$age" -lt 0 ] || [ "$age" -ge "$ttl" ] || exit 0
+if ! /usr/sbin/chester-update status > "$tmp"; then printf '{"ok":false}\n' > "$tmp"; fi
+checked=$(date +%s)
+jq --argjson checked "$checked" '{ok:(.ok==true),release_verified:(.release_verified==true),latest_build:(.latest_build // ""),latest_bin:(.latest_bin // ""),checked_at:$checked}' "$tmp" > "$tmp.valid" 2>/dev/null || printf '{"ok":false,"release_verified":false,"checked_at":%s}\n' "$checked" > "$tmp.valid"
+mv "$tmp.valid" "$cache"
+chmod 600 "$cache"

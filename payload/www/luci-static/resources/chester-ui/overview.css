@@ -110,3 +110,9 @@
 .chester-home .ch-fan-control.is-running .ch-icon{animation:ch-fan-active 2s linear infinite;transform-origin:center}
 @keyframes ch-fan-active{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.chester-home .ch-fan-control.is-running .ch-icon{animation:none}}
+
+.chester-home .ch-shortcut.ch-update-shortcut{position:relative}
+.chester-home .ch-update-shortcut .ch-shortcut-label{min-height:18px}
+.chester-home .ch-update-state{font-size:11px;line-height:1.15;text-align:center;color:var(--ct-muted,#626873);max-width:100%;text-wrap:balance}
+.chester-home .ch-update-shortcut.is-available:after{content:'';position:absolute;top:9px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--ch-blue,#007aff)}
+#maincontent#maincontent .chester-home .ch-update-shortcut.is-available .ch-update-state{color:var(--ch-blue,#007aff)!important}
