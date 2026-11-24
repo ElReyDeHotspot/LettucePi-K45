@@ -1,0 +1,11 @@
+const fs=require('fs'),path=require('path'),assert=require('assert/strict');
+const code=fs.readFileSync(path.join(__dirname,'../payload/www/luci-static/resources/chester-ui/overview-core.js'),'utf8');
+const start=code.lastIndexOf('render(){const shell=this.createShell();'),end=code.indexOf(',handleSaveApply:',start);
+const polls=[];let resolve;
+const methods=new Function('poll','REFRESH_INTERVAL','dom','misectel','_', 'return ({'+code.slice(start,end)+'});')({add:(fn,interval)=>polls.push(interval)},15,{},{},v=>v);
+const shell={layout:true};let fetched=0,updated;
+Object.assign(methods,{createShell:()=>shell,fetchData:()=>{fetched++;return new Promise(r=>{resolve=r;});},updateShell:d=>{updated=d;}});
+const ready=methods.render();assert(ready instanceof Promise,'do not expose an empty dashboard before its data is ready');
+assert.equal(fetched,1);assert.equal(updated,undefined);assert.deepEqual(polls,[]);
+resolve({fresh:true});
+ready.then(result=>{assert.equal(result,shell);assert.deepEqual(updated,{fresh:true});assert.deepEqual(polls,[15,2]);console.log('PASS: Overview first appears with fresh data; one initial load starts live polling after completion.');}).catch(e=>{console.error(e);process.exitCode=1;});
