@@ -4,7 +4,7 @@ const temperature=new Function('baseclass',fs.readFileSync(root+'chester-ui/temp
 const replies={'chester.fan.status':{available:true,drive_percent:40,mode:'1'},'misectel.temp_status':{available:true,value:48500},'misectel.modem_temp':{available:true,value:'37°C'}},requested=[];
 global.L={resolveDefault:(p,fallback)=>p.catch(()=>fallback)};
 const rpc={declare:s=>{const key=s.object+'.'+s.method;return async()=>{requested.push(key);return replies[key]||{};};}};
-const page=new Function('view','poll','rpc','settings','temperature','fanVisual','ui','uci','misectel',fs.readFileSync(root+'view/misectel-system/fan.js','utf8'))({extend:x=>x},{},rpc,{},temperature,{},{},{get:()=>'/sys/class/hwmon/hwmon0/temp1_input'},{});
+const page=new Function('view','poll','rpc','settings','temperature','fanState','fanVisual','ui','uci','misectel',fs.readFileSync(root+'view/misectel-system/fan.js','utf8'))({extend:x=>x},{},rpc,{},temperature,new Function('baseclass',fs.readFileSync(root+'chester-ui/fan-state.js','utf8'))({extend:x=>x}),{},{},{get:()=>'/sys/class/hwmon/hwmon0/temp1_input'},{});
 (async()=>{
  const state={fanUnit:'C',temperatureValue:{},modemTemperatureValue:{},activeModeValue:{textContent:'Manual'},fanGraphic:{update(s){assert.equal(s.drive_percent,40);}}};
  await page.refreshTemperature.call(state);assert.equal(state.temperatureValue.textContent,'48.5°C');assert.equal(state.modemTemperatureValue.textContent,'37°C');

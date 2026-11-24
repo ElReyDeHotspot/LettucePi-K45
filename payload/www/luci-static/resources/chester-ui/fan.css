@@ -133,3 +133,12 @@ body.theme-misectel #maincontent#maincontent .st-fan .fv-button-grid :is(.fv-mod
 #maincontent .fv-button-grid .fv-modes{grid-template-columns:repeat(6,minmax(0,1fr))}
 #maincontent .fv-button-grid .fv-mode{grid-column:span 2}
 #maincontent .fv-button-grid .fv-mode:first-child{grid-column:2 / span 2}
+
+/* Matching two-line button faces and a centered, evenly spaced cluster. */
+#maincontent .fv-button-grid{gap:8px}
+#maincontent .fv-button-grid :is(.fv-modes,.fv-presets){gap:8px}
+body.theme-misectel #maincontent#maincontent .st-fan .fv-button-grid :is(.fv-mode,.fv-preset){height:48px!important;min-height:48px!important;flex-direction:column;gap:3px;padding:6px 3px!important;border-radius:10px}
+#maincontent .st-fan .fv-button-grid :is(.fv-mode,.fv-preset)>.st-icon{display:none}
+#maincontent .st-fan .fv-button-grid :is(.fv-mode,.fv-preset) strong{font-size:10.5px;line-height:13px;font-weight:600;text-align:center}
+#maincontent .st-fan .fv-button-grid :is(.fv-mode,.fv-preset) small{font-size:10px;line-height:12px;font-weight:400;opacity:.85;text-align:center}
+#maincontent .fv-detail[hidden]{display:none}

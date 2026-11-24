@@ -14,5 +14,5 @@ console.log('PASS fan controls: validated snapshots, immediate preset/mode actio
 const visibility={modeSelect:{value:'2'},thresholdField:{},manualField:{},hysteresisNote:{},syncThreshold(){this.synced=true;}};
 page.updateTemperatureVisibility.call(visibility);assert.equal(visibility.thresholdField.hidden,false);assert.equal(visibility.manualField.hidden,true);assert.equal(visibility.synced,true);
 visibility.modeSelect.value='1';page.updateTemperatureVisibility.call(visibility);assert.equal(visibility.thresholdField.hidden,true);assert.equal(visibility.manualField.hidden,false);
-assert(source.includes("'Auto '+temperature.label(c,this.fanUnit)"));
+assert(source.includes('this.autoTemperature.textContent=temperature.label(c,this.fanUnit)'));
 console.log('PASS Auto slider: temperature replaces percentage only in Auto, unit-aware threshold appears beside Auto.');
