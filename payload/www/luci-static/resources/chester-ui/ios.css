@@ -220,3 +220,8 @@
 #maincontent .chester-ios.cs-page .cs-save-row{position:sticky;bottom:12px;z-index:10;display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:74px;margin-top:20px;padding:16px 20px;border:1px solid var(--ios-line);border-radius:18px;background:var(--ap-card,#f8fbfff0);backdrop-filter:blur(16px);box-shadow:0 8px 35px #071a291a;}
 html[data-chester-appearance=night] #maincontent .chester-ios.cs-page .cs-save-row{background:#162a3af2;}
 @media(max-width:700px){#maincontent .chester-ios.cs-page .cs-save-row{bottom:8px;padding:12px;gap:10px;}#maincontent .chester-ios.cs-page .cs-save-row .cs-muted{font-size:12px;}#maincontent .chester-ios.cs-page .cs-save{min-height:46px;}}
+
+#maincontent .chester-ios.cs-page .cs-save-row{flex-direction:column;justify-content:center;}
+#maincontent .chester-ios.cs-page .cs-save-row>.cs-save{width:min(100%,320px);min-height:48px;order:0;}
+#maincontent .chester-ios.cs-page .cs-save-row>.cs-muted{order:1;text-align:center;}
+#maincontent .chester-ios.cs-page .cs-save-row>.cs-muted:empty{display:none;}

@@ -41,10 +41,10 @@ return view.extend({
   this.modeNote=E('div',{'class':'cs-muted'});
   this.notice=E('input',{type:'checkbox'});this.notice.checked=this.mode==='auto_select';
   this.compareButton=E('button',{type:'button','class':'cs-run',click:ui.createHandlerFn(this,function(){return this.action(function(){return compare('1');});})},['Compare SIMs now']);
-  this.saveMessage=E('span',{'class':'cs-muted','aria-live':'polite'},['Changes apply when you save.']);
+  this.saveMessage=E('span',{'class':'cs-muted','aria-live':'polite'},[]);
   this.saveButton=E('button',{type:'button','class':'cs-save',click:ui.createHandlerFn(this,this.saveSettings)},['Save Changes']);
   this.log=E('pre',{'class':'cs-log'});
-  var root=E('div',{'class':'cs-page chester-ios'},[E('style',{},[CSS]),E('link',{rel:'stylesheet',href:L.resource('chester-ui/ios.css')+'?v=20261124-2'}),E('div',{'class':'cs-head'},[E('div',{},[E('div',{'class':'ios-title',role:'heading','aria-level':'2'},['SIM Selection']),E('div',{'class':'cs-muted'},['Your connections, at a glance.'])]),E('button',{type:'button','class':'cs-refresh',click:ui.createHandlerFn(this,function(){return this.action(refresh);})},['↻ Refresh'])]),
+  var root=E('div',{'class':'cs-page chester-ios'},[E('style',{},[CSS]),E('link',{rel:'stylesheet',href:L.resource('chester-ui/ios.css')+'?v=20261124-3'}),E('div',{'class':'cs-head'},[E('div',{},[E('div',{'class':'ios-title',role:'heading','aria-level':'2'},['SIM Selection']),E('div',{'class':'cs-muted'},['Your connections, at a glance.'])]),E('button',{type:'button','class':'cs-refresh',click:ui.createHandlerFn(this,function(){return this.action(refresh);})},['↻ Refresh'])]),
    (s.modems||[]).length>1?E('div',{'class':'cs-panel'},[field('Cellular modem',this.modem)]):'',this.banner,
    E('section',{'class':'cs-panel cs-mode-panel'},[E('h3',{},['How should the SIM be selected?']),E('div',{'class':'cs-modes','aria-label':'SIM selection mode'},this.modeButtons),this.modeNote]),
    E('div',{'class':'cs-grid'},this.cardRefs.map(function(r){return r.node;})),
