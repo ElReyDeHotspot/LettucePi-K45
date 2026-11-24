@@ -47,3 +47,5 @@ html[data-chester-appearance=night] #maincontent .gp-state.is-on{color:#8ce5ba}
 @media(max-width:700px){#maincontent .gp-categories,#maincontent .gp-fields,#maincontent .gp-device-categories{grid-template-columns:1fr}#maincontent .gp-category:last-child:nth-child(odd){grid-column:auto}#maincontent .gp-rule{flex-wrap:wrap}#maincontent .gp-rule-actions{width:100%;justify-content:flex-end}#maincontent .gp-save-bar{padding:12px;bottom:8px}#maincontent .gp-save-bar span{max-width:120px}#maincontent .gp-save-bar button{min-height:46px}#maincontent .gp-category{padding:16px}}
 
 #maincontent .gp-editor .st-card{scroll-margin-top:76px}
+
+#maincontent .gp-save-bar{justify-content:flex-end}
