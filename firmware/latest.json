@@ -1,12 +1,12 @@
 {
   "product": "K45P",
   "board": "misectel,m02k45",
-  "version": "1.0.14",
-  "build": "202611240002",
-  "bin": "14",
+  "version": "1.0.15",
+  "build": "202611240003",
+  "bin": "15",
   "built": "2026-11-24",
-  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.14-sysupgrade.itb",
-  "sha256": "4ab600217d3db6f713639324535d1176091589b69e2a7b6e710124781b4566c8",
+  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.15-sysupgrade.itb",
+  "sha256": "685d37d48ef232691d76a5008ffbadc457b5cd2c0962260916ac27ba7fd8b370",
   "size": 41783550,
-  "notes": "Updated fan controls for desktop and mobile with instant presets, temperature control and CPU/modem readings.\nHome fan status matches the selected mode.\nConsistent interface colors, headings and device controls.\nVendor Linux 6.12.94 retained."
+  "notes": "Faster Overview loading with cached modem readings and one background refresh.\nRemoved unnecessary AT connection checks during page loading.\nPage-loading audit completed; full Cellular Info retained.\nVendor Linux 6.12.94 retained."
 }
