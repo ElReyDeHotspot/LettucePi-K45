@@ -163,3 +163,20 @@ body.theme-misectel #maincontent#maincontent .st-fan .fv-power-button{display:fl
 
 #maincontent .st-fan .fv-telemetry .st-stat:last-child>.st-icon{display:none}
 #maincontent .st-fan .fv-telemetry .st-stat:last-child strong{font-size:18px;white-space:nowrap}
+
+/* The control track shares the fan's width and center at every breakpoint. */
+#maincontent .st-fan .fv-fan-column{display:grid;grid-template-columns:84px 268px;align-items:center;gap:18px}
+#maincontent .fv-side-menu{grid-column:1;grid-row:1}
+#maincontent .fv-fan-column .fv-orbit{grid-column:2;grid-row:1}
+#maincontent .fv-fan-column .fv-under-fan{grid-column:2;grid-row:2;width:100%;min-width:0}
+#maincontent .fv-fan-column .fv-controls{padding:0;border:0}
+#maincontent .fv-fan-column .fv-manual-heading{text-align:center;margin:0 0 8px}
+#maincontent .fv-fan-column .fv-manual-heading strong{font-size:13px}
+#maincontent .fv-fan-column .fv-slider-row{position:relative;display:block;margin:0 0 18px}
+#maincontent .fv-fan-column .fv-slider-row>span{position:absolute;display:block;bottom:-14px;line-height:16px;font-size:10px}
+#maincontent .fv-fan-column .fv-slider-row>span:first-child{left:0}
+#maincontent .fv-fan-column .fv-slider-row>span:last-child{right:0}
+#maincontent .fv-fan-column .fv-temperature-control .st-muted{text-align:center}
+@media(max-width:1150px) and (min-width:761px){#maincontent .st-fan .fv-fan-column{grid-template-columns:78px 220px;gap:12px}}
+@media(max-width:760px){#maincontent .st-fan .fv-fan-column{grid-template-columns:78px 220px;justify-content:center;gap:14px}}
+@media(max-width:400px){#maincontent .st-fan .fv-fan-column{grid-template-columns:72px 180px;gap:10px}}
