@@ -153,3 +153,7 @@ html[data-chester-appearance=night] #maincontent .st-wifi .wf-save-bar{backgroun
 #maincontent .st-wifi .wf-segment>button:focus-visible{outline:3px solid #74b5ff;outline-offset:1px;}
 #maincontent .st-wifi .wf-setup-help{margin:16px 0 0;font-size:13px;}
 @media(max-width:600px){#maincontent .st-wifi .wf-setup-row{align-items:stretch;flex-direction:column;gap:12px;padding:16px 0;}#maincontent .st-wifi .wf-segment{width:100%;}}
+
+/* Keep segmented controls legible against both theme backgrounds. */
+#maincontent .st-wifi .wf-segment>button{color:var(--st-muted)!important;}
+#maincontent .st-wifi .wf-segment>button[aria-pressed=true]{color:#fff!important;background:#007aff!important;}
