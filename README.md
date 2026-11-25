@@ -7,13 +7,17 @@ Custom firmware and OTA updates for the Chester K45P.
 | Component | Specification |
 | --- | --- |
 | Processor | MediaTek MT7988D, up to 1.8 GHz |
-| Memory | 1 GB RAM |
+| Memory (RAM) | 1 GB |
+| Default Gateway Address | 192.168.100.1 |
 | Cellular modem | Quectel RM551E-GL |
 | Cellular modes | 5G SA, 5G NSA, LTE |
 | SIM slots | Dual SIM |
-| WAN / LAN | 1 x 2.5Gbps, switchable WAN or LAN |
+| 2.5Gbps WAN/LAN | 1 x RJ45 port, switchable WAN or LAN |
 | LAN | 3 x 1Gbps |
-| Wi-Fi | 2.4 GHz and 5 GHz |
+| Wi-Fi Standard | Wi-Fi 7 (IEEE 802.11be), dual-band |
+| Wi-Fi Chipset | MediaTek MT7992 |
+| 2.4 GHz Wi-Fi | 2×2 MIMO, up to 40 MHz channel width |
+| 5 GHz Wi-Fi | 3×3 MIMO, up to 160 MHz channel width |
 | Firmware | LP-OpenWrt25 |
 
 ## Features
