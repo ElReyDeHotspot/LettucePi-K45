@@ -27,9 +27,9 @@ Custom firmware and OTA updates for the Chester K45P.
 
 ## Firmware
 
-Latest published: **Rev. 16 · v1.0.16**.
+Latest published: **Rev. 17 · v1.0.17**.
 
-[Download firmware](firmware/LettucePi-K45P-1.0.16-sysupgrade.itb) ·
+[Download firmware](firmware/LettucePi-K45P-1.0.17-sysupgrade.itb) ·
 [Release manifest](firmware/latest.json)
 
 Use **Overview → Update** to install updates.
