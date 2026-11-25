@@ -1,0 +1,36 @@
+#!/bin/sh
+# Run once after registration. Five read requests; no calibration writes.
+set -eu
+module=/usr/lib/chester/wifi-check/chester_wifi_check.ko
+driver=/lib/modules/6.12.94/mt7996e.ko
+log() { logger -t chester-wifi "$*"; }
+exec 9>/var/lock/chester-wifi-check.lock
+flock -n 9 || exit 0
+[ "$(uname -r)" = 6.12.94 ] || { log 'Wi-Fi: eFuse verification unavailable (unsupported kernel)'; exit 0; }
+[ -f /tmp/chester-wifi-check.done ] && exit 0
+driver_hash=$(sha256sum "$driver" 2>/dev/null | cut -d ' ' -f 1) || driver_hash=''
+case "$driver_hash" in
+ a51af118ae7535efa1ba9d1b5274445990368b24e449dd1ad51b3f87c0fe13af|d0b31ebb24727101234130cb0520b1dab0a58727a990f63bcd9c7f68b3bba3ac|dce8bde0c34fe34b7e1f0517dad403ebed2005f0c212e0013ba5e47194d18fc8) ;;
+ *) log 'Wi-Fi: eFuse verification unavailable (unsupported driver); calibration unchanged'; exit 0 ;;
+esac
+if ! (cd /usr/lib/chester/wifi-check && sha256sum -c SHA256SUMS >/dev/null 2>&1); then
+ log 'Wi-Fi: eFuse verification unavailable (checker integrity check failed)'; exit 0
+fi
+# Registration creates the active EEPROM debugfs entry. Wait only during boot.
+ready=0
+for attempt in $(seq 1 60); do
+ if [ -r /sys/kernel/debug/ieee80211/phy0/mt76/eeprom ] && iw phy phy0 info >/dev/null 2>&1; then ready=1; break; fi
+ sleep 2
+done
+[ "$ready" = 1 ] || { log 'Wi-Fi: eFuse verification unavailable (radio not ready); calibration unchanged'; exit 0; }
+cleanup() { [ ! -d /sys/module/chester_wifi_check ] || rmmod chester_wifi_check; }
+trap cleanup EXIT
+trap 'exit 0' INT TERM
+if ! insmod "$module"; then
+ log 'Wi-Fi: eFuse verification unavailable (checker could not load); calibration unchanged'; exit 0
+fi
+result=$(cat /sys/module/chester_wifi_check/parameters/result)
+printf '%s\n' "$result" >/tmp/chester-wifi-check.status
+# The kernel helper emits success only after 19 raw eFuse values match.
+printf '%s\n' "$result" | grep -qx 'verified=1 matched=19 total=19 blocks=5' && touch /tmp/chester-wifi-check.done
+exit 0

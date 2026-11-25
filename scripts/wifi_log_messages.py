@@ -10,24 +10,29 @@ import struct
 import sys
 
 VENDOR_SHA256 = 'a51af118ae7535efa1ba9d1b5274445990368b24e449dd1ad51b3f87c0fe13af'
-CLARIFIED_SHA256 = 'd0b31ebb24727101234130cb0520b1dab0a58727a990f63bcd9c7f68b3bba3ac'
+LEGACY_SHA256 = 'd0b31ebb24727101234130cb0520b1dab0a58727a990f63bcd9c7f68b3bba3ac'
+CLARIFIED_SHA256 = 'dce8bde0c34fe34b7e1f0517dad403ebed2005f0c212e0013ba5e47194d18fc8'
 MESSAGES = (
     (b'eeprom tx_power zeros detected, using defaults\n',
      b'Wi-Fi: initializing vendor power template\n'),
     (b'eeprom load fail, use default bin\n',
-     b'Wi-Fi: template ready; eFuse next\n'),
+     b'Wi-Fi: vendor template loaded\n'),
 )
 
 
 def preservation_digest(data):
     digest = hashlib.sha256(data).hexdigest()
-    return VENDOR_SHA256 if digest == CLARIFIED_SHA256 else digest
+    return VENDOR_SHA256 if digest in (CLARIFIED_SHA256, LEGACY_SHA256) else digest
 
 
 def patch(data):
     digest = hashlib.sha256(data).hexdigest()
     if digest == CLARIFIED_SHA256:
         return data
+    if digest == LEGACY_SHA256:
+        for old, legacy in ((MESSAGES[0][0], MESSAGES[0][1]), (MESSAGES[1][0], b'Wi-Fi: template ready; eFuse next\n')):
+            data = data.replace(legacy+b'\0'*(len(old)-len(legacy)+1), old+b'\0')
+        digest = hashlib.sha256(data).hexdigest()
     if digest != VENDOR_SHA256:
         raise ValueError('Unrecognized vendor Wi-Fi module; refusing diagnostic patch')
     # Locate read-only string sections from the actual ELF section headers.

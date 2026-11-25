@@ -38,6 +38,7 @@ sed -i -e '/\/misectel\//d' -e '/\/qmodem\//d' -e '/\/video\//d' "$R/etc/apk/rep
 "$APK" --root "$R" --arch aarch64_cortex-a53 --no-scripts --allow-untrusted add \
   "$REPO"/integrations/secure-web/packages/*.apk
 (cd "$REPO/integrations/cloudflare"; sha256sum -c SHA256SUMS)
+(cd "$REPO/payload/usr/lib/chester/wifi-check"; sha256sum -c SHA256SUMS)
 python3 "$REPO/scripts/customize.py" "$R"
 node "$REPO/scripts/titlecase-ui.cjs" "$R/www/luci-static/resources/view" --write
 for scope in protocol tools misectel ui.js form.js; do

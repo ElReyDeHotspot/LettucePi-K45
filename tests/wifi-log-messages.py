@@ -51,6 +51,16 @@ class LogMessageTest(unittest.TestCase):
     def test_reapplying_is_safe(self):
         self.assertEqual(policy.patch(self.expected), self.expected)
 
+    def test_legacy_string_only_module_is_upgraded(self):
+        legacy = self.original
+        replacements = ((policy.MESSAGES[0][0], policy.MESSAGES[0][1]),
+                        (policy.MESSAGES[1][0], b'Wi-Fi: template ready; eFuse next\n'))
+        for old, text in replacements:
+            legacy = legacy.replace(old+b'\0', text+b'\0'*(len(old)-len(text)+1))
+        with patch.object(policy, 'LEGACY_SHA256', hashlib.sha256(legacy).hexdigest()):
+            self.assertEqual(policy.patch(legacy), self.expected)
+            self.assertEqual(policy.preservation_digest(legacy), self.vendor)
+
     def test_unknown_or_code_modified_modules_are_rejected(self):
         changed = bytearray(self.original)
         changed[64] ^= 1

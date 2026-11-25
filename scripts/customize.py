@@ -225,3 +225,8 @@ for name in ('www/luci-static/resources/luci.js', 'usr/share/ucode/luci/template
 policy=root/'etc/chester-traffic/config.json'
 if policy.exists():
     assert not json.loads(policy.read_text()).get('enabled',False), 'Factory Block Lists must default to Off'
+
+# A one-shot read-only calibration status check; no resident polling.
+link=root/"etc/rc.d/S99chester_wifi_check"
+if link.is_symlink() or link.exists():link.unlink()
+link.symlink_to("../init.d/chester_wifi_check")
