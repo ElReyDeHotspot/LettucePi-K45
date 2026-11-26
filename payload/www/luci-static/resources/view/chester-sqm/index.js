@@ -55,7 +55,7 @@ return view.extend({
     direction('Upload','Room for calls, messages and everything you send.',up,upRate,'↑',s.shaping),
     direction('Download','Keep large downloads from taking over.',down,downRate,'↓',s.download_active)
    ]),
-   E('section',{'class':'st-card sq-guide'},[settings.icon('clock'),E('div',{},[E('strong',{},['Start at 90% of Your Measured Speed']),E('p',{'class':'st-muted'},['Run a speed test with Smart Queue off, then enter slightly lower limits. Cellular speeds change, so adjust if needed.'])]),E('a',{'class':'st-button secondary',href:L.url('admin','chester','ookla')},['Open Speeds'])]),
+   E('section',{'class':'st-card sq-guide'},[settings.icon('clock'),E('div',{},[E('strong',{},['Start at 90% of Your Measured Speed']),E('p',{'class':'st-muted'},['Run a speed test with Smart Queue off, then enter slightly lower limits. Cellular speeds change, so adjust if needed.'])]),E('a',{'class':'st-button secondary',href:L.url('admin','chester','speeds')},['Open Speeds'])]),
    !s.download_available?E('p',{'class':'sq-warning'},['Download limiting is unavailable on this firmware. Upload control is still available.']):'',
    s.offload==='1'?E('p',{'class':'sq-warning'},['Flow offloading is on. Smart Queue will turn it off when enabled so traffic passes through the queue.']):'',
    E('details',{'class':'st-card sq-technical'},[E('summary',{},['Connection Details']),E('div',{'class':'sq-details'},[

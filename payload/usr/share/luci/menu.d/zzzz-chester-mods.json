@@ -33,19 +33,6 @@
       ]
     }
   },
-  "admin/chester/ookla": {
-    "title": "Speeds",
-    "order": 30,
-    "action": {
-      "type": "view",
-      "path": "lettucepi/speedtest"
-    },
-    "depends": {
-      "acl": [
-        "luci-app-lettucepi-speedtest"
-      ]
-    }
-  },
   "admin/chester/zapret": {
     "title": "Zapret2",
     "order": 40,
@@ -132,6 +119,30 @@
       "uci": {
         "ttyd": true
       }
+    }
+  },
+  "admin/chester/speeds": {
+    "title": "Speeds",
+    "order": 30,
+    "action": {
+      "type": "view",
+      "path": "lettucepi/speedtest"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-lettucepi-speedtest"
+      ]
+    }
+  },
+  "admin/chester/ookla": {
+    "action": {
+      "type": "view",
+      "path": "lettucepi/speeds-redirect"
+    },
+    "depends": {
+      "acl": [
+        "luci-app-lettucepi-speedtest"
+      ]
     }
   }
 }
