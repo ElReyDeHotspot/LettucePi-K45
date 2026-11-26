@@ -1,0 +1,112 @@
+{
+  "date": "2026-11-26",
+  "product": "K45P",
+  "tests": {
+    "app1": {
+      "passed": true,
+      "firmware_revision": 19,
+      "app_revision": 1,
+      "package_bytes": 11753,
+      "settings_files_checked": 41,
+      "settings_files_byte_identical": 39,
+      "user_settings_preserved": true,
+      "only_modem_port_discovery_and_smart_network_fingerprint_changed": true,
+      "smart_settings_preserved": true,
+      "ipv4_and_ipv6_ping_https_after_reboot": true,
+      "all_package_file_hashes_verified": true,
+      "vendor_kernel_rom_and_calibration_unchanged": true,
+      "recovery_enabled_and_no_pending_transaction": true,
+      "signature_verified_on_router": true
+    },
+    "app2": {
+      "passed": true,
+      "firmware_revision": 19,
+      "app_revision": 2,
+      "package_bytes": 12567,
+      "settings_files_checked": 41,
+      "settings_files_byte_identical": 40,
+      "user_settings_preserved": true,
+      "only_modem_port_discovery_and_smart_network_fingerprint_changed": true,
+      "smart_settings_preserved": true,
+      "ipv4_and_ipv6_ping_https_after_reboot": true,
+      "all_package_file_hashes_verified": true,
+      "vendor_kernel_rom_and_calibration_unchanged": true,
+      "recovery_enabled_and_no_pending_transaction": true,
+      "signature_verified_on_router": true
+    },
+    "negative_tests": {
+      "invalid_signature_rejected": true,
+      "wrong_board_rejected": true,
+      "app_and_firmware_share_exclusive_lock": true,
+      "bad_package_hash_rejected": true,
+      "failure_tests_preserved_settings_and_running_build": true
+    },
+    "legacy_rev16": {
+      "passed": true,
+      "original_rev16_updater_read_only_fixture": true,
+      "public_signed_rev20_seen_as_available": true,
+      "current_app2_full_ota_counter_verified": true,
+      "public_image_hash_and_size_verified": true,
+      "shipped_remote_router_not_accessed": true
+    },
+    "bridge_preflight": {
+      "passed": true,
+      "stock_sysupgrade_validation": true,
+      "signed_manifest_verified_with_current_and_original_rev16_verifier": true,
+      "factory_reset_app_bootstrap_in_image": true,
+      "size": 42897662,
+      "sha256": "e345f33839f9756cba543008b733278919b6db1598607bb2a86df6f89f880b4e"
+    },
+    "bridge_ota": {
+      "passed": true,
+      "firmware_revision": 20,
+      "new_boot_confirmed": true,
+      "settings_files_checked": 41,
+      "settings_files_byte_identical": 37,
+      "expected_internal_changes": [
+        {
+          "file": "etc/config/misectel",
+          "fields": [
+            "display.clients.app_whitelist"
+          ]
+        },
+        {
+          "file": "etc/config/qmodem",
+          "fields": [
+            "modem-device.0002_01_00_0.at_port",
+            "modem-device.0002_01_00_0.valid_at_ports"
+          ]
+        },
+        {
+          "file": "etc/config/chester",
+          "fields": [
+            "update.update.minimum_build"
+          ]
+        },
+        {
+          "file": "etc/config/chester_mtu",
+          "fields": [
+            "settings.main.smart_network"
+          ]
+        }
+      ],
+      "customer_settings_preserved": true,
+      "smart_mtu_mss_settings_preserved_and_applied": true,
+      "ipv4_ipv6_ping_and_https_after_reboot": true,
+      "vendor_kernel_and_factory_calibration_unchanged": true,
+      "full_firmware_signed_channel_working": true,
+      "rom20_app_baseline_signature_verified": true,
+      "app_revision_reset_to_baked_in_baseline": true,
+      "early_recovery_enabled": true
+    },
+    "lan_after_bridge": {
+      "passed": true,
+      "checks": {
+        "ipv4_https": true,
+        "ipv6_https": true
+      }
+    }
+  },
+  "scope": "Connected K45P tested; shipped Rev16 compatibility exercised with its original read-only OTA client and verifier. The remote customer router was not accessed.",
+  "configuration_comparison": "Customer configuration preserved. Reboot discovery updates modem AT device paths and Smart network fingerprint. Full OTA advances its rollback floor; vendor first-boot code adds a duplicate preexisting menu entry without changing effective menu policy."
+}
