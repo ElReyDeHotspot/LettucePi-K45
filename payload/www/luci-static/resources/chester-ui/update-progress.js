@@ -63,11 +63,12 @@ class Window{
   this.wasPolling=poll.active();poll.stop();
   this.previousFocus=document.activeElement;
   this.header=E('h2',{id:'chester-update-dialog-title'},'System Update');
-  this.device=E('p',{class:'cup-device'},'Chester '+options.product+' · '+(options.product==='K45P'?'Rev. ':'BIN')+options.revision);
+  this.device=E('p',{class:'cup-device'},'Chester '+options.product+' · '+(options.product==='K45P'?'Rev. ':'BIN')+options.revision+(options.kind==='app'?' · App '+options.appRevision:''));
   this.title=E('h3');this.help=E('p',{class:'cup-help'},HELP);
   this.leaf=E('div',{class:'cup-emblem','aria-hidden':'true'},[E('img',{src:'/luci-static/misectel/green-leaf.svg',alt:'',width:70,height:70})]);
-  this.segments=STEPS.map(()=>E('span',{class:'cup-segment'}));this.caption=E('p',{class:'cup-caption'});
-  this.rows=STEPS.map(label=>({marker:E('span',{class:'cup-marker'},[checkIcon()]),label:E('span',{class:'cup-step-label'},label),status:E('span',{class:'cup-step-status'})}));
+  const labels=options.kind==='app'?['Prepare Router','Download Apps','Verify Apps','Install & Restart','Reconnect','Confirm Update']:STEPS;
+  this.segments=labels.map(()=>E('span',{class:'cup-segment'}));this.caption=E('p',{class:'cup-caption'});
+  this.rows=labels.map(label=>({marker:E('span',{class:'cup-marker'},[checkIcon()]),label:E('span',{class:'cup-step-label'},label),status:E('span',{class:'cup-step-status'})}));
   for(const row of this.rows)row.root=E('li',{class:'cup-step'},[row.marker,row.label,row.status]);
   this.detail=E('p',{class:'cup-detail',role:'status','aria-live':'polite'});
   this.powerBar=E('div',{class:'cup-power'},[powerIcon(),E('strong',{},'Keep Your Router Powered On')]);
@@ -86,7 +87,7 @@ class Window{
   this.baseline=options.boot?Promise.resolve():this.io.probe().then(value=>{if(value.product!==this.model.product||!value.boot)throw new Error('The router identity could not be read.');this.model.boot=value.boot;this.persist();});
   this.baseline.catch(()=>{});this.schedule(0);
  }
- persist(){if(this.model.preview)return;try{const m=this.model;window.sessionStorage.setItem(STORE,JSON.stringify({id:m.id,product:m.product,build:m.build,revision:m.revision,boot:m.boot,keep:m.keep,started:m.started,stage:m.stage,issued:m.issued,accepted:m.accepted}));}catch(e){}}
+ persist(){if(this.model.preview)return;try{const m=this.model;window.sessionStorage.setItem(STORE,JSON.stringify({id:m.id,product:m.product,build:m.build,revision:m.revision,boot:m.boot,keep:m.keep,kind:m.kind,appRevision:m.appRevision,started:m.started,stage:m.stage,issued:m.issued,accepted:m.accepted}));}catch(e){}}
  schedule(delay){window.clearTimeout(this.timer);if(!this.closed)this.timer=window.setTimeout(()=>this.tick(),delay);}
  async install(){
   if(this.model.issued)return;
@@ -112,14 +113,14 @@ class Window{
  paint(){
   const m=this.model;
   this.overlay.dataset.state=m.complete?'complete':m.failed?(m.recovering?'recovering':'failed'):m.offline?'offline':'working';
-  this.title.textContent=m.complete?'Update Confirmed':m.failed?(m.recovering?'Restoring Router Services':m.wrongConfirmations>=3?'Update Not Confirmed':'Update Stopped'):this.paused?'Check Your Connection':m.stage===3?'Installing & Restarting':m.stage===4?'Reconnecting':m.stage===5?'Confirming Update':['Preparing Your Router','Downloading Firmware','Verifying Firmware'][m.stage];
+  this.title.textContent=m.complete?'Update Confirmed':m.failed?(m.recovering?'Restoring Router Services':m.wrongConfirmations>=3?'Update Not Confirmed':'Update Stopped'):this.paused?'Check Your Connection':m.stage===3?'Installing & Restarting':m.stage===4?'Reconnecting':m.stage===5?'Confirming Update':['Preparing Your Router',m.kind==='app'?'Downloading App Update':'Downloading Firmware',m.kind==='app'?'Verifying App Update':'Verifying Firmware'][m.stage];
   this.help.textContent=m.complete?'The router is back online and the installed firmware matches this update.':m.failed?(m.recovering?'The update stopped. Restoring the optional services paused for the update.':'Review the status below before trying again. No update will be retried automatically.'):HELP;this.powerBar.hidden=m.complete;
   this.caption.textContent=m.complete?'All Steps Complete':'Step '+(m.stage+1)+' of 6';
   this.segments.forEach((segment,i)=>{segment.className='cup-segment'+(m.complete||i<m.stage?' is-done':i===m.stage?' is-current':'');});
   this.rows.forEach((row,i)=>{const done=m.complete||i<m.stage,current=!m.complete&&i===m.stage;row.root.className='cup-step'+(done?' is-done':current?' is-current':'');row.marker.className='cup-marker'+(done?' is-done':current?' is-current':'');row.status.textContent=done?'Complete':current?(m.failed?'Stopped':'In Progress'):'Waiting';});
   const custom=m.failed||this.paused||m.stage>=4||m.offline&&m.stage<3;
   this.detail.hidden=!custom;this.detail.textContent=custom?m.detail:'';
-  this.footerText.textContent=m.complete?'Installed Version Verified':m.failed?(m.recovering?'Restoring Optional Services…':'No Automatic Retry Will Be Started'):this.paused?'Waiting for Your Connection':m.stage>=4?'Checking Installed Firmware…':m.stage===3?'Waiting for Your Router…':m.stage===2?'Checking Firmware Integrity…':m.stage===1?'Downloading Firmware…':'Preparing the Update…';
+  this.footerText.textContent=m.complete?'Installed Version Verified':m.failed?(m.recovering?'Restoring Optional Services…':'No Automatic Retry Will Be Started'):this.paused?'Waiting for Your Connection':m.stage>=4?'Checking Installed Firmware…':m.stage===3?'Waiting for Your Router…':m.stage===2?(m.kind==='app'?'Checking App Integrity…':'Checking Firmware Integrity…'):m.stage===1?(m.kind==='app'?'Downloading App Update…':'Downloading Firmware…'):'Preparing the Update…';
   this.action.hidden=!(m.complete||m.failed&&!m.recovering||this.paused);
   this.action.textContent=m.complete?'Continue to Router':this.paused?'Check Again':'Close';
  }

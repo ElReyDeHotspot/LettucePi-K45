@@ -17,7 +17,7 @@ f=${url##*/}
 case "$f" in LettucePi-K45P-*-sysupgrade.itb) ;; *) exit 1 ;; esac
 case "$f" in *[!A-Za-z0-9._-]*) exit 1 ;; esac
 [ "$url" = "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/$f" ] || exit 1
-installed=$(sed -n 's/^build=//p' /etc/chester-version | head -1)
+installed=$(sed -n 's/^build=//p' /rom/etc/chester-version | head -1)
 floor=$(uci -q get chester.update.minimum_build || true)
 for v in "$installed" "${floor:-$installed}"; do
     [ "${#v}" = 12 ] || exit 1

@@ -11,3 +11,7 @@ The bootstrap binary, public key and early recovery service ship in future full 
 `chester-update firmware-status` and `firmware-install` retain the explicit full-firmware path for base changes. The normal update path never silently falls back to a full flash when an app package fails or is incompatible. UI app releases do not increase the full-firmware BIN number.
 
 Each ROM build has its own signed channel under `apps/bases/<ROM build>/latest.json`. Publish a signed revision-zero baseline using `scripts/sign-app-baseline.py` with every full firmware release. Revision zero has no downloadable payload and cannot be installed. Existing BIN63 bootstrap clients also use the original top-level app channel.
+
+The active client fetches `latest.signed.json`, which carries the exact manifest bytes and signature together. This prevents cached versions of separate metadata/signature files from being mixed. Each accepted install pins its verified envelope for the detached worker. Firmware rollback checks use the ROM firmware stamp, independently of overlay app revisions.
+
+Rev.16 clients retain the original signed FIT channel. Rev.20 is the one-time migration image that bakes in the app updater, public key and recovery service; later app packages preserve settings without reflashing the vendor kernel. Resetting an older firmware with only a live bootstrap removes that bootstrap; the migration image retains it after reset.

@@ -16,7 +16,7 @@ function releaseNotes(value){
 }
 function versionLabel(info,prefix){if(info.app_update)return 'App Update '+(info[prefix+'_app']||0)+' · Firmware '+(info[prefix+'_bin']||'');const v=info[prefix+'_version'],bin=info[prefix+'_bin'];return v?('Version '+v+(bin?' · Rev. '+bin:'')):'Not reported';}
 function releaseDate(value){if(!value)return 'Not reported';const d=/^\d{4}-\d{2}-\d{2}$/.test(value)?new Date(value+'T00:00:00'):new Date(value);return isNaN(d.getTime())?String(value):d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});}
-function fileSize(value){const n=Number(value);return n>0?(n/1048576).toFixed(1)+' MB':'Not reported';}
+function fileSize(value){const n=Number(value);return n>0?(n<1024?n+' B':n<1048576?(n/1024).toFixed(1)+' KB':(n/1048576).toFixed(1)+' MiB'):'Not Reported';}
 function line(label,value,extra){return E('div',{'class':'up-line'},[E('span',{'class':'st-muted'},[label]),E('strong',{'class':extra||''},[value||'Not Reported'])]);}
 function infoCard(title,description,body,icon){return settings.card(title,description,body,icon);}
 
@@ -109,7 +109,7 @@ return view.extend({
     settings.button('Cancel',()=>ui.hideModal(),{class:'st-button secondary'}),
     settings.button('Update Now',async()=>{
      ui.hideModal();let status;
-     try{status=progress.open({product:'K45P',build:String(this.info.latest_build||''),revision:String(this.info.latest_bin||''),keep});}
+     try{status=progress.open({product:'K45P',build:String(this.info.latest_build||''),revision:String(this.info.latest_bin||''),keep,kind:this.info.app_update?'app':'firmware',appRevision:String(this.info.latest_app||'')});}
      catch(error){ui.showModal('Update Could Not Start',[E('p',{},error.message),settings.button('Close',()=>ui.hideModal())]);return;}
      try{await this.savePreferences();await status.install();}
      catch(error){status.fail(error.message||'Update options could not be saved. The update has not started.');}

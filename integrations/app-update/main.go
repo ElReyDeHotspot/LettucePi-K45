@@ -625,6 +625,11 @@ func (e Engine) status(localOnly bool) {
 	board, _ := os.ReadFile(e.path("/tmp/sysinfo/board_name"))
 	model, _ := os.ReadFile(e.path("/tmp/sysinfo/model"))
 	out := map[string]any{"ok": false, "app_update": true, "installed_version": local["version"], "installed_build": local["build"], "installed_built": local["built"], "installed_bin": rom["bin"], "installed_app": e.state().Revision, "kernel": strings.TrimSpace(string(kernel)), "board": strings.TrimSpace(string(board)), "model": strings.TrimSpace(string(model))}
+	out["release_verified"] = false
+	out["manifest_checked"] = false
+	out["update_available"] = false
+	out["requires_firmware"] = false
+	out["error"] = ""
 	out["os_version"] = strings.Trim(fields(e.path("/etc/os-release"))["VERSION_ID"], "\"")
 	if localOnly {
 		out["ok"] = true
@@ -645,6 +650,8 @@ func (e Engine) status(localOnly bool) {
 	}
 	out["ok"] = true
 	out["manifest_checked"] = true
+	out["release_verified"] = true
+	out["release_board"] = m.Board
 	out["latest_version"] = m.Target.Version
 	out["latest_build"] = m.Target.Build
 	out["latest_built"] = m.Target.Built

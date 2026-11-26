@@ -61,6 +61,7 @@ if [ "$1" = -T ]; then [ {mode!r} != compatibility ]; else [ {mode!r} != flash ]
             p.chmod(0o755)
         script = source
         for old, new in {
+            '/rom/etc/chester-version': str(root / 'version'),
             '/etc/chester-version': str(root / 'version'),
             '/tmp/chester-update.log': str(root / 'log'),
             '/tmp/chester-update-job.json': str(root / 'job'),
