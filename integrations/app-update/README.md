@@ -19,3 +19,5 @@ Rev.16 clients retain the original signed FIT channel. Rev.20 is the one-time mi
 ## Validation
 
 [Live validation results](validation-20261126.json): two signed app updates (11,753 and 12,567 bytes), invalid-release rejection, settings preservation, IPv4/IPv6 from the router and LAN, original Rev.16 OTA compatibility, and an actual settings-preserving Rev.20 full OTA with postboot checks. The shipped customer unit was not accessed.
+
+Overview Update uses a lightweight local status helper and the verified app channel. Checks are cached for 15 minutes (one minute after failure), independently of page loading. The cache is invalidated by an installed build change; app revisions are compared within the same firmware base. App Update 1 includes this fix for the current K43P BIN64 and K45P Rev.20 bases.
