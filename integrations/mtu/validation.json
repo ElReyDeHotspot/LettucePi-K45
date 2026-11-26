@@ -1,0 +1,21 @@
+{
+  "product": "K45P",
+  "release": "Rev. 19 / 1.0.19",
+  "smart_recommended": true,
+  "ipv4_ipv6_mtu_1280_1400_1500": true,
+  "automatic_custom_disabled_mss_packet_capture": true,
+  "bidirectional_tcp_syn_mss_verified": true,
+  "rollback_and_interrupted_transaction_recovery": true,
+  "smart_policy_edge_cases": true,
+  "smart_saved_mode_after_reboot": true,
+  "post_reboot_ipv4_ipv6": true,
+  "cellular_mlab_completed": true,
+  "ethernet_live_test": "Skipped by request; WAN disconnected. Role labels, disconnected state and LAN hiding tested in frontend fixtures.",
+  "day_night_desktop_mobile_checked": true,
+  "legacy_speeds_url_redirect_verified": true,
+  "packaged_image_matches_source": true,
+  "compatibility_test_passed": true,
+  "manifest_signature_verified": true,
+  "flashed": false,
+  "image_sha256": "fbc224463c92f2d8d12ad9fd89211a7f87b5017b98d6535d939311ec880f3ba5"
+}

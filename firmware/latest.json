@@ -1,12 +1,12 @@
 {
   "product": "K45P",
   "board": "misectel,m02k45",
-  "version": "1.0.18",
-  "build": "202611250001",
-  "bin": "18",
-  "built": "2026-11-25",
-  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.18-sysupgrade.itb",
-  "sha256": "1fd2c8aaca5f0cdf28795437090a33b68b4ea8510c7cbc8af26a05beefb44566",
-  "size": 41799934,
-  "notes": "Improved LTE/5G band and tower scans, 5G nearby measurements and percentage progress.\nUpdated Cellular cards and selected Network Mode highlighting."
+  "version": "1.0.19",
+  "build": "202611260019",
+  "bin": "19",
+  "built": "2026-11-26",
+  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.19-sysupgrade.itb",
+  "sha256": "fbc224463c92f2d8d12ad9fd89211a7f87b5017b98d6535d939311ec880f3ba5",
+  "size": 41804030,
+  "notes": "Smart MTU & MSS controls, per-link M-Lab speed tests and updated Speeds layout.\nUpdated IPv6 and VPN controls, safer full LTE/5G scans and Cellular menu order."
 }
