@@ -33,12 +33,13 @@ Custom firmware and OTA updates for the Chester K45P.
 
 ## Firmware
 
-Latest published: **Rev. 19 · v1.0.19**.
+Latest published: **Rev. 20 · v1.0.20**.
 
-[Download firmware](firmware/LettucePi-K45P-1.0.19-sysupgrade.itb) ·
+[Download firmware](firmware/LettucePi-K45P-1.0.20-sysupgrade.itb) ·
 [Release manifest](firmware/latest.json)
 
-Use **Overview → Update** to install updates.
+Use **Overview → Update** to install updates. Rev. 20 enables small signed app updates.
+Earlier releases receive Rev. 20 through their existing OTA path; keep settings enabled.
 For fresh vendor routers, run [Update-K45P.cmd](scripts/Update-K45P.cmd).
 The Windows installer erases saved settings.
 

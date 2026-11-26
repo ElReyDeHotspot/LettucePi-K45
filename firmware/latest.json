@@ -1,12 +1,12 @@
 {
   "product": "K45P",
   "board": "misectel,m02k45",
-  "version": "1.0.19",
-  "build": "202611260019",
-  "bin": "19",
+  "version": "1.0.20",
+  "build": "202611260020",
+  "bin": "20",
   "built": "2026-11-26",
-  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.19-sysupgrade.itb",
-  "sha256": "fbc224463c92f2d8d12ad9fd89211a7f87b5017b98d6535d939311ec880f3ba5",
-  "size": 41804030,
-  "notes": "Smart MTU & MSS controls, per-link M-Lab speed tests and updated Speeds layout.\nUpdated IPv6 and VPN controls, safer full LTE/5G scans and Cellular menu order."
+  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.20-sysupgrade.itb",
+  "sha256": "e345f33839f9756cba543008b733278919b6db1598607bb2a86df6f89f880b4e",
+  "size": 42897662,
+  "notes": "Enables small signed app updates while preserving settings.\nIncludes current app fixes; vendor kernel and per-router calibration remain unchanged."
 }
