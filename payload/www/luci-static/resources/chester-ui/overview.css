@@ -116,3 +116,7 @@
 .chester-home .ch-update-state{font-size:11px;line-height:1.15;text-align:center;color:var(--ct-muted,#626873);max-width:100%;text-wrap:balance}
 .chester-home .ch-update-shortcut.is-available:after{content:'';position:absolute;top:9px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--ch-blue,#007aff)}
 #maincontent#maincontent .chester-home .ch-update-shortcut.is-available .ch-update-state{color:var(--ch-blue,#007aff)!important}
+
+/* Keep the selected modem mode blue, with a persistent halo in both themes. */
+body.theme-misectel #maincontent#maincontent .chester-home .chester-mode__row{padding:3px!important;min-height:44px!important}
+body.theme-misectel #maincontent#maincontent .chester-home .chester-mode__btn.is-active{position:relative;z-index:1;background:#007aff!important;border-color:transparent!important;border-radius:10px!important;color:#fff!important;-webkit-text-fill-color:#fff!important;font-weight:650!important;box-shadow:0 0 0 3px rgba(0,122,255,.35),0 2px 8px rgba(0,122,255,.22)!important}

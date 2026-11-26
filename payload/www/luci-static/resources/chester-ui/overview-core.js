@@ -545,7 +545,7 @@ return;portNames.push(name);});const ports=await Promise.all(portNames.map(async
  const controlCard=E('section',{'class':'ch-card'},[E('h3',{},['Quick Controls']),this.ledToggleWrap]);
  this.wanSection=E('section',{},[E('h4',{},['WAN Status']),this.wanNode]);
  return E('div',{'class':'chester-home'},[
-  E('link',{rel:'stylesheet',href:L.resource('chester-ui/overview.css')+'?v=20261124-home-shortcuts7'}),
+  E('link',{rel:'stylesheet',href:L.resource('chester-ui/overview.css')+'?v=20261125-mode-halo1'}),
   E('div',{'class':'ch-head'},[E('div',{},[E('div',{'class':'ch-title-row'},[E('div',{'class':'ch-title',role:'heading','aria-level':'2'},['Overview']),this.onlineBadge]),E('p',{'class':'ch-muted'},['Your Chester K45P, at a glance.'])])]),
   this.securityNode,this.summaryNode,
   E('div',{'class':'ch-layout'},[E('section',{'class':'ch-card ch-cellular-card'},[E('div',{'class':'ch-card-heading'},[E('h3',{},['Cellular']),this.modemSelectWrap]),this.modemNode]),E('div',{'class':'ch-side'},[portCard,controlCard])]),
