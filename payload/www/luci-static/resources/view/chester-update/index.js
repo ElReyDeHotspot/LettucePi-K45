@@ -86,7 +86,7 @@ return view.extend({
   const changes=E('section',{'class':'st-card up-changes'},[E('div',{'class':'up-changes-head'},[settings.icon('plus'),E('div',{},[E('h3',{},['What’s Changed']),this.changesSub])]),this.changesBody]);
   const preferenceCard=infoCard('Update Options','Choose how updates are installed.',[
    E('div',{'class':'up-option-grid'},[this.info.app_update?E('p',{class:'st-muted'},'App updates always preserve your settings.'):settings.toggle('Keep My Settings',this.keepInput,'Preserve Wi-Fi, APN, passwords and router settings. Turn off for a fresh setup.'),
-   settings.toggle('Automatic Updates',this.autoInput,'Install available signed releases daily at the selected time.')]),
+   settings.toggle('Automatic Updates',this.autoInput,this.info.app_update?'Install available app updates daily at the selected time.':'Install available signed firmware daily at the selected time.')]),
    E('div',{'class':'up-schedule'},[settings.field('Install At',this.timeInput,'Router timezone: '+this.zone)]),
    settings.footer(settings.button('Save Options',async ev=>{const b=ev.currentTarget;b.disabled=true;try{await this.savePreferences();}catch(e){}finally{b.disabled=this.preferencesUnavailable;}},{disabled:this.preferencesUnavailable?'disabled':null}),this.preferenceNote)
   ],'clock');
@@ -96,7 +96,7 @@ return view.extend({
    E('section',{'class':'st-card up-hero','aria-live':'polite'},[E('div',{'class':'up-hero-copy'},[E('div',{'class':'up-hero-icon'},[E('img',{src:'/luci-static/misectel/green-leaf.svg',alt:'',width:38,height:38})]),E('div',{},[this.pill,this.statusTitle,this.statusCopy])]),E('div',{'class':'up-actions'},[this.checkButton,this.installButton])]),
    this.checkedNode,E('div',{'class':'up-columns'},[installed,latest]),changes,preferenceCard,
    E('details',{'class':'st-advanced up-details'},[E('summary',{},['Firmware Details']),this.detailsBody]),
-   E('p',{'class':'st-muted up-footnote'},['Updates verify the release signature, image size, checksum and device compatibility before installation. The router restarts to finish.'])
+   E('p',{'class':'st-muted up-footnote'},[this.info.app_update?'App updates verify an independent signature, exact firmware compatibility and file checksums. An interrupted installation is rolled back at boot.':'Updates verify the release signature, image size, checksum and device compatibility before installation. The router restarts to finish.'])
   ],'up-page');
   this.paintStatus(this.info,true);const resumed=progress.resume({product:'K45P'});if(!resumed)Promise.resolve().then(()=>this.checkForUpdates());return page;
  },

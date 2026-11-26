@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"syscall"
 	"testing"
 )
 
@@ -228,4 +229,58 @@ func TestMinutePrecisionVendorBaseline(t *testing.T) {
 		t.Fatal(err)
 	}
 	_ = e
+}
+
+func TestInsufficientFlashDoesNotTouchFiles(t *testing.T) {
+	e, m, p := fixture(t)
+	var st syscall.Statfs_t
+	if err := syscall.Statfs(e.dir(), &st); err != nil {
+		t.Fatal(err)
+	}
+	// A sparse metadata file makes the rollback budget exceed free flash without
+	// consuming that space or writing a large payload.
+	if err := os.Truncate(e.path("etc/chester-version"), int64(st.Bavail)*st.Bsize+(2<<20)); err != nil {
+		t.Fatal(err)
+	}
+	if err := e.apply(m, p); err == nil {
+		t.Fatal("insufficient rollback space accepted")
+	}
+	got, _ := os.ReadFile(e.path(m.Files[0].Path))
+	if string(got) != "old UI" {
+		t.Fatal("file changed before flash-space preflight")
+	}
+	if _, err := os.Stat(filepath.Join(e.tx(), "journal.json")); !os.IsNotExist(err) {
+		t.Fatal("transaction started despite insufficient space")
+	}
+}
+
+func TestInterruptedVersionAndRevisionAreRolledBack(t *testing.T) {
+	e, m, _ := fixture(t)
+	oldVersion, _ := os.ReadFile(e.path("etc/chester-version"))
+	oldState := []byte(`{"revision":0,"base_build":"20261126145149","files":{}}`)
+	write(t, e.path("etc/chester-app-update/state.json"), oldState)
+	oldFiles := map[string][]byte{m.Files[0].Path: []byte("old UI"), "etc/chester-version": oldVersion, "etc/chester-app-update/state.json": oldState}
+	j := Journal{}
+	for path, data := range oldFiles {
+		write(t, filepath.Join(e.tx(), "old", path), data)
+		j.Old = append(j.Old, Old{Path: path, Exists: true, Mode: 0644})
+	}
+	if err := saveJSON(filepath.Join(e.tx(), "journal.json"), j); err != nil {
+		t.Fatal(err)
+	}
+	for path := range oldFiles {
+		write(t, e.path(path), []byte("interrupted update"))
+	}
+	if err := e.recover(); err != nil {
+		t.Fatal(err)
+	}
+	for path, data := range oldFiles {
+		got, _ := os.ReadFile(e.path(path))
+		if !bytes.Equal(got, data) {
+			t.Fatal("rollback mismatch", path)
+		}
+	}
+	if e.state().Revision != 0 {
+		t.Fatal("app counter advanced after rollback")
+	}
 }
