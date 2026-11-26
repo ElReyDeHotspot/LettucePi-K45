@@ -1,15 +1,7 @@
 {
-	"luci-app-chester-ipv6": {
-		"description": "Manage cellular IPv6 NAT6",
-		"read": {
-			"ubus": {
-				"chester_ipv6": [ "status", "test" ]
-			}
-		},
-		"write": {
-			"ubus": {
-				"chester_ipv6": [ "set" ]
-			}
-		}
-	}
+ "luci-app-chester-ipv6": {
+  "description": "Manage and test cellular IPv6",
+  "read": {"ubus": {"chester.ipv6": ["status", "test"], "chester_ipv6": ["status", "test"]}},
+  "write": {"ubus": {"chester.ipv6": ["save"], "chester_ipv6": ["set"]}}
+ }
 }

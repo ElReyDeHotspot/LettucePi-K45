@@ -154,7 +154,7 @@ if nc.exists():
 
 for p in root.rglob('*'):
     if p.is_file() and not p.is_symlink() and ('zh-cn' in p.name or 'zh-tw' in p.name or 'zh_cn' in p.name or 'zh_tw' in p.name):p.unlink()
-for folder in ['usr/bin','usr/sbin','usr/libexec','usr/share/rpcd/ucode','etc/init.d','etc/hotplug.d','etc/uci-defaults','lib/preinit','www/cgi-bin']:
+for folder in ['usr/bin','usr/sbin','usr/libexec','usr/share/rpcd/ucode','etc/init.d','etc/hotplug.d','etc/uci-defaults','etc/odhcp6c.user.d','lib/netifd','lib/preinit','www/cgi-bin']:
     for p in (repo/'payload'/folder).rglob('*') if (repo/'payload'/folder).exists() else []:
         if p.is_file():(root/p.relative_to(repo/'payload')).chmod(0o755)
 (root/'usr/share/rpcd/ucode/misectel').chmod(0o755)
