@@ -7,6 +7,7 @@ import (
 	"crypto/ed25519"
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"os"
@@ -282,5 +283,42 @@ func TestInterruptedVersionAndRevisionAreRolledBack(t *testing.T) {
 	}
 	if e.state().Revision != 0 {
 		t.Fatal("app counter advanced after rollback")
+	}
+}
+
+func TestCoherentEnvelopeAndPinnedWorkerRelease(t *testing.T) {
+	e, m, _ := fixture(t)
+	m.URL = "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K43P/refs/heads/main/apps/releases/test/package.tgz"
+	pub, key, _ := ed25519.GenerateKey(rand.Reader)
+	write(t, filepath.Join(e.dir(), "public.key"), []byte(base64.StdEncoding.EncodeToString(pub)))
+	raw, _ := json.Marshal(m)
+	sig := ed25519.Sign(key, raw)
+	blob, _ := json.Marshal(Envelope{Manifest: raw, Signature: sig})
+	write(t, e.path("tmp/chester-app-channel.json"), blob)
+	id := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	if _, err := e.pinRequest(id); err != nil {
+		t.Fatal(err)
+	}
+	next := m
+	next.Revision = 2
+	next.Target.Build = "20261126170000"
+	nextRaw, _ := json.Marshal(next)
+	nextSig := ed25519.Sign(key, nextRaw)
+	nextBlob, _ := json.Marshal(Envelope{Manifest: nextRaw, Signature: nextSig})
+	write(t, e.path("tmp/chester-app-channel.json"), nextBlob)
+	pinned, err := e.readRelease(e.requestPath(id))
+	if err != nil || pinned.Revision != 1 {
+		t.Fatal("worker release was replaced by another client check", err)
+	}
+	latest, err := e.cached()
+	if err != nil || latest.Revision != 2 {
+		t.Fatal("current channel did not advance", err)
+	}
+	mixed, _ := json.Marshal(Envelope{Manifest: raw, Signature: nextSig})
+	if _, err := e.decodeRelease(mixed); err == nil {
+		t.Fatal("mixed metadata and signature accepted")
+	}
+	if _, err := e.decodeRelease(bytes.Repeat([]byte{'x'}, 262145)); err == nil {
+		t.Fatal("oversized channel accepted")
 	}
 }
