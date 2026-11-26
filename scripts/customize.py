@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Apply the K45P UI port to an extracted, unmodified K45P rootfs."""
 from pathlib import Path
-import shutil, re, sys, json, hashlib
+import shutil, re, sys, json, hashlib, runpy
 
 root=Path(sys.argv[1]).resolve(); repo=Path(__file__).resolve().parents[1]
 assert root != Path('/') and (root/'etc/openwrt_release').is_file()
@@ -18,6 +18,7 @@ esac
 pw.write_text(guard+pw.read_text())
 original_backend=(root/'usr/share/rpcd/ucode/misectel').read_text()
 shutil.copytree(repo/'payload',root,dirs_exist_ok=True)
+runpy.run_path(str(repo/'scripts/prune-legacy-vpn.py'))['prune'](root)
 # The vendor overlay menu otherwise replaces the shared VPN entry with a
 # first-child route. Keep the approved client screen in the immutable image.
 vpn_menu=root/'usr/share/luci/menu.d/zzzzzz-chester-vpn-client.json'
