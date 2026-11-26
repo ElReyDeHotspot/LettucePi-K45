@@ -18,6 +18,11 @@ esac
 pw.write_text(guard+pw.read_text())
 original_backend=(root/'usr/share/rpcd/ucode/misectel').read_text()
 shutil.copytree(repo/'payload',root,dirs_exist_ok=True)
+# The vendor overlay menu otherwise replaces the shared VPN entry with a
+# first-child route. Keep the approved client screen in the immutable image.
+vpn_menu=root/'usr/share/luci/menu.d/zzzzzz-chester-vpn-client.json'
+assert json.loads(vpn_menu.read_text())['admin/vpn']['action']['path']=='misectel-vpn/chester-client'
+assert (root/'www/luci-static/resources/view/misectel-vpn/chester-client.js').is_file()
 # LuCI is served by ucode CGI. The patched upstream server has no Lua module.
 p=root/'etc/config/uhttpd'
 p.write_text('\n'.join(line for line in p.read_text().splitlines() if 'lua_prefix' not in line)+'\n')
@@ -157,7 +162,7 @@ for folder in ['usr/bin','usr/sbin','usr/libexec','usr/share/rpcd/ucode','etc/in
 assert (root/'usr/sbin/tpws').read_bytes()[:4]==b'\x7fELF'
 tc=root/'sbin/tc'
 if not tc.exists() and not tc.is_symlink():tc.symlink_to('/usr/libexec/tc-full')
-for name,start in [('chester-sqm',96),('ttyd',99),('failover',99)]:
+for name,start in [('chester-sqm',96),('ttyd',99),('failover',99),('chester_scan_recovery',99)]:
     init=(root/('etc/init.d/'+name)).read_text()
     stop=re.search(r'^STOP=(\d+)',init,re.M)
     timings=[('S',start)]+([('K',int(stop[1]))] if stop else [])
