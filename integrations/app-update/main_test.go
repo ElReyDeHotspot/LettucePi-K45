@@ -214,7 +214,8 @@ func TestSignedBaselineAndStateReset(t *testing.T) {
 
 func TestMinutePrecisionVendorBaseline(t *testing.T) {
 	e, m, _ := fixture(t)
-	m.Base = "202611210001"
+	m.Base = "202611260019"
+	m.Target.Built = "2026-11-26"
 	m.Target.Build = m.Base
 	m.Revision = 0
 	m.Size = 0

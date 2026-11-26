@@ -226,7 +226,9 @@ func verifyManifest(b, sig, pub []byte) (Manifest, error) {
 		return m, errors.New("Invalid app release metadata")
 	}
 	if _, err := time.Parse("2006-01-02T15:04Z", m.Target.Built); err != nil {
-		return m, errors.New("Invalid app build date")
+		if _, dayErr := time.Parse("2006-01-02", m.Target.Built); dayErr != nil {
+			return m, errors.New("Invalid app build date")
+		}
 	}
 	if m.Revision == 0 {
 		if m.Target.Build != m.Base || m.Size != 0 || m.URL != "" || m.SHA != bytesHash(nil) || len(m.Files) != 0 {
