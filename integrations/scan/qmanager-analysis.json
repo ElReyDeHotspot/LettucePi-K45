@@ -1,0 +1,44 @@
+{
+  "date": "2026-11-25",
+  "method": "REA 6.10.1 with Ghidra 12.2, static analysis only",
+  "artifact": {
+    "url": "https://github.com/dr-dolomite/QManager/blob/main/dependencies/atcli_smd11",
+    "sha256": "4d2984e211bad41eeebda8387b269d80f101cd0d9d98c8d55d4445a190598acc",
+    "architecture": "ARM EABI5, static executable",
+    "command_function": "0x16094",
+    "read_function": "0x56c14"
+  },
+  "observed": [
+    "Client accepts a command and optional device path, default /dev/smd11.",
+    "Writes the supplied command followed by CRLF; reads and prints lines until a terminal reply.",
+    "The recovered command path uses blocking reads, not an internal QSCAN progress or SIM-disable workflow.",
+    "The shell gatekeeper provides serialization, an AT warm-up and a 300-second outer safety cap.",
+    "The RM520N native broker source explicitly uses a 300-second long-command deadline and timeout resynchronization."
+  ],
+  "sources": [
+    "https://github.com/dr-dolomite/QManager/blob/main/scripts/usr/bin/qcmd",
+    "https://github.com/dr-dolomite/QManager/blob/main/scripts/usr/bin/qmanager_neighbour_scanner",
+    "https://github.com/dr-dolomite/QManager-RM520N/blob/main/native/qmanager_atd/src/at/exec.rs",
+    "https://github.com/dr-dolomite/QManager-RM520N/blob/main/native/qmanager_atd/src/at/channel.rs",
+    "https://www.etsi.org/deliver/etsi_ts/136100_136199/136141/13.04.00_60/ts_136141v130400p.pdf"
+  ],
+  "live_validation": {
+    "modem": "RM551E-GL / RM551EGL00AAR02A02M8G",
+    "full_command": "AT+QSCAN=3,1",
+    "full_terminal_reply": "OK",
+    "full_elapsed_seconds_approximately": 181,
+    "full_network_cells": 20,
+    "full_radio_types": ["LTE", "5G"],
+    "nearby_with_nr_measurements_cells": 12,
+    "nearby_elapsed_seconds_approximately": 3,
+    "saved_modem_settings_unchanged": true,
+    "reboot_required": false
+  },
+  "limitations": [
+    "Ghidra reports control-flow warnings in the stripped Rust executable; findings describe the recovered normal command path, not a complete reconstruction.",
+    "The old 180-second deadline cut off replies at the measured completion boundary. Successful validation included a warm-up and a longer deadline; their individual effects were not isolated.",
+    "SIM fallback polling was observed on the USB AT port during an MHI scan. The updated SIM daemon pauses all its AT paths while a validated scanner worker owns the modem.",
+    "Percentages are estimates capped below 100 until successful completion.",
+    "No third-party executable or decompiled implementation is included in the firmware."
+  ]
+}

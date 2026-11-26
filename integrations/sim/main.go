@@ -156,7 +156,23 @@ func active() string {
 
 var statusATPort, statusATModem string
 
+var scanRunning = func() bool {
+	marker, e := os.ReadFile(simLockPath + "/scan.pid")
+	if e != nil {
+		return false
+	}
+	pid := strings.TrimSpace(string(marker))
+	if !regexp.MustCompile(`^[1-9][0-9]{0,9}$`).MatchString(pid) {
+		return false
+	}
+	cmdline, e := os.ReadFile("/proc/" + pid + "/cmdline")
+	return e == nil && strings.Contains(string(cmdline), "chester-scan\x00worker\x00")
+}
+
 func readAT(at string) string {
+	if scanRunning() {
+		return ""
+	}
 	if statusATModem != cfg.Modem {
 		statusATPort = ""
 		statusATModem = cfg.Modem
@@ -312,6 +328,11 @@ func liveRSRP(text string) *int {
 	return lte
 }
 func snapshot() {
+	// A scan owns the whole modem, including fallback USB AT ports. Keep the
+	// last confirmed snapshot without renewing its observation timestamps.
+	if scanRunning() {
+		return
+	}
 	previousActive := state.Active
 	core := readAT("core")
 	s := ""
@@ -513,6 +534,9 @@ func load() (Config, error) {
 	return c, e
 }
 func capabilities() {
+	if scanRunning() {
+		return
+	}
 	v, e := native("get_sim_switch_capabilities")
 	if e != nil {
 		state.Message = "Waiting for the modem's SIM controls"
@@ -1040,6 +1064,9 @@ func other(slot string) string {
 	return "1"
 }
 func autoTick() {
+	if scanRunning() {
+		return
+	}
 	now := time.Now()
 	if now.Before(backoffUntil) {
 		phase("backoff", "Waiting before the next automatic SIM attempt")
@@ -1190,6 +1217,12 @@ func main() {
 	}
 	nextStatus := time.Now()
 	for ctx.Err() == nil {
+		if scanRunning() {
+			if !wait(ctx, time.Second) {
+				break
+			}
+			continue
+		}
 		fresh, e := load()
 		if e == nil {
 			if cfg.Modem != fresh.Modem {

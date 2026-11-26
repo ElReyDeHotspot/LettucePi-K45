@@ -10,6 +10,28 @@ import (
 	"time"
 )
 
+func TestScanPausesAllSIMATPathsAndPreservesSnapshot(t *testing.T) {
+	oldScan, oldCommand, oldState := scanRunning, command, state
+	t.Cleanup(func() { scanRunning, command, state = oldScan, oldCommand, oldState })
+	scanRunning = func() bool { return true }
+	command = func(context.Context, int, string, ...string) ([]byte, error) {
+		t.Fatal("SIM polling reached modem during scan")
+		return nil, nil
+	}
+	state = State{Active: "1", Cards: map[string]*Card{"1": {Slot: "1", Presence: "present", Ready: true, Seen: 123}}}
+	before, _ := json.Marshal(state)
+	if readAT("core") != "" {
+		t.Fatal("read during scan")
+	}
+	snapshot()
+	capabilities()
+	autoTick()
+	after, _ := json.Marshal(state)
+	if string(before) != string(after) {
+		t.Fatal("scan changed the last confirmed SIM snapshot")
+	}
+}
+
 func TestLivePresenceClearsStaleConnectionAndHandlesATFallback(t *testing.T) {
 	oldCmd, oldState, oldCfg := command, state, cfg
 	oldPath, oldResults := statePath, resultsPath

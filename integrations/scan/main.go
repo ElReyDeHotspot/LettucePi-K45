@@ -20,6 +20,8 @@ import (
 )
 
 const runtimeDir = "/tmp/chester-scan"
+const maxCommandOutput = 262144
+const fullScanSeconds = 300
 
 var nameRE = regexp.MustCompile(`^[A-Za-z0-9_][A-Za-z0-9_.-]{0,31}$`)
 var portRE = regexp.MustCompile(`^/dev/(mhi_DUN|ttyUSB[0-9]+|ttyACM[0-9]+)$`)
@@ -127,7 +129,7 @@ type cappedBuffer struct{ bytes.Buffer }
 
 func (b *cappedBuffer) Write(p []byte) (int, error) {
 	n := len(p)
-	if left := 65536 - b.Len(); left > 0 {
+	if left := maxCommandOutput - b.Len(); left > 0 {
 		if len(p) > left {
 			p = p[:left]
 		}
@@ -167,7 +169,36 @@ func at(port, command string, seconds int) (string, error) {
 		time.Sleep(100 * time.Millisecond)
 	}
 	defer syscall.Flock(int(f.Fd()), syscall.LOCK_UN)
-	text, err := run(seconds+5, "tom_modem", "-u", "-d", port, "-o", "a", "-t", strconv.Itoa(seconds), "-c", command)
+	var text string
+	var err error
+	if strings.HasPrefix(command, "AT+QSCAN=") && command != "AT+QSCAN=?" {
+		// Preserve the daemon's timeout/partial-response fields. tom_modem's
+		// UBUS wrapper prints only successful response text and loses these.
+		send := func(cmd string, timeout int) (string, error) {
+			request, _ := json.Marshal(map[string]any{"at_port": port, "at_cmd": cmd, "timeout": timeout})
+			reply, e := run(timeout+5, "ubus", "-S", "-t", strconv.Itoa(timeout+3), "call", "at-daemon", "sendat", string(request))
+			if e != nil {
+				return "", e
+			}
+			return scanReply(reply)
+		}
+		// As in QManager, prove the channel responsive immediately before a
+		// long command, under the same shared AT lock as the scan itself.
+		warm, e := send("AT", 3)
+		if e != nil || !regexp.MustCompile(`(?m)(^|[\r\n])OK(?:[\r\n]|$)`).MatchString(warm) {
+			return warm, errors.New("The modem AT channel is not ready for a full scan")
+		}
+		text, err = send(command, seconds)
+		if err != nil {
+			// Consume a late response and check channel health before releasing
+			// the AT lock. Do not retry a timed-out scan automatically.
+			if _, recovery := send("AT", 3); recovery != nil {
+				err = fmt.Errorf("%w; AT channel recovery is pending", err)
+			}
+		}
+	} else {
+		text, err = run(seconds+5, "tom_modem", "-u", "-d", port, "-o", "a", "-t", strconv.Itoa(seconds), "-c", command)
+	}
 	if regexp.MustCompile(`(?m)(^|[\r\n])(?:\+CM[ES] ERROR[^\r\n]*|ERROR)(?:[\r\n]|$)`).MatchString(text) {
 		return text, errors.New("The modem rejected this command")
 	}
@@ -178,6 +209,70 @@ func at(port, command string, seconds int) (string, error) {
 		return text, errors.New("The modem did not return a complete response")
 	}
 	return text, nil
+}
+func scanReply(reply string) (string, error) {
+	var response struct {
+		Status   string `json:"status"`
+		Response string `json:"response"`
+		Partial  string `json:"partial_response"`
+		Message  string `json:"message"`
+	}
+	if err := json.Unmarshal([]byte(reply), &response); err != nil {
+		return "", errors.New("Could not decode the modem scan response")
+	}
+	text := response.Response
+	if text == "" {
+		text = response.Partial
+	}
+	if response.Status != "success" {
+		message := response.Message
+		if message == "" {
+			message = "The modem did not complete the scan"
+		}
+		return text, errors.New(message)
+	}
+	return text, nil
+}
+
+// Some firmware returns only the enable flag until NR measurement reporting
+// is enabled. Use it for this snapshot only, preserving the original setting.
+func nrMeasurementState(text string) (string, bool) {
+	for _, line := range strings.Split(strings.ReplaceAll(text, "\r", "\n"), "\n") {
+		line = strings.TrimSpace(line)
+		if !strings.HasPrefix(line, "+QNWCFG:") {
+			continue
+		}
+		v := fields(strings.TrimPrefix(line, "+QNWCFG:"))
+		if get(v, 0) == "nr5g_meas_info" && (get(v, 1) == "0" || get(v, 1) == "1") {
+			return v[1], true
+		}
+	}
+	return "", false
+}
+func nrMeasurements(query func(string, int) (string, error), pause func(time.Duration)) (text string, err error) {
+	const command = `AT+QNWCFG="nr5g_meas_info"`
+	text, err = query(command, 5)
+	if err != nil {
+		return text, err
+	}
+	state, known := nrMeasurementState(text)
+	if !known {
+		return text, errors.New("NR neighbour measurements are not supported by this firmware")
+	}
+	if state == "1" {
+		return text, nil
+	}
+	// Restore even if enabling times out: the modem may still have applied it.
+	defer func() {
+		if _, e := query(command+",0", 5); e != nil {
+			err = errors.Join(err, fmt.Errorf("Could not restore NR measurement setting: %w", e))
+		}
+	}()
+	if _, err = query(command+",1", 5); err != nil {
+		return text, err
+	}
+	pause(time.Second)
+	return query(command, 5)
 }
 func fields(line string) []string {
 	r := csv.NewReader(strings.NewReader(strings.TrimSpace(line)))
@@ -262,6 +357,9 @@ func lteBand(channel string) string {
 	if e != nil {
 		return ""
 	}
+	if n >= 66436 && n <= 67335 {
+		return "B66"
+	}
 	for _, r := range [][3]int{{1, 0, 599}, {2, 600, 1199}, {3, 1200, 1949}, {4, 1950, 2399}, {5, 2400, 2649}, {7, 2750, 3449}, {8, 3450, 3799}, {12, 5010, 5179}, {13, 5180, 5279}, {14, 5280, 5379}, {17, 5730, 5849}, {20, 6150, 6449}, {25, 8040, 8689}, {26, 8690, 9039}, {28, 9210, 9659}, {29, 9660, 9769}, {30, 9770, 9869}, {38, 37750, 38249}, {40, 38650, 39649}, {41, 39650, 41589}, {48, 55240, 56739}} {
 		if n >= r[1] && n <= r[2] {
 			return "B" + strconv.Itoa(r[0])
@@ -271,14 +369,14 @@ func lteBand(channel string) string {
 }
 func parse(raw map[string]string) []Cell {
 	out := []Cell{}
-	for _, kind := range []string{"serving", "carriers", "neighbors", "scan"} {
+	for _, kind := range []string{"serving", "carriers", "neighbors", "nr_neighbors", "scan"} {
 		if raw["scan"] != "" && kind != "scan" {
 			continue
 		}
 		for _, line := range strings.Split(strings.ReplaceAll(raw[kind], "\r", "\n"), "\n") {
 			line = strings.TrimSpace(line)
 			idx := strings.Index(line, ":")
-			if idx < 0 || (!strings.HasPrefix(line, "+QENG:") && !strings.HasPrefix(line, "+QCAINFO:") && !strings.HasPrefix(line, "+QSCAN:")) {
+			if idx < 0 || (!strings.HasPrefix(line, "+QENG:") && !strings.HasPrefix(line, "+QCAINFO:") && !strings.HasPrefix(line, "+QSCAN:") && !(kind == "nr_neighbors" && strings.HasPrefix(line, "+QNWCFG:"))) {
 				continue
 			}
 			v := fields(line[idx+1:])
@@ -288,6 +386,17 @@ func parse(raw map[string]string) []Cell {
 			var c Cell
 			var ok bool
 			switch kind {
+			case "nr_neighbors":
+				if v[0] != "nr5g_meas_info" || get(v, 1) != "1" {
+					continue
+				}
+				c, ok = cell("5G", v, 2, 3, "Neighbor")
+				if !ok {
+					continue
+				}
+				c.RSRP = number(get(v, 4), -160, -20)
+				c.RSRQ = number(get(v, 5), -50, 0)
+				c.SINR = number(get(v, 6), -30, 100)
 			case "scan":
 				rat := "LTE"
 				if v[0] == "NR5G" {
@@ -392,10 +501,13 @@ func parse(raw map[string]string) []Cell {
 					c.SINR = number(get(v, 9), -30, 100)
 				}
 			}
-			if c.RAT == "LTE" && c.Band == "" {
-				c.Band = lteBand(c.ARFCN)
-				if c.Band != "" {
+			if c.RAT == "LTE" {
+				if derived := lteBand(c.ARFCN); derived != "" && c.Band != derived {
 					c.BandSource = "LTE channel table"
+					if c.Band != "" {
+						c.BandSource += "; modem reported " + c.Band
+					}
+					c.Band = derived
 				}
 			}
 			out = append(out, c)
@@ -490,7 +602,12 @@ func worker(modem, mode string) {
 	s.Phase = "running"
 	s.Message = "Reading serving cells, carriers and nearby cells…"
 	atomicState(s)
-	defer func() { s.Running = false; cleanupSIMLock(os.Getpid()); atomicState(s) }()
+	defer func() {
+		s.Running = false
+		s.Elapsed = time.Now().Unix() - s.Started
+		cleanupSIMLock(os.Getpid())
+		atomicState(s)
+	}()
 	fail := func(e error) { s.Phase = "failed"; s.Message = e.Error() }
 	if e := os.Mkdir("/tmp/chester-sim.lock", 0700); e != nil {
 		fail(errors.New("A SIM operation is running. Wait for it to finish"))
@@ -513,11 +630,20 @@ func worker(modem, mode string) {
 		result.Supported = supported(capText)
 	}
 	cmds := [][2]string{{"serving", `AT+QENG="servingcell"`}, {"carriers", "AT+QCAINFO"}, {"neighbors", `AT+QENG="neighbourcell"`}}
+	failedNearby := 0
 	for _, cmd := range cmds {
 		text, e := at(port, cmd[1], 5)
 		result.Raw[cmd[0]] = text
 		if e != nil {
+			failedNearby++
 			result.Notes = append(result.Notes, cmd[0]+": "+e.Error())
+		}
+	}
+	if mode == "nearby" {
+		text, e := nrMeasurements(func(command string, seconds int) (string, error) { return at(port, command, seconds) }, time.Sleep)
+		result.Raw["nr_neighbors"] = text
+		if e != nil {
+			result.Notes = append(result.Notes, "5G neighbors: "+e.Error())
 		}
 	}
 	if mode != "nearby" {
@@ -525,15 +651,25 @@ func worker(modem, mode string) {
 			fail(errors.New("This modem did not confirm support for the selected full scan. Use nearby refresh instead"))
 			return
 		}
-		s.Message = "Scanning nearby networks. Allow up to 3 minutes; closing this page does not stop the scan."
+		s.Message = "Scanning nearby networks. Allow up to 5 minutes; closing this page does not stop the scan."
 		atomicState(s)
 		cmd := "AT+QSCAN=" + map[string]string{"lte": "1", "nr": "2", "all": "3"}[mode]
-		text, e := at(port, cmd+",1", 180)
+		command := cmd + ",1"
+		text, e := at(port, command, fullScanSeconds)
 		result.Raw["scan"] = text
 		if e != nil && strings.Contains(e.Error(), "rejected") {
-			text, e = at(port, cmd, 180)
+			command = cmd
+			text, e = at(port, command, fullScanSeconds)
 			result.Raw["scan"] = text
 		}
+		// Keep the actual attempt available even if automatic Nearby recovery
+		// replaces the current UI result. This contains no firmware settings.
+		errorText := ""
+		if e != nil {
+			errorText = e.Error()
+		}
+		attempt, _ := json.Marshal(map[string]any{"command": command, "timestamp": time.Now().Unix(), "raw": text, "error": errorText})
+		os.WriteFile(runtimeDir+"/last-full-attempt.json", attempt, 0600)
 		if e != nil {
 			fail(fmt.Errorf("Full scan did not complete: %v. Previous completed results are retained", e))
 			return
@@ -541,7 +677,7 @@ func worker(modem, mode string) {
 	}
 	result.Cells = parse(result.Raw)
 	result.Timestamp = time.Now().Unix()
-	if len(result.Cells) == 0 && len(result.Notes) == 3 && mode == "nearby" {
+	if len(result.Cells) == 0 && failedNearby == 3 && mode == "nearby" {
 		fail(errors.New("The modem did not return cell information. Check its AT port and try again"))
 		return
 	}
