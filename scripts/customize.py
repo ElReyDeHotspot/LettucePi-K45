@@ -236,3 +236,7 @@ if policy.exists():
 link=root/"etc/rc.d/S99chester_wifi_check"
 if link.is_symlink() or link.exists():link.unlink()
 link.symlink_to("../init.d/chester_wifi_check")
+
+# Recover interrupted app updates before management services start.
+link=root/"etc/rc.d/S04chester_app_recover"
+if not link.exists() and not link.is_symlink():link.symlink_to("../init.d/chester_app_recover")
