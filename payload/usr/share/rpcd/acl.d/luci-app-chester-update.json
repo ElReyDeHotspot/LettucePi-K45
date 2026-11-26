@@ -8,12 +8,18 @@
         ],
         "/usr/sbin/chester-update status-local": [
           "exec"
+        ],
+        "/usr/sbin/chester-update job-status": [
+          "exec"
         ]
       }
     },
     "write": {
       "file": {
         "/usr/sbin/chester-update install": [
+          "exec"
+        ],
+        "/usr/sbin/chester-update install *": [
           "exec"
         ]
       }

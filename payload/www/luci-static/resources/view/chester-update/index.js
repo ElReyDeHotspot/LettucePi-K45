@@ -5,6 +5,7 @@
 'require rpc';
 'require dom';
 'require chester-ui.settings as settings';
+'require chester-ui.update-progress as progress';
 
 const callUpdateSettings=rpc.declare({object:'misectel',method:'update_settings',expect:{}});
 const callSetUpdateSettings=rpc.declare({object:'misectel',method:'set_update_settings',params:['auto','time','keep_settings'],expect:{}});
@@ -97,58 +98,25 @@ return view.extend({
    E('details',{'class':'st-advanced up-details'},[E('summary',{},['Firmware Details']),this.detailsBody]),
    E('p',{'class':'st-muted up-footnote'},['Updates verify the release signature, image size, checksum and device compatibility before installation. The router restarts to finish.'])
   ],'up-page');
-  this.paintStatus(this.info,true);Promise.resolve().then(()=>this.checkForUpdates());return page;
+  this.paintStatus(this.info,true);const resumed=progress.resume({product:'K45P'});if(!resumed)Promise.resolve().then(()=>this.checkForUpdates());return page;
  },
-	handleInstall: function (keep) {
-		var self = this;
-		ui.showModal(_('Update Firmware'), [
-			E('p', {}, _('The router will download the update, check it, install it and restart.')),
-			E('ul', {}, [
-				keep
-					? E('li', {}, _('Your settings are kept.'))
-					: E('li', {}, [ E('strong', {},
-						_('Your settings will be erased, including the Wi-Fi name and password, the APN and the admin password.')) ]),
-				E('li', {}, _('Packages you installed yourself are not kept.')),
-				E('li', {}, _('Do not unplug the router while it works.'))
-			]),
-			E('p', { 'class': 'alert-message warning' },
-				_('This takes a few minutes. The page will stop responding while the router restarts.')),
-			E('div', { 'class': 'right' }, [
-				E('button', { 'class': 'btn', 'click': ui.hideModal }, _('Cancel')),
-				' ',
-				E('button', {
-					'class': 'btn cbi-button-action important',
-					'click': ui.createHandlerFn(self, function () {
-						ui.showModal(_('Updating'), [
-							E('p', { 'class': 'spinning' },
-								_('Downloading and installing. Do not unplug the router.'))
-						]);
-						var installRequested=false;
-						return self.savePreferences().then(function () { installRequested=true;return fs.exec('/usr/sbin/chester-update', [ 'install' ]); }).then(function (res) {
-							var out = (res.stdout || '').trim();
-							if (out.indexOf('OK:') !== 0) {
-								ui.showModal(_('Update Failed'), [
-									E('p', {}, out || _('The update could not be started.')),
-									E('p', {}, _('The firmware was not installed.')),
-									E('div', { 'class': 'right' }, [
-										E('button', { 'class': 'btn', 'click': ui.hideModal }, _('Close'))
-									])
-								]);
-								return;
-							}
-							/* The flash is detached, so this response arrives before
-							 * the reboot. Hand over to LuCI's reconnect countdown. */
-							ui.showModal(_('Installing'), [
-								E('p', { 'class': 'spinning' },
-									_('The router is installing the update and will restart. Do not unplug it.'))
-							]);
-							ui.awaitReconnect(window.location.host);
-						}).catch(function(error){ui.showModal(_(installRequested?'Update Status Unavailable':'Update Could Not Start'),[E('p',{},[installRequested?'The result could not be confirmed. Keep the router powered on and check its status before retrying.':error.message||String(error)]),E('button',{'class':'btn',click:ui.hideModal},[_('Close')])]);});
-					})
-				}, _('Update Now'))
-			])
-		]);
-	},
+ handleInstall(keep){
+  ui.showModal('Update Firmware',[
+   E('p',{},'The router will download, verify and install the update, then restart.'),
+   E('p',{},keep?'Your saved router settings will be kept.':'Your saved settings, Wi-Fi name and password, APN and admin password will be erased.'),
+   E('p',{},'Keep the router powered on. The status window will stay open while the router restarts.'),
+   E('div',{class:'up-actions'},[
+    settings.button('Cancel',()=>ui.hideModal(),{class:'st-button secondary'}),
+    settings.button('Update Now',async()=>{
+     ui.hideModal();let status;
+     try{status=progress.open({product:'K45P',build:String(this.info.latest_build||''),revision:String(this.info.latest_bin||''),keep});}
+     catch(error){ui.showModal('Update Could Not Start',[E('p',{},error.message),settings.button('Close',()=>ui.hideModal())]);return;}
+     try{await this.savePreferences();await status.install();}
+     catch(error){status.fail(error.message||'Update options could not be saved. The update has not started.');}
+    })
+   ])
+  ]);
+ },
 
  handleSave:null,handleSaveApply:null,handleReset:null
 });

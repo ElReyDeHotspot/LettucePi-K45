@@ -1,11 +1,20 @@
 #!/bin/sh
 # K45P FIT updater. Never substitutes the K43P flash method or forces checks.
 set -eu
+umask 077
 MANIFEST_URL=https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/latest.json
 RAW_BASE=https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45
 REF_URL=https://api.github.com/repos/ElReyDeHotspot/LettucePi-K45/git/ref/heads/main
 VERSION_FILE=/etc/chester-version
 LOG=/tmp/chester-update.log
+JOB=/tmp/chester-update-job.json
+RUN_ID=
+job() {
+    jq -n --arg id "$RUN_ID" --arg phase "$1" --arg message "$2" --argjson updated "$(date +%s)" \
+        '{id:$id,phase:$phase,message:$message,updated:$updated,recovering:false}' > "$JOB.tmp"
+    mv -f "$JOB.tmp" "$JOB"
+}
+fail() { job failed "$1"; echo "FAIL: $1"; exit 1; }
 field() { sed -n "s/^$1=//p" "$VERSION_FILE" 2>/dev/null | head -1; }
 local_status() {
     os_version=$(sed -n 's/^VERSION_ID=//p' /etc/os-release 2>/dev/null | tr -d '\"')
@@ -25,6 +34,9 @@ fetch_manifest() {
     /usr/libexec/chester-verify-manifest "$1" "$1.sig" >/dev/null || return 1
 }
 case "${1:-status}" in
+job-status)
+    if [ -s "$JOB" ]; then cat "$JOB"; else printf '{"phase":"idle"}\n'; fi
+    ;;
 status-local)
     local_status
     ;;
@@ -42,28 +54,45 @@ status)
     ;;
 install)
     [ "$(cat /tmp/sysinfo/board_name)" = 'misectel,m02k45' ] || { echo 'FAIL: unsupported board'; exit 1; }
-    mkdir /tmp/k45p-update.lock 2>/dev/null || { echo 'FAIL: an update is already running'; exit 1; }
+    RUN_ID=${2:-}
+    case "$RUN_ID" in *[!0-9a-f]*) exit 2;; esac
+    [ -z "$RUN_ID" ] || [ "${#RUN_ID}" = 32 ] || exit 2
+    mkdir -p /var/lock
+    exec 9>/var/lock/chester-k45-update.lock
+    flock -xn 9 || { echo 'FAIL: an update is already running'; exit 1; }
+    : > "$LOG"
+    job queued 'The update is queued.'
+    setsid "$0" run-install "$RUN_ID" </dev/null >>"$LOG" 2>&1 &
+    echo 'OK: Update started.'
+    ;;
+run-install)
+    flock -xn 9 || exit 1
+    RUN_ID=${2:-}
     t=$(mktemp /tmp/k45p-manifest.XXXXXX)
-    trap 'rm -f "$t" "$t.sig"; rmdir /tmp/k45p-update.lock 2>/dev/null || true' EXIT
-    fetch_manifest "$t" || { echo 'FAIL: invalid K45P manifest'; exit 1; }
-    [ "$(jq -r .build "$t")" -gt "$(field build)" ] || { echo 'FAIL: release is already installed or older'; exit 1; }
+    trap 'rm -f "$t" "$t.sig"' EXIT
+    job checking 'Checking the signed release and router compatibility.'
+    fetch_manifest "$t" || fail 'The signed K45P release could not be verified.'
+    [ "$(jq -r .build "$t")" -gt "$(field build)" ] || fail 'The release is already installed or older.'
     url=$(jq -r .url "$t"); sha=$(jq -r .sha256 "$t"); size=$(jq -r .size "$t")
     url="$RAW_BASE/$MANIFEST_REF/${url#"$RAW_BASE/main/"}"
-    [ "$(df -k /tmp | awk 'NR==2 {print $4}')" -gt $((size / 1024 + 16384)) ] || { echo 'FAIL: insufficient memory'; exit 1; }
-    : > "$LOG"
+    job preparing 'Preparing temporary storage for the update.'
+    [ "$(df -k /tmp | awk 'NR==2 {print $4}')" -gt $((size / 1024 + 16384)) ] || fail 'There is not enough temporary memory for this update.'
     img=/tmp/k45p-sysupgrade.itb
-    curl --http1.1 -fL --retry 3 --connect-timeout 20 --max-time 1200 -o "$img.part" "$url" >> "$LOG" 2>&1 || { echo 'FAIL: download failed'; exit 1; }
-    [ "$(wc -c < "$img.part" | tr -d ' ')" = "$size" ] || { echo 'FAIL: incorrect size'; exit 1; }
-    [ "$(sha256sum "$img.part" | awk '{print $1}')" = "$sha" ] || { rm -f "$img.part"; echo 'FAIL: checksum mismatch'; exit 1; }
+    job downloading 'Downloading the signed firmware. Keep the router powered on.'
+    curl --http1.1 -fL --retry 3 --connect-timeout 20 --max-time 1200 -o "$img.part" "$url" >> "$LOG" 2>&1 || fail 'The firmware download failed.'
+    job verifying 'Checking the firmware size, checksum and compatibility.'
+    [ "$(wc -c < "$img.part" | tr -d ' ')" = "$size" ] || fail 'The downloaded firmware size is incorrect.'
+    [ "$(sha256sum "$img.part" | awk '{print $1}')" = "$sha" ] || { rm -f "$img.part"; fail 'The downloaded firmware checksum is incorrect.'; }
     mv "$img.part" "$img"
-    sysupgrade -T "$img" >> "$LOG" 2>&1 || { echo 'FAIL: stock K45P image validation failed'; exit 1; }
+    sysupgrade -T "$img" >> "$LOG" 2>&1 || fail 'Stock K45P image validation failed.'
     uci set chester.update.minimum_build="$(jq -r .build "$t")"
     uci commit chester
-    echo 'OK: installing, the K45P will restart'
+    job installing 'Installing the verified firmware and restarting the router.'
+    sleep 3
     if [ "$(uci -q get chester.update.keep_settings || true)" = 0 ]; then
-        (sleep 3; sysupgrade -n "$img" >> "$LOG" 2>&1) </dev/null >/dev/null 2>&1 &
+        sysupgrade -n "$img" >> "$LOG" 2>&1 || fail 'Sysupgrade did not accept the verified firmware.'
     else
-        (sleep 3; sysupgrade "$img" >> "$LOG" 2>&1) </dev/null >/dev/null 2>&1 &
+        sysupgrade "$img" >> "$LOG" 2>&1 || fail 'Sysupgrade did not accept the verified firmware.'
     fi
     ;;
 auto-run)
