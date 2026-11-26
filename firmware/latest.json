@@ -1,12 +1,12 @@
 {
   "product": "K45P",
   "board": "misectel,m02k45",
-  "version": "1.0.17",
-  "build": "202611240007",
-  "bin": "17",
-  "built": "2026-11-24",
-  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.17-sysupgrade.itb",
-  "sha256": "d78521dd264bf2608d6039bf4a7a9b6bf1fb9e2c773daf722f49f8366ccf5478",
+  "version": "1.0.18",
+  "build": "202611250001",
+  "bin": "18",
+  "built": "2026-11-25",
+  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.18-sysupgrade.itb",
+  "sha256": "1fd2c8aaca5f0cdf28795437090a33b68b4ea8510c7cbc8af26a05beefb44566",
   "size": 41799934,
-  "notes": "Boot log confirms eFuse calibration after all 19 override bytes match the active EEPROM.\nOne-time read-only verification; no ongoing polling or calibration changes."
+  "notes": "Improved LTE/5G band and tower scans, 5G nearby measurements and percentage progress.\nUpdated Cellular cards and selected Network Mode highlighting."
 }
