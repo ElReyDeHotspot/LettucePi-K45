@@ -28,18 +28,18 @@ Custom firmware and OTA updates for the Chester K45P.
 - Failover, load balancing and isolated Guest Wi-Fi.
 - Live Traffic, Block Lists, Cloudflare and DMZ.
 - Built-in Ookla and M-Lab speed tests.
-- Wi-Fi, VLANs, fan control, TTL/HL and terminal.
+- Wi-Fi 7 with optional separate MLO, VLANs, fan control, TTL/HL and terminal.
 - Sun/Night themes and signed OTA updates.
 
 ## Firmware
 
-Latest published: **Rev. 20 · v1.0.20**.
+Latest published: **Rev. 21 · v1.0.21** — optional separate Wi-Fi 7 MLO network.
 
-[Download firmware](firmware/LettucePi-K45P-1.0.20-sysupgrade.itb) ·
+[Download firmware](firmware/LettucePi-K45P-1.0.21-sysupgrade.itb) ·
 [Release manifest](firmware/latest.json)
 
 Use **Overview → Update** to install updates. Rev. 20 enables small signed app updates.
-Earlier releases receive Rev. 20 through their existing OTA path; keep settings enabled.
+Earlier releases receive the latest full revision through their existing OTA path; keep settings enabled.
 For fresh vendor routers, run [Update-K45P.cmd](scripts/Update-K45P.cmd).
 The Windows installer erases saved settings.
 

@@ -65,3 +65,15 @@ coverage; the live connection test used direct UCI configuration.
 Tests: `node tests/mlo.cjs`, existing `wifi-save.cjs`/`wifi-enable.cjs`, and
 `python tests/mlo-native.py` emitted to native ucode. The capability fixtures
 run with mocked reads and make no configuration changes.
+
+## Full firmware Rev. 21
+
+Rev. 21 (`1.0.21`, ROM build `202611270021`) includes these controls in the
+immutable full image, with MLO disabled by default. Existing main/guest Wi-Fi
+settings are retained during normal upgrades. It includes the signed
+revision-zero app baseline for this exact ROM build.
+
+The final image passed extraction/payload/trust/calibration checks and stock
+`sysupgrade -T` on the K45P. It was not flashed or boot-tested during release
+preparation; the live association evidence above remains a Rev. 20 overlay
+test. See `rev21-validation.json` and the repository changelog.

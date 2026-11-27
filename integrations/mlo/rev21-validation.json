@@ -1,0 +1,17 @@
+{
+  "revision": 21,
+  "version": "1.0.21",
+  "build": "202611270021",
+  "size": 42901758,
+  "sha256": "08407b48a41256d221e88208e0fc5dbaae33269640e8829c9370c326351170ff",
+  "stock_sysupgrade_test_passed": true,
+  "native_mlo_fixture_passed": true,
+  "network_wireless_unchanged": true,
+  "flashed": false,
+  "vendor_kernel_dtb_unchanged": true,
+  "vendor_calibration_artifacts_preserved": true,
+  "protected_palette_header_excluded": true,
+  "mlo_defaults_off": true,
+  "aggregate_mlo_throughput_verified": false,
+  "rev21_boot_verified": false
+}

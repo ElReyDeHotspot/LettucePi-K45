@@ -1,5 +1,27 @@
 # Changelog
 
+## Rev. 21 · v1.0.21 — November 27, 2026
+
+- Baked the separate Wi-Fi 7 MLO controls, board/stack capability probe and
+  checked save/apply into full firmware. MLO defaults off; main and guest Wi-Fi
+  settings are preserved. The MLO network uses LAN access and WPA3 SAE extended
+  key/GCMP-256 across the 2.4 GHz and 5 GHz links.
+- Included the current Overview app-update detection fixes and coherent signed
+  app bootstrap. Added a signed revision-zero baseline for ROM build
+  `202611270021`.
+- Preserved the vendor Linux 6.12.94 kernel, device tree, matching radio
+  modules/firmware, calibration artifacts and existing signing trust. The two
+  pre-existing palette/header edits were excluded from the image and commit.
+- Final-image extraction, MLO payload, JavaScript packaging, Wi-Fi save/enable,
+  native capability and calibration-preservation checks passed. Stock
+  `sysupgrade -T` accepted the exact image on the identified K45P; this test
+  does not flash or reboot the router. Network/wireless settings stayed intact.
+- The earlier Rev. 20 development-overlay test demonstrated two MLD links and
+  IPv4/IPv6 connectivity on one RZ717 client, as detailed below. Rev. 21 has
+  not been flashed or boot-tested. Aggregate/simultaneous throughput,
+  long-duration operation and additional-client interoperability remain
+  unverified.
+
 ## November 26, 2026 — MLO development update
 
 - Added an optional separate Wi-Fi 7 MLO network to the existing Wi-Fi page.

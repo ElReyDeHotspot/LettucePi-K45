@@ -1,12 +1,12 @@
 {
   "product": "K45P",
   "board": "misectel,m02k45",
-  "version": "1.0.20",
-  "build": "202611260020",
-  "bin": "20",
-  "built": "2026-11-26",
-  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.20-sysupgrade.itb",
-  "sha256": "e345f33839f9756cba543008b733278919b6db1598607bb2a86df6f89f880b4e",
-  "size": 42897662,
-  "notes": "Enables small signed app updates while preserving settings.\nIncludes current app fixes; vendor kernel and per-router calibration remain unchanged."
+  "version": "1.0.21",
+  "build": "202611270021",
+  "bin": "21",
+  "built": "2026-11-27",
+  "url": "https://raw.githubusercontent.com/ElReyDeHotspot/LettucePi-K45/main/firmware/LettucePi-K45P-1.0.21-sysupgrade.itb",
+  "sha256": "08407b48a41256d221e88208e0fc5dbaae33269640e8829c9370c326351170ff",
+  "size": 42901758,
+  "notes": "Adds an optional separate Wi-Fi 7 MLO network, disabled by default.\nIncludes current app-update fixes; keeps settings and preserves the vendor kernel and per-router calibration."
 }
