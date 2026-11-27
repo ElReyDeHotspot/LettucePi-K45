@@ -1,0 +1,6 @@
+{
+  "luci-app-misectel-wifi": {
+    "description": "Read K45P MLO stack capability from the Wi-Fi page",
+    "read": { "ubus": { "chester.mlo": ["status"] } }
+  }
+}

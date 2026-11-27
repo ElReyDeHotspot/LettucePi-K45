@@ -1,0 +1,17 @@
+#!/usr/bin/ucode
+'use strict';
+import {readfile} from 'fs';
+
+// Read-only probe. Hardware capability is checked separately against iwinfo.
+function status() {
+ let board=trim(readfile('/tmp/sysinfo/board_name')||'');
+ let netifd=readfile('/lib/netifd/wireless.uc')||'';
+ let hostapd=readfile('/usr/share/hostap/hostapd.uc')||'';
+ let ap=readfile('/usr/share/ucode/wifi/ap.uc')||'';
+ let supported=board=='misectel,m02k45' &&
+  index(netifd,'mlo_vif_create')>=0 && index(netifd,'parse_array(data.device)')>=0 &&
+  index(netifd,'hostapd_update_mlo')>=0 && index(hostapd,'mld_set:')>=0 &&
+  index(ap,'mld_ap=1')>=0;
+ return {supported:!!supported, reason:supported?'':'The installed Wi-Fi stack has not passed the K45P MLO capability check.'};
+}
+return {'chester.mlo':{status:{call:()=>status()}}};

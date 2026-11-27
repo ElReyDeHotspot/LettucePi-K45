@@ -55,4 +55,4 @@ APK_TOOLS=/path/to/apk3 FWTOOL=/path/to/fwtool \
   bash scripts/build.sh /path/to/K45-original-25.12.1.itb /var/tmp/k45p-build-new
 ```
 
-[Base provenance](provenance.json) · [Release verification](firmware/SECURITY.md)
+[Changelog](CHANGELOG.md) · [Base provenance](provenance.json) · [Release verification](firmware/SECURITY.md)
